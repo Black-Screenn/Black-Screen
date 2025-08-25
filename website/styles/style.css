@@ -11,3 +11,17 @@
     cursor: pointer;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
 }
+
+.container{
+    background-color: #fefcfb;
+    color: #001f54;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.container .row{
+    display: flex;
+    justify-content: center;
+}
