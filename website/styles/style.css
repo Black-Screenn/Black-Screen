@@ -1,6 +1,4 @@
-.navbar{
-    border-bottom: 15px solid #001f54;
-}
+
 
 .nav-item{
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15); /* Subtle shadow */
@@ -12,7 +10,7 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
 }
 
-.container{
+.container-mvv{
     background-color: #fefcfb;
     color: #001f54;
     height: 400px;
@@ -21,7 +19,8 @@
     justify-content: center;
 }
 
-.container .row{
+.container-mvv .row{
     display: flex;
     justify-content: center;
 }
+
