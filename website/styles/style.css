@@ -1,7 +1,11 @@
 
 
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
 .nav-item{
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15); /* Subtle shadow */
   transition: box-shadow 0.3s ease-in-out;
 }
 
@@ -10,17 +14,86 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
 }
 
+.hero {
+  background-position: bottom !important;
+  min-height: 800px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-direction: column;
+  padding: clamp(2rem, 6vh, 5rem) 1rem !important;
+  color: #fefcfb;
+}
+
 .container-mvv{
     background-color: #fefcfb;
     color: #001f54;
-    height: 400px;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    flex-direction: column;    
 }
 
 .container-mvv .row{
     display: flex;
     justify-content: center;
+    
+}
+
+#Sobre .container-sobre,
+#equipe .container-mvv {
+  height: auto !important;
+  padding: 3rem !important;
+}
+
+#Sobre, #contato, #equipe, #mvv {
+  scroll-margin-top: 90px;
+}
+
+.team-photo {
+  width: 150px;
+  height: 150px;
+  border-radius: 360px;
+  object-fit: cover;
+}
+
+p {
+    overflow-wrap: anywhere; 
+    word-wrap: break-word;
+}
+
+.team-member {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.team-member h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.team-member p {
+  margin-bottom: 0;
+}
+
+
+@media (max-width: 767.98px) {
+  .container-sobre .row { gap: 1.25rem !important; }
+  .container-sobre .text-start,
+  .container-sobre .text-end { text-align: center !important; }
+  .mb-4-mobile { margin-bottom: 1.5rem !important; }
+  .team-row {
+    justify-content: center !important;
+  }
+   #equipe .row > div {
+    display: flex;
+    justify-content: center;
+  }
+  .team-member {
+    max-width: 200px;
+    margin: 0 auto 2rem auto !important;
+  }
 }
 
