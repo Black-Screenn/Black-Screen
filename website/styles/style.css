@@ -1,8 +1,12 @@
 
-
-
 .navbar-toggler-icon {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+.navbar {
+  background-color: #0a1128;
+
+
 }
 
 .nav-item{
@@ -15,6 +19,7 @@
 }
 
 .hero {
+  background-image: linear-gradient(to bottom, rgba(0,31,84,0.7), rgba(3,64,120,0.7)), url('/website/img/depositphotos_638037894-stock-photo-atm-empty-grey-wall-background\ \(1\).jpg');
   background-position: bottom !important;
   min-height: 800px !important;
   display: flex;
@@ -24,6 +29,15 @@
   flex-direction: column;
   padding: clamp(2rem, 6vh, 5rem) 1rem !important;
   color: #fefcfb;
+}
+
+.container-sobre{
+  background-color: #0a1128;
+  color: #fefcfb;
+}
+
+.imgmvv{
+  height: 50px;
 }
 
 .container-mvv{
@@ -37,6 +51,24 @@
     display: flex;
     justify-content: center;
     
+}
+
+.page-section-equipe{
+  background-color: #0a1128; 
+  color: #fefcfb;
+}
+
+.fw-bolder{
+  color: #0a1128;
+}
+
+#submitButton{
+  background-color: #0a1128;
+  border: #0a1128 solid;
+}
+
+.img-folder{
+  height: 50px;
 }
 
 #Sobre .container-sobre,
