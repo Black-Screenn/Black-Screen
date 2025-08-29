@@ -65,6 +65,12 @@
 #submitButton{
   background-color: #0a1128;
   border: #0a1128 solid;
+  margin-bottom: 10px
+}
+
+#submitButton:hover{
+  cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
 }
 
 .img-folder{
@@ -129,3 +135,45 @@ p {
   }
 }
 
+.title{
+  margin-top: 70px;
+}
+
+.fundo-cadastro-login{
+  background-image: linear-gradient(to bottom, rgba(0,31,84,0.7), rgba(3,64,120,0.7)), url('/website/img/depositphotos_638037894-stock-photo-atm-empty-grey-wall-background\ \(1\).jpg');
+  background-position: bottom !important;
+  min-height: 800px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-direction: column;
+  padding: clamp(2rem, 6vh, 5rem) 1rem !important;
+  color: #fefcfb;
+}
+
+.fundo-cadastro-login .container{
+  background-color: #fefcfb;
+  min-height: 350px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.form-control{
+  border: #0a1128 solid 5px;
+}
+
+.img-login-cadastro{
+  height: 60px;
+  width: 120px;
+  
+}
+
+.logo-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-top: 15px
+}
