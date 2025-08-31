@@ -15,7 +15,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
-<body onload="listar()">
+<body ><!--onload="listar()"-->
   <!--header inicio-->
   <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="navbar">
         <div class="container-fluid">
@@ -54,52 +54,59 @@
         <span id="mensagem_erro"></span>
       </div>
     </div>
-    <div class="container">
-      <div class="card card-cadastro">
-        <h2>Bem-vindo!</h2>
-        <div class="formulario">
-          <!--
-                         Para inserir mais um campo, copie uma das inputs abaixo.
-                         Assim que inserir vá para o script abaixo.
-                     -->
-          <div class="campo">
-            <span>Código de ativação:</span>
-            <input id="codigo_input" type="text" placeholder="Insira aqui seu código" />
-          </div>
-          <div class="campo">
-            <span>Nome:</span>
-            <input id="nome_input" type="text" placeholder="Seu nome" />
-          </div>
-          <div class="campo">
-            <span>E-mail:</span>
-            <input id="email_input" type="text" placeholder="meuemail@provedor.com" />
-          </div>
-          <div class="campo">
-            <span>Senha:</span>
-            <input id="senha_input" type="password" placeholder="******" />
-          </div>
-          <div class="campo">
-            <span>Confirmação da Senha:</span>
-            <input id="confirmacao_senha_input" type="password" placeholder="******" />
-          </div>
-          <button class="botao" onclick="cadastrar()">Cadastrar</button>
-        </div>
-        <div id="div_aguardar" class="loading-div">
-          <img src="./assets/circle-loading.gif" id="loading-gif" />
-        </div>
+    <div class="fundo-cadastro-login text-center p-5">
+        <h1 class="title">Cadastre-se!</h1>
+        <div class="container px-5 my-5 col-md-5 rounded-4 mt-3">
+            <div class="logo-container">
+                <img class="img-login-cadastro" src="assets/imgs/blackscreenlogo.png" alt="Logo BlackScreen">
+            </div>
+                <form id="contactForm text-black">
+                <div class="form-floating mb-3">
+                    <input class="form-control" id="nome_input" type="text" required/>
+                    <label for="nome_input">Nome</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input class="form-control" id="email_input" type="text" required/>
+                    <label for="email_input">E-mail</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input class="form-control" id="senha_input" type="password" required/>
+                    <label for="senha_input">Senha</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input class="form-control" id="confirmacao_senha_input" type="password" required/>
+                    <label for="confirmacao_senha_input">Confirmação de Senha</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input class="form-control" id="newField3" type="text" required/>
+                    <label for="newField3">New Field 3</label>
+                </div>
+                <div class="d-grid mb-3">
+                    <button class="btn btn-primary btn-lg" id="submitButton" type="button" onclick="cadastrar()">Cadastrar</button>
+                </div>
+                <div id="div_aguardar" class="loading-div">
+                    <img src="./assets/circle-loading.gif" id="loading-gif" />
+                </div>
 
-        <div id="div_erros_login"></div>
-      </div>
+                <div id="div_erros_login"></div>
+            </form>
+        </div>
     </div>
-  </div>
 
   <!--footer inicio-->
-  <div class="footer">
-    <div class="container">
-      <h4>Feito com amor por aluno &hearts; SPTech &copy; 2023</h4>
-      <span class="version">v1.0.0</span>
+  <div class="container">
+        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+            <p class="ms-5 text-muted">© 2025 Black Screen</p>
+
+            <a href="index.html" class="text-right me-5">
+                <img class="img-folder" src="assets/imgs/blackscreenlogo.png" alt="Logo BlackScreen">
+            </a>
+        </footer>
     </div>
-  </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    </script>
   <!--footer fim-->
 </body>
 
@@ -108,10 +115,10 @@
 <script>
 
   // Array para armazenar empresas cadastradas para validação de código de ativação 
-  let listaEmpresasCadastradas = [];
+  // let listaEmpresasCadastradas = [];
 
   function cadastrar() {
-    // aguardar();
+    aguardar();
 
     //Recupere o valor da nova input pelo nome do id
     // Agora vá para o método fetch logo abaixo
@@ -119,16 +126,14 @@
     var emailVar = email_input.value;
     var senhaVar = senha_input.value;
     var confirmacaoSenhaVar = confirmacao_senha_input.value;
-    var codigoVar = codigo_input.value;
-    var idEmpresaVincular
+    // var idEmpresaVincular
 
     // Verificando se há algum campo em branco
     if (
       nomeVar == "" ||
       emailVar == "" ||
       senhaVar == "" ||
-      confirmacaoSenhaVar == "" ||
-      codigoVar == ""
+      confirmacaoSenhaVar == ""
     ) {
       cardErro.style.display = "block";
       mensagem_erro.innerHTML =
@@ -141,7 +146,7 @@
     }
 
     // Verificando se o código de ativação é de alguma empresa cadastrada
-    for (let i = 0; i < listaEmpresasCadastradas.length; i++) {
+    /* for (let i = 0; i < listaEmpresasCadastradas.length; i++) {
       if (listaEmpresasCadastradas[i].codigo_ativacao == codigoVar) {
         idEmpresaVincular = listaEmpresasCadastradas[i].id
         console.log("Código de ativação válido.");
@@ -151,7 +156,7 @@
         mensagem_erro.innerHTML = "(Mensagem de erro para código inválido)";
         finalizarAguardar();
       }
-    }
+    }*/
 
     // Enviando o valor da nova input
     fetch("/usuarios/cadastrar", {
@@ -165,7 +170,7 @@
         nomeServer: nomeVar,
         emailServer: emailVar,
         senhaServer: senhaVar,
-        idEmpresaVincularServer: idEmpresaVincular
+        //idEmpresaVincularServer: idEmpresaVincular
       }),
     })
       .then(function (resposta) {
@@ -196,7 +201,7 @@
   }
 
   // Listando empresas cadastradas 
-  function listar() {
+ /* function listar() {
     fetch("/empresas/listar", {
       method: "GET",
     })
@@ -213,7 +218,7 @@
       .catch(function (resposta) {
         console.log(`#ERRO: ${resposta}`);
       });
-  }
+  }*/
 
   function sumirMensagem() {
     cardErro.style.display = "none";

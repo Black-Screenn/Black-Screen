@@ -1,3 +1,7 @@
+CREATE database blackscreen;
+
+use blackscreen;
+
 CREATE TABLE empresa (
     idEmpresa INT NOT NULL AUTO_INCREMENT,
     nome VARCHAR(45) NOT NULL,
