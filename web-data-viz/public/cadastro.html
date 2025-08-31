@@ -84,12 +84,13 @@
                 <div class="d-grid mb-3">
                     <button class="btn btn-primary btn-lg" id="submitButton" type="button" onclick="cadastrar()">Cadastrar</button>
                 </div>
-                <div id="div_aguardar" class="loading-div">
+               
+            </form>
+             <div id="div_aguardar" class="loading-div">
                     <img src="./assets/circle-loading.gif" id="loading-gif" />
                 </div>
 
                 <div id="div_erros_login"></div>
-            </form>
         </div>
     </div>
 
@@ -118,6 +119,8 @@
   // let listaEmpresasCadastradas = [];
 
   function cadastrar() {
+  const cardErro = document.getElementById("cardErro");
+  const mensagem_erro = document.getElementById("mensagem_erro");
     aguardar();
 
     //Recupere o valor da nova input pelo nome do id
@@ -127,24 +130,54 @@
     var senhaVar = senha_input.value;
     var confirmacaoSenhaVar = confirmacao_senha_input.value;
     // var idEmpresaVincular
+    var emailRegex = /^[^@]+@[^@]+\.com$/;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
 
     // Verificando se há algum campo em branco
     if (
       nomeVar == "" ||
       emailVar == "" ||
       senhaVar == "" ||
-      confirmacaoSenhaVar == ""
+      confirmacaoSenhaVar == "" /*||
+      codigoVar == ""*/
     ) {
       cardErro.style.display = "block";
       mensagem_erro.innerHTML =
-        "(Mensagem de erro para todos os campos em branco)";
+        "(por favor preenche todos o campos)";
 
       finalizarAguardar();
       return false;
-    } else {
+    } else if (!emailRegex.test(emailVar)) {
+        cardErro.style.display = "block";
+        mensagem_erro.innerHTML = "(Por favor, insira um e-mail válido.)";
+        finalizarAguardar();
+        return false;
+    } else if (senhaVar.length < 6) {
+        cardErro.style.display = "block";
+        mensagem_erro.innerHTML =
+        "(A senha deve ter pelo menos 6 caracteres.)";
+        finalizarAguardar();
+        return false;
+    } else if (!passwordRegex.test(senhaVar)) {
+      cardErro.style.display = "block";
+      mensagem_erro.innerHTML = "(A senha deve conter pelo menos uma letra maiúscula, um número e um caractere especial.)";
+      finalizarAguardar();
+      return false;
+    } else if (senhaVar.toLowerCase() == nomeVar.toLowerCase() || senhaVar.toLowerCase() == emailVar.toLowerCase()
+    ) {
+      cardErro.style.display = "block";
+      mensagem_erro.innerHTML = "(A senha não pode ser igual ao nome ou ao e-mail.)";
+      finalizarAguardar();
+      return false;
+    } else if(senhaVar != confirmacaoSenhaVar){
+        cardErro.style.display = "block";
+        mensagem_erro.innerHTML =
+        "(A senha e confirmacao devem ser iguais)";
+        finalizarAguardar();
+        return false;
+    } else{
       setInterval(sumirMensagem, 5000);
     }
-
     // Verificando se o código de ativação é de alguma empresa cadastrada
     /* for (let i = 0; i < listaEmpresasCadastradas.length; i++) {
       if (listaEmpresasCadastradas[i].codigo_ativacao == codigoVar) {
