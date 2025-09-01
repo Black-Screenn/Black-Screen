@@ -2,12 +2,13 @@ CREATE database blackscreen;
 
 use blackscreen;
 
-CREATE TABLE empresa (
-    idEmpresa INT NOT NULL AUTO_INCREMENT,
-    nome VARCHAR(45) NOT NULL,
-    cnpj CHAR(14) NOT NULL,
-    PRIMARY KEY (idEmpresa)
-  );
+create table empresa (
+    idEmpresa int not null auto_increment,
+    nome varchar(45) not null,
+    cnpj char(14) not null,
+    primary key (idEmpresa),
+    unique key (cnpj)
+);
   
 
 CREATE TABLE usuario (
