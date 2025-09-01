@@ -11,11 +11,12 @@ create table empresa (
 );
   
 
-CREATE TABLE usuario (
-    idUsuario INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(50) NOT NULL,
-    senha VARCHAR(12) NOT NULL,
-    email VARCHAR(64) NOT NULL,
-    fkEmpresa INT NOT NULL,
-    FOREIGN KEY (fkEmpresa) REFERENCES empresa (idEmpresa)
-  );
+create table usuario (
+    idUsuario int primary key auto_increment,
+    nome varchar(50) not null,
+    senha varchar(12) not null,
+    email varchar(64) not null,
+    fkEmpresa int not null,
+    foreign key (fkEmpresa) references empresa (idEmpresa),
+    unique key (email)
+);
