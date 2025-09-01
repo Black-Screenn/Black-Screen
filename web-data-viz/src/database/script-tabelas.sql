@@ -42,3 +42,12 @@ create table endereco (
     foreign key (fkCaixa) references caixas (idCaixa),
     unique key (fkCaixa)
 );
+
+create table desempenho (
+    idDesempenho int auto_increment primary key,
+    cpu_percent decimal(5,2) not null,
+    ram_percent decimal(5,2) not null,
+    disco_percent decimal(5,2) not null,
+    fkCaixa int not null,
+    foreign key (fkCaixa) references caixas (idCaixa)
+);
