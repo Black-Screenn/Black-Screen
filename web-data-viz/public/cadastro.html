@@ -124,7 +124,7 @@
     var confirmacaoSenhaVar = confirmacao_senha_input.value;
     // var idEmpresaVincular
     var emailRegex = /^[^@]+@[^@]+\.com$/;
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+    var passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
 
     // Verificando se há algum campo em branco
     if (
@@ -154,12 +154,6 @@
     } else if (!passwordRegex.test(senhaVar)) {
       cardErro.style.display = "block";
       mensagem_erro.innerHTML = "(A senha deve conter pelo menos uma letra maiúscula, um número e um caractere especial.)";
-      finalizarAguardar();
-      return false;
-    } else if (senhaVar.toLowerCase() == nomeVar.toLowerCase() || senhaVar.toLowerCase() == emailVar.toLowerCase()
-    ) {
-      cardErro.style.display = "block";
-      mensagem_erro.innerHTML = "(A senha não pode ser igual ao nome ou ao e-mail.)";
       finalizarAguardar();
       return false;
     } else if(senhaVar != confirmacaoSenhaVar){

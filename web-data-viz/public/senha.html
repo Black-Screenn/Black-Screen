@@ -61,20 +61,19 @@
             </div>
                 <form id="contactForm text-black">
                 <div class="form-floating mb-3">
-                    <input class="form-control" id="email_input" type="text" required/>
-                    <label for="email_input">Senha atual
-                    </label>
+                    <input class="form-control" id="senha_input" type="text" required/>
+                    <label for="senha_input">Senha atual</label>
                 </div>
                 <div class="form-floating mb-3">
-                    <input class="form-control" id="senha_input" type="password" required/>
-                    <label for="senha_input">Senha Nova</label>
+                    <input class="form-control" id="novaSenha_input" type="password" required/>
+                    <label for="novaSenha_input">Senha Nova</label>
                 </div>
                 <div class="form-floating mb-3">
                     <input class="form-control" id="confirmacao_senha_input" type="password" required/>
                     <label for="confirmacao_senha_input">Confirmação de Senha</label>
                 </div>
                 <div class="d-grid mb-3">
-                    <button class="btn btn-primary btn-lg" id="submitButton" type="button" onclick="entrar()">Entrar   </button>
+                    <button class="btn btn-primary btn-lg" id="submitButton" type="button" onclick="trocar()">Entrar   </button>
                 </div>
                 
             </form>
@@ -106,24 +105,44 @@
 <script>
 
 
-    function entrar() {
+    function trocar() {
         aguardar();
 
-        var emailVar = email_input.value;
         var senhaVar = senha_input.value;
+        var novaSenhaVar = novaSenha_input.value;
+        var confirmacaoSenhaVar = confirmacao_senha_input.value;
+        var passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
 
-        if (emailVar == "" || senhaVar == "") {
-            cardErro.style.display = "block"
-            mensagem_erro.innerHTML = "(Mensagem de erro para todos os campos em branco)";
-            finalizarAguardar();
-            return false;
-        }
-        else {
+        if (senhaVar == "" ||novaSenhaVar == "" ||confirmacaoSenhaVar == "") {
+      cardErro.style.display = "block";
+      mensagem_erro.innerHTML =
+        "(por favor preenche todos o campos)";
+
+      finalizarAguardar();
+      return false;
+    } else if (senhaVar.length < 6) {
+        cardErro.style.display = "block";
+        mensagem_erro.innerHTML =
+        "(A senha deve ter pelo menos 6 caracteres.)";
+        finalizarAguardar();
+        return false;
+    } else if (!passwordRegex.test(senhaVar)) {
+      cardErro.style.display = "block";
+      mensagem_erro.innerHTML = "(A senha deve conter pelo menos uma letra maiúscula, um número e um caractere especial.)";
+      finalizarAguardar();
+      return false;
+    } else if(senhaVar != confirmacaoSenhaVar){
+        cardErro.style.display = "block";
+        mensagem_erro.innerHTML =
+        "(A senha e confirmacao devem ser iguais)";
+        finalizarAguardar();
+        return false;
+    }else {
             setInterval(sumirMensagem, 5000)
         }
 
-        console.log("FORM LOGIN: ", emailVar);
-        console.log("FORM SENHA: ", senhaVar);
+        console.log("FORM LOGIN: ", senhaVar);
+        console.log("FORM SENHA: ", novaSenhaVar);
 
         fetch("/usuarios/autenticar", {
             method: "POST",
@@ -131,11 +150,11 @@
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                emailServer: emailVar,
-                senhaServer: senhaVar
+                senhaServer: senhaVar,
+                novaenhaServer: novaSenhaVar
             })
         }).then(function (resposta) {
-            console.log("ESTOU NO THEN DO entrar()!")
+            console.log("ESTOU NO THEN DO trocar()!")
 
             if (resposta.ok) {
                 console.log(resposta);
@@ -143,13 +162,13 @@
                 resposta.json().then(json => {
                     console.log(json);
                     console.log(JSON.stringify(json));
-                    sessionStorage.EMAIL_USUARIO = json.email;
+                    sessionStorage.senha_USUARIO = json.senha;
                     sessionStorage.NOME_USUARIO = json.nome;
                     sessionStorage.ID_USUARIO = json.id;
                     //sessionStorage.AQUARIOS = JSON.stringify(json.aquarios)
 
                     setTimeout(function () {
-                        window.location = "index.html";
+                        window.location = "login.html";
                     }, 1000); // apenas para exibir o loading
 
                 });
