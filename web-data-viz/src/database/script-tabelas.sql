@@ -20,3 +20,11 @@ create table usuario (
     foreign key (fkEmpresa) references empresa (idEmpresa),
     unique key (email)
 );
+
+create table caixas (
+    idCaixa int auto_increment primary key,
+    codigoCaixa varchar(10) not null,
+    fkEmpresa int not null,
+    foreign key (fkEmpresa) references empresa (idEmpresa),
+    unique key (codigoCaixa)
+);
