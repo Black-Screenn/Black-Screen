@@ -51,3 +51,18 @@ create table desempenho (
     fkCaixa int not null,
     foreign key (fkCaixa) references caixas (idCaixa)
 );
+
+create view vw_alertas as
+select 
+    d.idDesempenho,
+    d.fkCaixa,
+    d.cpu_percent,
+    d.ram_percent,
+    d.disco_percent,
+    case
+        when d.cpu_percent > 90 then 'ALERTA CPU'
+        when d.ram_percent > 90 then 'ALERTA RAM'
+        when d.disco_percent > 90 then 'ALERTA DISCO'
+        else 'OK'
+    end as alerta
+from desempenho d;
