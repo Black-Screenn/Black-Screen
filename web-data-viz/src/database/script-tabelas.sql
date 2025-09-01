@@ -28,3 +28,17 @@ create table caixas (
     foreign key (fkEmpresa) references empresa (idEmpresa),
     unique key (codigoCaixa)
 );
+
+create table endereco (
+    idEndereco int primary key auto_increment,
+    cep char(9) not null,
+    logradouro varchar(200) not null,
+    numero varchar(20) not null,
+    complemento varchar(200),
+    bairro varchar(100) not null,
+    cidade varchar(100) not null,
+    uf char(2) not null,
+    fkCaixa int not null,
+    foreign key (fkCaixa) references caixas (idCaixa),
+    unique key (fkCaixa)
+);
