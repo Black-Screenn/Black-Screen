@@ -158,7 +158,6 @@ p {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  align-items: center;
 }
 
 .form-control{
@@ -181,8 +180,8 @@ p {
 }
 
 .loading-div {
-  width: 50px;
   display: none;
+  margin-bottom: 15px
 }
 
 .loading-div img {
