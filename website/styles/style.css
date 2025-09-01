@@ -19,7 +19,7 @@
 }
 
 .hero {
-  background-image: linear-gradient(to bottom, rgba(0,31,84,0.7), rgba(3,64,120,0.7)), url('/website/img/depositphotos_638037894-stock-photo-atm-empty-grey-wall-background\ \(1\).jpg');
+  background-image: linear-gradient(to bottom, rgba(0,31,84,0.7), rgba(3,64,120,0.7)), url('../img/fundo.jpg');
   background-position: bottom !important;
   min-height: 800px !important;
   display: flex;
@@ -140,7 +140,7 @@ p {
 }
 
 .fundo-cadastro-login{
-  background-image: linear-gradient(to bottom, rgba(0,31,84,0.7), rgba(3,64,120,0.7)), url('/website/img/depositphotos_638037894-stock-photo-atm-empty-grey-wall-background\ \(1\).jpg');
+  background-image: linear-gradient(to bottom, rgba(0,31,84,0.7), rgba(3,64,120,0.7)), url('../img/fundo.jpg');
   background-position: bottom !important;
   min-height: 800px !important;
   display: flex;
