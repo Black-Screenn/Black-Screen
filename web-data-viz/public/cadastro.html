@@ -46,11 +46,6 @@
   <!--header fim-->
 
   <div class="login">
-    <div class="alerta_erro">
-      <div class="card_erro" id="cardErro">
-        <span id="mensagem_erro"></span>
-      </div>
-    </div>
     <div class="fundo-cadastro-login text-center p-5">
         <h1 class="title">Cadastre-se!</h1>
         <div class="container px-5 my-5 col-md-5 rounded-4 mt-3">
@@ -77,13 +72,17 @@
                 <div class="d-grid mb-3">
                     <button class="btn btn-primary btn-lg" id="submitButton" type="button" onclick="cadastrar()">Cadastrar</button>
                 </div>
-               
             </form>
-             <div id="div_aguardar" class="loading-div">
-                    <img src="./assets/circle-loading.gif" id="loading-gif" />
-                </div>
 
-                <div id="div_erros_login"></div>
+            <div id="div_aguardar" class="loading-div">
+                <img src="./assets/circle-loading.gif" id="loading-gif">
+            </div>
+          
+            <div class="card_erro" id="cardErro">
+                <div class="alerta_erro">
+                    <span id="mensagem_erro"></span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -136,30 +135,30 @@
     ) {
       cardErro.style.display = "block";
       mensagem_erro.innerHTML =
-        "(por favor preenche todos o campos)";
+        "(Preencha todos o campos para continuar!)";
 
       finalizarAguardar();
       return false;
     } else if (!emailRegex.test(emailVar)) {
         cardErro.style.display = "block";
-        mensagem_erro.innerHTML = "(Por favor, insira um e-mail válido.)";
+        mensagem_erro.innerHTML = "(Por favor, insira um e-mail válido!)";
         finalizarAguardar();
         return false;
     } else if (senhaVar.length < 6) {
         cardErro.style.display = "block";
         mensagem_erro.innerHTML =
-        "(A senha deve ter pelo menos 6 caracteres.)";
+        "(A senha deve ter pelo menos 6 caracteres!)";
         finalizarAguardar();
         return false;
     } else if (!passwordRegex.test(senhaVar)) {
       cardErro.style.display = "block";
-      mensagem_erro.innerHTML = "(A senha deve conter pelo menos uma letra maiúscula, um número e um caractere especial.)";
+      mensagem_erro.innerHTML = "(A senha deve conter pelo menos uma letra maiúscula, um número e um caractere especial!)";
       finalizarAguardar();
       return false;
     } else if(senhaVar != confirmacaoSenhaVar){
         cardErro.style.display = "block";
         mensagem_erro.innerHTML =
-        "(A senha e confirmacao devem ser iguais)";
+        "(A senha e confirmação devem ser iguais!)";
         finalizarAguardar();
         return false;
     } else{

@@ -181,6 +181,8 @@ p {
 
 .loading-div {
   display: none;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 15px
 }
 
@@ -195,25 +197,18 @@ p {
 
 .alerta_erro{
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  padding: 5px;
 }
 
 .card_erro {
   display: none;
-  background-color: #fff;
   color: black;
-  width: 300px;
-  position: fixed;
-  top: 80px;           /* position below navbar */
-  right: 20px;         /* some padding from right */
-  z-index: 1050;       /* make sure it’s above everything else */
-  border-radius: 4px;
-  border: #ED145B 3px solid;
-  padding: 15px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  align-items: center;
 }
 
 .card_erro #mensagem_erro{
   font-weight: 500;
-  font-size: 20px;
+  color:red;
+  /* font-size: 20px; */
 }

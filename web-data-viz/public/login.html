@@ -48,11 +48,7 @@
 
 
     <div class="login">
-        <div class="alerta_erro">
-            <div class="card_erro" id="cardErro">
-                <span id="mensagem_erro"></span>
-            </div>
-        </div>
+       
         <div class="fundo-cadastro-login text-center p-5">
         <h1 class="title">Entre em sua conta</h1>
         <div class="container px-5 my-5 col-md-5 rounded-4 mt-3">
@@ -74,10 +70,20 @@
                 
             </form>
             <div id="div_aguardar" class="loading-div">
-                    <img src="./assets/circle-loading.gif" id="loading-gif">
-                </div>
+                <img src="./assets/circle-loading.gif" id="loading-gif">
+            </div>
+            <div>
+                <h5 style="color: black;">Não tem uma conta? <a href="cadastro.html">Cadastre-se</a></h5>
+            </div>
 
-                <div id="div_erros_login"></div>
+            <div class="card_erro" id="cardErro">
+                <div class="alerta_erro">
+                    <span id="mensagem_erro"></span>
+                </div>
+            </div>
+
+
+            <div id="div_erros_login"></div> 
         </div>
     </div>
     </div>
@@ -155,9 +161,12 @@
             } else {
 
                 console.log("Houve um erro ao tentar realizar o login!");
+                mensagem_erro.innerHTML = "Email ou senha estão incorretos!"
 
                 resposta.text().then(texto => {
                     console.error(texto);
+                    cardErro.style.display = "block"
+                    mensagem_erro.innerHTML = texto
                     finalizarAguardar(texto);
                 });
             }
@@ -170,7 +179,7 @@
     }
 
     function sumirMensagem() {
-        cardErro.style.display = "none"
+        mensagem_erro.style.display = "none"
     }
 
 </script>
