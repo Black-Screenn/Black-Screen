@@ -2,13 +2,15 @@
 <html lang="pt-br">
 
 <head>
-    <link rel="shortcut icon" href="../assets/imgs/blackscreenicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../assets/icon/favicon2.ico" type="image/x-icon">
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlackScreen| Dashboards</title>
+
     
     <link rel="stylesheet" href="./../css/dashboards.css">
-    <link rel="stylesheet" href="./../css/style.css" />
+    <link rel="stylesheet" href="./../css/estilo.css" />
     <script src="../js/sessao.js"></script>
     <script src="./../js/alerta.js"></script>
 
@@ -20,22 +22,25 @@
     <!-- scripts do Chart.js - 2022-1 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!--FONT AWESOME-->
+    <script src="https://kit.fontawesome.com/9f7414eb10.js" crossorigin="anonymous"></script>
+</head>
+
 <!-- <body onload=" atualizarFeed()"> -->
 
 <body>
 
     <div class="janela">
         <div class="header-left">
-            <h1></h1>
-            <img src="../assets/imgs/blackscreenlogo.png" alt="BlackSCreen" style="width: 300px;">
+            <h1>AquaTech</h1>
 
             <div class="hello">
-                <h3>Bem vindo, <span id="b_usuario">usuário</span>!</h3>
+                <h3>Olá, <span id="b_usuario">usuário</span>!</h3>
             </div>
 
             <div class="btn-nav-white">
                 <a href="./cards.html">
-                    <h3>Cadastro de componentes</h3>
+                    <h3>Aquários</h3>
                 </a>
             </div>
 
@@ -47,7 +52,7 @@
 
             <div class="btn-nav-white">
                 <a href="./mural.html">
-                    <h3>Log de alertas</h3>
+                    <h3>Mural de Avisos</h3>
                 </a>
             </div>
 
@@ -58,23 +63,13 @@
         </div>
 
         <div class="dash">
-            <div class="grafico-main" id="grafico-main">
-
+            <div id="alerta">
             </div>
 
-            <div class="kpis" id="kpis">
-                <div class="kpi">
-                    <h3>Média de uso de CPU:</h4>
-                    <span>45%</span>
-                </div>
-                <div class="kpi">
-                    <h3>Média de uso de RAM:</h4>
-                    <span>22.8%</span>
-                </div>
-                <div class="kpi">
-                    <h3>Média de uso de DISCO:</h4>
-                    <span>71%</span>
-                </div>
+            <div class="btns-dash" id="btnAquario">
+                <!-- O gráfico é chamado de acordo com o id (fk_aquario) do banco  -->
+            </div>
+            <div id="graficos">
             </div>
         </div>
     </div>

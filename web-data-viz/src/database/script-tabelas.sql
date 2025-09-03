@@ -9,6 +9,8 @@ create table empresa (
     primary key (idEmpresa),
     unique key (cnpj)
 );
+
+INSERT INTO empresa (nome, cnpj) VALUES("TecBan","01234567890123");
   
 
 create table usuario (
@@ -20,6 +22,8 @@ create table usuario (
     foreign key (fkEmpresa) references empresa (idEmpresa),
     unique key (email)
 );
+
+INSERT INTO usuario(nome, senha, email, fkEmpresa) VALUES("Bob","bob","bob@email.com",1);
 
 create table caixas (
     idCaixa int auto_increment primary key,
