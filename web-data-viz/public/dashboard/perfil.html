@@ -20,7 +20,6 @@
     <!-- scripts do Chart.js - 2022-1 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- <body onload=" atualizarFeed()"> -->
 
 <body>
 
@@ -29,13 +28,12 @@
             <h1></h1>
             <img src="../assets/imgs/blackscreenlogo.png" alt="BlackSCreen" style="width: 300px;">
 
-            <div class="hello">
+             <div class="hello">
                 <h3>Bem vindo, <span id="b_usuario">usuário</span>!</h3>
             </div>
 
             <div class="btn-nav-white">
-                <!-- ADICIONAR HREF QUANDO A TELA FOR CRIADA -->
-                <a href=""> 
+                <a href="cadastroComponentes.html"> 
                     <h3>Cadastro de componentes</h3>
                 </a>
             </div>
@@ -47,7 +45,7 @@
             </div>
 
             <div class="btn-nav-white">
-                <a href="./mural.html">
+                <a href="./logAlertas.html">
                     <h3>Log de alertas</h3>
                 </a>
             </div>
@@ -65,12 +63,37 @@
 
         </div>
 
+
+
+
         <div class="dash">
-            
+        
+        <h2>Meu Perfil</h2>
 
-            
+  <div class="perfil-container">
+    <div class="perfil-item">
+      <label>Nome Completo:</label>
+      <p id="b_usuario2"></p>
+    </div>
+
+    <div class="perfil-item">
+      <label>Email:</label>
+      <p id="b_email"></p>
+    </div>
+
+    <div class="perfil-item senha-box">
+  <label>Senha:</label>
+  <div class="senha-container">
+    <input type="password" id="b_senha" disabled>
+    <button type="button" class="esconder-senha" onclick="esconderSenha()">
+      <img src="https://cdn-icons-png.flaticon.com/512/6405/6405909.png" alt="olho">
+    </button>
+  </div>
+  <a href="../senha.html" class="btn-senha">Alterar Senha</a>
+</div>
 
 
+            </div>
         </div>
     </div>
 
@@ -81,9 +104,18 @@
 
 <script>
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
-    b_senha.innerHTML = sessionStorage.SENHA_USUARIO;
-    b_email.innerHTML = sessionStorage.EMAIL_USUARIO
+    b_usuario2.innerHTML = sessionStorage.NOME_USUARIO;
+    b_senha.value = sessionStorage.SENHA_USUARIO;
+    b_email.innerHTML = sessionStorage.EMAIL_USUARIO;
 
+    function esconderSenha() {
+    const senhaInput = document.getElementById("b_senha");
+    if (senhaInput.type === "password") {
+      senhaInput.type = "text";
+    } else {
+      senhaInput.type = "password";
+    }
+  }
     
 
 </script>

@@ -478,3 +478,83 @@ canvas {
   margin-bottom: 100px;
   cursor: pointer;
 }
+
+
+
+/* __________________________________Meu Perfil_________________________________________ */
+
+.perfil-container {
+  background: white;
+  border: 2px solid #1282a2;
+  border-radius: 10px;
+  padding: 30px;
+  width: 60%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+}
+
+.perfil-item label {
+  font-weight: 600;
+  color: #034078;
+}
+
+.perfil-item p {
+  margin: 5px 0 0 0;
+  font-size: 1rem;
+  color: #161618;
+}
+
+.senha-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.senha-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.senha-container input {
+  border: 1px solid #1282a2;
+  border-radius: 5px;
+  padding: 5px 10px;
+  width: 200px;
+  font-size: 1rem;
+}
+
+.esconder-senha {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.esconder-senha img {
+  width: 30px;   
+  height: 40px;
+  object-fit: contain;
+}
+
+.btn-senha {
+  background-color: #1282a2;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  text-align: center;
+  width: fit-content;
+  transition: 0.3s;
+}
+
+.btn-senha:hover {
+  background-color: #034078;
+}
