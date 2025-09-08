@@ -1,4 +1,4 @@
-CREATE database blackscreen;
+CREATE database if not exists blackscreen;
 
 use blackscreen;
 
@@ -11,6 +11,9 @@ create table empresa (
 );
 
 INSERT INTO empresa (nome, cnpj) VALUES("TecBan","01234567890123");
+INSERT INTO empresa(nome, cnpj) VALUES("BlackScreen", "12312312312312");
+INSERT INTO empresa (nome, cnpj) VALUES("TecBan","01234567890123");
+
   
 
 create table usuario (
@@ -23,7 +26,12 @@ create table usuario (
     unique key (email)
 );
 
-INSERT INTO usuario(nome, senha, email, fkEmpresa) VALUES("Bob","bob","bob@email.com",1);
+INSERT INTO usuario(nome, senha, email, fkEmpresa) VALUES("Lucas","Sptech#2025","lucas.aquino@sptech.school",1);
+INSERT INTO usuario(nome, senha, email, fkEmpresa) VALUES("Miguel","Sptech#2025","miguel.magalhes@sptech.school",1);
+INSERT INTO usuario(nome, senha, email, fkEmpresa) VALUES("Pedro","Sptech#2025","pedro.amaral@sptech.school",1);
+INSERT INTO usuario(nome, senha, email, fkEmpresa) VALUES("Hanieh","Sptech#2025","hanieh.Ashouri@sptech.school",1);
+INSERT INTO usuario(nome, senha, email, fkEmpresa) VALUES("Vitorio","Sptech#2025","vitorio.bearari@sptech.school",1);
+
 
 create table caixas (
     idCaixa int auto_increment primary key,
@@ -52,7 +60,7 @@ create table desempenho (
     cpu_percent decimal(5,2) not null,
     ram_percent decimal(5,2) not null,
     disco_percent decimal(5,2) not null,
-    fkCaixa int not null,
+    fkCaixa int,
     foreign key (fkCaixa) references caixas (idCaixa)
 );
 
