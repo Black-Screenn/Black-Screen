@@ -24,9 +24,6 @@
 <!-- <body onload=" atualizarFeed()"> -->
 
 <body>
- 
-    <body>
-
     <div class="janela">
         <div class="header-left">
             <h1></h1>
@@ -67,46 +64,42 @@
         </div>
 
         <div class="dash">
-            <div class="login">
-    <div class="fundo-cadastro-login text-center p-5">
-        <h1 class="title">Cadastre-se!</h1>
-        <div class="container px-5 my-5 col-md-5 rounded-4 mt-3">
-            <div class="logo-container">
-                <img class="img-login-cadastro" src="../assets/imgs/blackscreenlogo.png" alt="Logo BlackScreen">
-            </div>
-                <form id="contactForm text-black">
-                <div class="form-floating mb-3">
-                    <input class="form-control" id="nome_input" type="text" required/>
-                    <label for="nome_input">Nome</label>
-                </div>
-                <div class="form-floating mb-3">
-                    <input class="form-control" id="unidade_input" type="number" required/>
-                    <label for="unidade_input">Unidade</label>
-                </div>
-                <div class="d-grid mb-3">
-                    <button class="btn btn-primary btn-lg" id="submitButton" type="button" onclick="cadastrar()">Cadastrar</button>
-                </div>
-            </form>
+  <div class="cadastro-container">
+    <h1 class="title">Cadastro de Componentes</h1>
+    <div class="form-box">
+      <div class="logo-container">
+        <img class="img-login-cadastro" src="../assets/imgs/blackscreenlogo.png" alt="Logo BlackScreen">
+      </div>
 
-            <div id="div_aguardar" class="loading-div">
-                <img src="../assets/circle-loading.gif" id="loading-gif">
-            </div>
-          
-            <div class="card_erro" id="cardErro">
-                <div class="alerta_erro">
-                    <span id="mensagem_erro"></span>
-                </div>
-            </div>
+      
+      <form id="contactForm" class="text-black">
+        <div class="form-floating mb-3">
+          <label for="nome_input">Nome</label>
+          <input class="form-control" id="nome_input" type="text" required />
+        </div>
+        <div class="form-floating mb-3">
+          <label for="unidade_input">Unidade</label>
+          <input class="form-control" id="unidade_input" type="text" required />
+        </div>
+        <div class="d-grid mb-3" style="margin-top: 25px;" >
+          <button class="btn btn-primary btn-lg" id="submitButton" type="button" onclick="cadastrar()">Cadastrar</button>
+        </div>
+      </form>
+
+      <div id="div_aguardar" class="loading-div">
+        <img src="../assets/circle-loading.gif" id="loading-gif">
+      </div>
+
+      <div class="card_erro" id="cardErro">
+        <div class="alerta_erro">
+          <span id="mensagem_erro"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
         </div>
     </div>
-            </div>
-
-
-        </div>
-    </div>
-
-
-</body>
 
 </body>
 
