@@ -16,4 +16,8 @@ router.put("/trocar", function (req, res) {
     usuarioController.trocar(req, res);
 });
 
+router.delete("/excluir", function (req, res) {
+    usuarioController.excluir(req, res);
+});
+
 module.exports = router;

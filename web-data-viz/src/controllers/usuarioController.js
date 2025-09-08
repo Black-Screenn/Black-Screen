@@ -130,8 +130,26 @@ function trocar(req, res) {
     }
 }
 
+function excluir(req, res) {
+    var idUsuario = req.body.idUsuario;
+
+    if (idUsuario == undefined) {
+        res.status(400).send("Seu ID está undefined!");
+    } else {
+        usuarioModel.excluir(idUsuario)
+            .then(() => {
+                res.json({ mensagem: "Conta excluída com sucesso!" });
+            })
+            .catch((erro) => {
+                console.log(erro);
+                res.status(500).json(erro.sqlMessage);
+            });
+    }
+}
+
 module.exports = {
     autenticar,
     cadastrar,
-    trocar
+    trocar,
+    excluir
 }

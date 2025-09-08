@@ -90,14 +90,20 @@
     </button>
   </div>
   <a href="../senha.html" class="btn-senha">Alterar Senha</a>
+  <a href="#" class="btn-excluir" onclick="abrirModalExcluir()">Excluir Conta</a>
 </div>
-
-
             </div>
         </div>
     </div>
-
-
+ 
+<div id="modal-excluir" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(10,17,40,0.85); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:#fefcfb; color:#0a1128; padding:2rem 2.5rem; border-radius:16px; box-shadow:0 5px 15px rgba(0,0,0,0.3); text-align:center; max-width:350px;">
+    <h3 style="margin-bottom:1rem;">Excluir Conta</h3>
+    <p style="margin-bottom:2rem;">Tem certeza que deseja excluir sua conta?<br>Esta ação não pode ser desfeita.</p>
+    <button id="btn-confirm-excluir" class="btn-excluir-modal">Excluir</button>
+    <button onclick="fecharModalExcluir()" class="btn-cancelar-modal">Cancelar</button>
+  </div>
+</div>
 </body>
 
 </html>
@@ -116,6 +122,60 @@
       senhaInput.type = "password";
     }
   }
-    
+
+  function excluirConta() {
+    if (confirm("Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.")) {
+        fetch("/usuarios/excluir", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                idUsuario: sessionStorage.ID_USUARIO
+            })
+        })
+        .then(resposta => {
+            if (resposta.ok) {
+                alert("Conta excluída com sucesso!");
+                sessionStorage.clear();
+                window.location = "../login.html";
+            } else {
+                resposta.text().then(texto => {
+                    alert("Erro ao excluir conta: " + texto);
+                });
+            }
+        })
+        .catch(erro => {
+            alert("Erro de conexão ao excluir conta.");
+        });
+    }
+}
+
+function abrirModalExcluir() {
+  document.getElementById("modal-excluir").style.display = "flex";
+}
+
+function fecharModalExcluir() {
+  document.getElementById("modal-excluir").style.display = "none";
+}
+
+document.getElementById("btn-confirm-excluir").onclick = function() {
+  fetch("/usuarios/excluir", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ idUsuario: sessionStorage.ID_USUARIO })
+  })
+  .then(resposta => {
+    if (resposta.ok) {
+      sessionStorage.clear();
+      window.location = "../login.html";
+    } else {
+      resposta.text().then(texto => {
+        fecharModalExcluir();
+      });
+    }
+  })
+  .catch(() => {
+    fecharModalExcluir();
+  });
+};
 
 </script>
