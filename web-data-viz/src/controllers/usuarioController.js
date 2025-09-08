@@ -21,7 +21,7 @@ function autenticar(req, res) {
                     if (resultadoAutenticar.length == 1) {
                         console.log(resultadoAutenticar);
                         res.json({
-                                        id: resultadoAutenticar[0].id,
+                                        idUsuario: resultadoAutenticar[0].idUsuario,
                                         email: resultadoAutenticar[0].email,
                                         nome: resultadoAutenticar[0].nome,
                                         senha: resultadoAutenticar[0].senha
@@ -94,7 +94,44 @@ function cadastrar(req, res) {
     }
 }
 
+function trocar(req, res) {
+    var idUsuario = req.body.idUsuario;       
+    var senhaAtual = req.body.senhaAtual;
+    var novaSenha = req.body.novaSenha;
+
+    if (idUsuario == undefined) {
+        res.status(400).send("Seu ID está undefined!");
+    } else if (senhaAtual == undefined) {
+        res.status(400).send("Sua senha atual está indefinida!");
+    } else if (novaSenha == undefined) {
+        res.status(400).send("Sua nova senha está indefinida!");
+    } else {
+        usuarioModel.validarSenha(idUsuario, senhaAtual)
+            .then((resultado) => {
+                if (resultado.length == 1) {
+                    usuarioModel.trocar(idUsuario, novaSenha)
+                        .then((resultadoUpdate) => {
+                            res.json({ mensagem: "Senha alterada com sucesso!" });
+                        })
+                        .catch((erro) => {
+                            console.log(erro);
+                            console.log("Erro ao trocar a senha: ", erro.sqlMessage);
+                            res.status(500).json(erro.sqlMessage);
+                        });
+                } else {
+                    res.status(403).send("Senha atual incorreta!");
+                }
+            })
+            .catch((erro) => {
+                console.log(erro);
+                console.log("Erro ao validar a senha atual: ", erro.sqlMessage);
+                res.status(500).json(erro.sqlMessage);
+            });
+    }
+}
+
 module.exports = {
     autenticar,
-    cadastrar
+    cadastrar,
+    trocar
 }

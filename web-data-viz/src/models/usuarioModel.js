@@ -22,7 +22,36 @@ function cadastrar(nome, email, senha) { // , fkEmpresa
     return database.executar(instrucaoSql);
 }
 
+function validarSenha(idUsuario, senhaAtual) {
+    console.log("Validando senha do usuário: ", idUsuario);
+
+    var instrucaoSql = `
+        SELECT idUsuario FROM usuario 
+        WHERE idUsuario = ${idUsuario} AND senha = '${senhaAtual}';
+    `;
+
+    console.log("Executando a instrução SQL: \n" + instrucaoSql);
+    return database.executar(instrucaoSql);
+}
+
+
+function trocar(idUsuario, novaSenha) {
+    console.log("Trocando a senha do usuário: ", idUsuario);
+
+    var instrucaoSql = `
+        UPDATE usuario 
+        SET senha = '${novaSenha}' 
+        WHERE idUsuario = ${idUsuario};
+    `;
+
+    console.log("Executando a instrução SQL: \n" + instrucaoSql);
+    return database.executar(instrucaoSql);
+}
+
+
 module.exports = {
     autenticar,
-    cadastrar
+    cadastrar,
+    validarSenha,
+    trocar
 };
