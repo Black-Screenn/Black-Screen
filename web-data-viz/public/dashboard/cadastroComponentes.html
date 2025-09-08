@@ -7,8 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlackScreen | Dashboards</title>
     
-    <link rel="stylesheet" href="./../css/dashboards.css">
-    <link rel="stylesheet" href="./../css/style.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboards.css">
+    
     <script src="../js/sessao.js"></script>
     <script src="./../js/alerta.js"></script>
 
@@ -66,7 +67,39 @@
         </div>
 
         <div class="dash">
-            
+            <div class="login">
+    <div class="fundo-cadastro-login text-center p-5">
+        <h1 class="title">Cadastre-se!</h1>
+        <div class="container px-5 my-5 col-md-5 rounded-4 mt-3">
+            <div class="logo-container">
+                <img class="img-login-cadastro" src="../assets/imgs/blackscreenlogo.png" alt="Logo BlackScreen">
+            </div>
+                <form id="contactForm text-black">
+                <div class="form-floating mb-3">
+                    <input class="form-control" id="nome_input" type="text" required/>
+                    <label for="nome_input">Nome</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input class="form-control" id="unidade_input" type="number" required/>
+                    <label for="unidade_input">Unidade</label>
+                </div>
+                <div class="d-grid mb-3">
+                    <button class="btn btn-primary btn-lg" id="submitButton" type="button" onclick="cadastrar()">Cadastrar</button>
+                </div>
+            </form>
+
+            <div id="div_aguardar" class="loading-div">
+                <img src="../assets/circle-loading.gif" id="loading-gif">
+            </div>
+          
+            <div class="card_erro" id="cardErro">
+                <div class="alerta_erro">
+                    <span id="mensagem_erro"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+            </div>
 
 
         </div>
@@ -82,6 +115,107 @@
 <script>
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
 
+    function cadastrar() {
+  const cardErro = document.getElementById("cardErro");
+  const mensagem_erro = document.getElementById("mensagem_erro");
+    aguardar();
+
+    
+    var nomeVar = nome_input.value;
+    var unidadeVar = unidade_input.value;
+    // var idEmpresaVincular
+
+    // Verificando se há algum campo em branco
+    if (
+      nomeVar == "" ||
+      unidadeVar == "" 
+    ) {
+      cardErro.style.display = "block";
+      mensagem_erro.innerHTML =
+        "(Preencha todos o campos para continuar!)";
+
+      finalizarAguardar();
+      return false;
+    } else{
+      setInterval(sumirMensagem, 5000);
+    }
+    // Verificando se o código de ativação é de alguma empresa cadastrada
+    /* for (let i = 0; i < listaEmpresasCadastradas.length; i++) {
+      if (listaEmpresasCadastradas[i].codigo_ativacao == codigoVar) {
+        idEmpresaVincular = listaEmpresasCadastradas[i].id
+        console.log("Código de ativação válido.");
+        break;
+      } else {
+        cardErro.style.display = "block";
+        mensagem_erro.innerHTML = "(Mensagem de erro para código inválido)";
+        finalizarAguardar();
+      }
+    }*/
+
+    // Enviando o valor da nova input
+    fetch("/componentes/cadastrar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        // crie um atributo que recebe o valor recuperado aqui
+        // Agora vá para o arquivo routes/usuario.js
+        componenteServer: nomeVar,
+        unidadeServer: unidadeVar
+        //idEmpresaVincularServer: idEmpresaVincular
+      }),
+    })
+      .then(function (resposta) {
+        console.log("resposta: ", resposta);
+
+        if (resposta.ok) {
+          cardErro.style.display = "block";
+
+          mensagem_erro.innerHTML =
+            "Cadastro realizado com sucesso!";
+
+          setTimeout(() => {
+            window.location = "dashboard.html";
+          }, "2000");
+
+          limparFormulario();
+          finalizarAguardar();
+        } else {
+          throw "Houve um erro ao tentar realizar o cadastro!";
+        }
+      })
+      .catch(function (resposta) {
+        console.log(`#ERRO: ${resposta}`);
+        finalizarAguardar();
+      });
+
+    return false;
+  }
+
+  // Listando empresas cadastradas 
+ /* function listar() {
+    fetch("/empresas/listar", {
+      method: "GET",
+    })
+      .then(function (resposta) {
+        resposta.json().then((empresas) => {
+          empresas.forEach((empresa) => {
+            listaEmpresasCadastradas.push(empresa);
+
+            console.log("listaEmpresasCadastradas")
+            console.log(listaEmpresasCadastradas[0].codigo_ativacao)
+          });
+        });
+      })
+      .catch(function (resposta) {
+        console.log(`#ERRO: ${resposta}`);
+      });
+  }*/
+
+  function sumirMensagem() {
+    cardErro.style.display = "none";
+  }
     // function listarInfosDeUm() {
     //     console.log("Criar função de trazer informações de post escolhido");
     // }

@@ -56,6 +56,14 @@ create table desempenho (
     foreign key (fkCaixa) references caixas (idCaixa)
 );
 
+create table componentes(
+    idComponente int auto_increment primary key,
+    unidade varchar(20),
+    componente varchar(20),
+    fkCaixa int not null,
+    foreign key (fkCaixa) references caixas (idCaixa)
+);
+
 create view vw_alertas as
 select 
     d.idDesempenho,
