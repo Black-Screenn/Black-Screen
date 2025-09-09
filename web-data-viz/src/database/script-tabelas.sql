@@ -66,6 +66,61 @@ create table componente_alerta (
   unique key (fkComponente, fkParametro) 
 );
 
+insert into empresa (nome, cnpj) values
+('BlackScreen', '12345678000199'),
+('SafeBank Systems', '98765432000177'),
+('CaixaProtegida Ltda', '11122233000155');
+
+insert into usuario (nome, senha, email, fkEmpresa) values
+('Pedro Amaral', 'senha123', 'pedro@blackscreen.com', 1),
+('Vitorio Bearari', 'senha456', 'vitorio@safebank.com', 2),
+('Hanieh Ashouri', 'senha789', 'hanieh@caixaprotegida.com', 3);
+
+insert into caixas (codigoCaixa, fkEmpresa) values
+('CX001', 1),
+('CX002', 1),
+('CX101', 2),
+('CX201', 3);
+
+insert into endereco (cep, logradouro, numero, complemento, bairro, cidade, uf, fkCaixa) values
+('01001-000', 'Av. Paulista', '1000', 'Térreo', 'Bela Vista', 'São Paulo', 'SP', 1),
+('02020-000', 'Rua Vergueiro', '200', 'Sala 2', 'Liberdade', 'São Paulo', 'SP', 2),
+('03030-000', 'Rua XV de Novembro', '300', null, 'Centro', 'Curitiba', 'PR', 3),
+('04040-000', 'Av. Atlântica', '400', 'Quiosque 5', 'Copacabana', 'Rio de Janeiro', 'RJ', 4);
+
+insert into p_alerta (parametro, fkCaixa) values
+(75.5, 1),
+(60.0, 1),
+(80.0, 2),
+(55.0, 3),
+(90.0, 4);
+
+insert into componentes (unidade, componente, fkCaixa) values
+('%', 'CPU', 1),
+('%', 'Disco', 1),
+('%', 'Memória', 2),
+('%', 'CPU', 3),
+('%', 'Memória', 4);
+
+insert into componente_alerta (fkComponente, fkParametro) values
+(1, 1), 
+(2, 2), 
+(3, 3), 
+(4, 4),
+(5, 5); 
+
+select emp.nome as empresa,
+       c.codigoCaixa,
+       comp.componente,
+       comp.unidade,
+       p.parametro as limite_alerta
+from empresa emp
+join caixas c on emp.idEmpresa = c.fkEmpresa
+join componentes comp on c.idCaixa = comp.fkCaixa
+join componente_alerta ca on comp.idComponente = ca.fkComponente
+join p_alerta p on ca.fkParametro = p.idDesempenho
+where emp.nome = 'BlackScreen'
+order by c.codigoCaixa, comp.componente;
 
 
 
