@@ -108,8 +108,6 @@
 </html>
 
 <script>
-
-
     function entrar() {
         aguardar();
 
@@ -134,6 +132,7 @@
             headers: {
                 "Content-Type": "application/json"
             },
+            credentials: "include",
             body: JSON.stringify({
                 emailServer: emailVar,
                 senhaServer: senhaVar
@@ -152,11 +151,10 @@
                     sessionStorage.NOME_USUARIO = json.nome;
                     sessionStorage.ID_USUARIO = json.idUsuario;
                     sessionStorage.SENHA_USUARIO = json.senha;
-                    //sessionStorage.AQUARIOS = JSON.stringify(json.aquarios)
 
                     setTimeout(function () {
                         window.location = "dashboard/dashboard.html";
-                    }, 1000); // apenas para exibir o loading
+                    }, 1000); 
 
                 });
 
@@ -183,5 +181,4 @@
     function sumirMensagem() {
         mensagem_erro.style.display = "none"
     }
-
 </script>

@@ -220,3 +220,5 @@ p {
   color:red;
   /* font-size: 20px; */
 }
+
+#map { height: 100vh; }

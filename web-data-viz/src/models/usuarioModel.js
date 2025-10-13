@@ -1,66 +1,57 @@
 var database = require("../database/config")
 
 function autenticar(email, senha) {
-    console.log("ACESSEI O USUARIO MODEL \n \n\t\t >> Se aqui der erro de 'Error: connect ECONNREFUSED',\n \t\t >> verifique suas credenciais de acesso ao banco\n \t\t >> e se o servidor de seu BD está rodando corretamente. \n\n function entrar(): ", email, senha)
-    var instrucaoSql = `
-        SELECT idUsuario, nome, email, senha FROM usuario WHERE email = '${email}' AND senha = '${senha}';
-    `;//, fk_empresa as empresaId 
-    console.log("Executando a instrução SQL: \n" + instrucaoSql);
-    return database.executar(instrucaoSql);
+  const instrucaoSql = `
+    select idUsuario, nome, email, fkEmpresa
+    from usuario
+    where email = ? and senha = ?
+    limit 1
+  `;
+  return database.executar(instrucaoSql, [email, senha]);
 }
+function cadastrar(nome, email, senha) {
 
-// Coloque os mesmos parâmetros aqui. Vá para a var instrucaoSql
-function cadastrar(nome, email, senha) { // , fkEmpresa
     console.log("ACESSEI O USUARIO MODEL \n \n\t\t >> Se aqui der erro de 'Error: connect ECONNREFUSED',\n \t\t >> verifique suas credenciais de acesso ao banco\n \t\t >> e se o servidor de seu BD está rodando corretamente. \n\n function cadastrar():", nome, email, senha); //, fkEmpresa
-    
-    // Insira exatamente a query do banco aqui, lembrando da nomenclatura exata nos valores
-    //  e na ordem de inserção dos dados.
-    var instrucaoSql = `
-        INSERT INTO usuario (nome, email, senha) VALUES ('${nome}', '${email}', '${senha}');
-    `; //, fk_empresa  //, '${fkEmpresa}'
+
+    const sql = `
+    insert into usuario (nome, email, senha)
+    values (?, ?, ?)
+  `;
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
-    return database.executar(instrucaoSql);
+  return db.executar(sql, [nome, email, senha]);
 }
 
 function validarSenha(idUsuario, senhaAtual) {
-    console.log("Validando senha do usuário: ", idUsuario);
-
-    var instrucaoSql = `
-        SELECT idUsuario FROM usuario 
-        WHERE idUsuario = ${idUsuario} AND senha = '${senhaAtual}';
-    `;
-
+  const sql = `
+    select idUsuario
+    from usuario
+    where idUsuario = ? and senha = ?
+    limit 1
+  `;
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
-    return database.executar(instrucaoSql);
+  return db.executar(sql, [idUsuario, senhaAtual]);
 }
 
-
 function trocar(idUsuario, novaSenha) {
-    console.log("Trocando a senha do usuário: ", idUsuario);
-
-    var instrucaoSql = `
-        UPDATE usuario 
-        SET senha = '${novaSenha}' 
-        WHERE idUsuario = ${idUsuario};
-    `;
-
+  const sql = `
+    update usuario
+    set senha = ?
+    where idUsuario = ?
+  `;
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
-    return database.executar(instrucaoSql);
+    return db.executar(sql, [novaSenha, idUsuario]);
 }
 
 function excluir(idUsuario) {
-    var instrucaoSql = `
-        DELETE FROM usuario WHERE idUsuario = ${idUsuario};
-    `;
+    const sql = `delete from usuario where idUsuario = ?`;
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
-    return database.executar(instrucaoSql);
+    return db.executar(sql, [idUsuario]);
 }
 
-
 module.exports = {
-    autenticar,
-    cadastrar,
-    validarSenha,
-    trocar,
-    excluir
+  autenticar,
+  cadastrar,
+  validarSenha,
+  trocar,
+  excluir
 };

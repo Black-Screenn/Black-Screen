@@ -37,6 +37,8 @@ create table endereco (
     bairro varchar(100) not null,
     cidade varchar(100) not null,
     uf char(2) not null,
+    latitude float,
+    longitude float,
     fkCaixa int not null,
     foreign key (fkCaixa) references caixas (idCaixa),
     unique key (fkCaixa) 
@@ -82,11 +84,11 @@ insert into caixas (codigoCaixa, fkEmpresa) values
 ('CX101', 2),
 ('CX201', 3);
 
-insert into endereco (cep, logradouro, numero, complemento, bairro, cidade, uf, fkCaixa) values
-('01001-000', 'Av. Paulista', '1000', 'Térreo', 'Bela Vista', 'São Paulo', 'SP', 1),
-('02020-000', 'Rua Vergueiro', '200', 'Sala 2', 'Liberdade', 'São Paulo', 'SP', 2),
-('03030-000', 'Rua XV de Novembro', '300', null, 'Centro', 'Curitiba', 'PR', 3),
-('04040-000', 'Av. Atlântica', '400', 'Quiosque 5', 'Copacabana', 'Rio de Janeiro', 'RJ', 4);
+insert into endereco (cep, logradouro, numero, complemento, bairro, cidade, uf, fkCaixa, latitude, longitude) values
+('01001-000', 'Av. Paulista', '1000', 'Térreo', 'Bela Vista', 'São Paulo', 'SP', 1, -7.948196, -34.890172),
+('02020-000', 'Rua Vergueiro', '200', 'Sala 2', 'Liberdade', 'São Paulo', 'SP', 2, -7.937091, -34.857388),
+('03030-000', 'Rua XV de Novembro', '300', null, 'Centro', 'Curitiba', 'PR', 3, -7.954592, -34.952316),
+('04040-000', 'Av. Atlântica', '400', 'Quiosque 5', 'Copacabana', 'Rio de Janeiro', 'RJ', 4, -5.853801, -36.210938);
 
 insert into p_alerta (parametro, fkCaixa) values
 (75.5, 1),
@@ -121,7 +123,4 @@ join componente_alerta ca on comp.idComponente = ca.fkComponente
 join p_alerta p on ca.fkParametro = p.idDesempenho
 where emp.nome = 'BlackScreen'
 order by c.codigoCaixa, comp.componente;
-
-
-
 
