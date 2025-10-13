@@ -8,70 +8,6 @@ body {
   font-family: 'Barlow', 'Segoe UI', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* .label-captura {
-  display: flex;
-  justify-content: center;
-}
-
-.dash-right .avisos {
-  width: 100%;
-  color: rgb(216, 216, 216);
-  font-family: 'Barlow', 'Segoe UI', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.dash-right .avisos .container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.dash-right .avisos .container .div-form {
-  width: 95%;
-}
-
-.dash-right .avisos .container .div-form #form_postagem {
-  width: 95%;
-}
-
-.dash-right .avisos .div-form label {
-  width: 95%;
-}
-
-.dash-right .avisos .div-form input {
-  width: 95%;
-  border-radius: 5px;
-}
-
-.dash-right .avisos .div-form textarea {
-  width: 95%;
-  border: 3px solid #e6005a;
-  background-color: white;
-  border-radius: 5px;
-}
-
-.dash-right .avisos .div-form button {
-  cursor: pointer;
-  font-family: 'Barlow', 'Segoe UI', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  border: 0;
-  border-radius: 5px;
-  font-weight: 600;
-  font-size: 18px;
-  padding: 10px 15px;
-  color: white;
-  background-color: #001F54;
-  width: 120px;
-} */
-
-/* .dash {
-  padding: 30px;
-  width: 100%;
-  height: 100vh;
-  overflow-x: hidden;
-  align-items: center;
-  justify-content: center;
-} */
-
-
 .publicacao-btn-editar {
   cursor: pointer;
   font-family: 'Barlow', 'Segoe UI', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -395,13 +331,15 @@ canvas {
   left: 0;
   z-index: 999;
   height: 100vh;
-  width: 20%;
+  padding: 24px 48px;
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
   align-items: center;
-  border-right: 3px solid #001F54;
-  background-color: #0a1128;
+  background-color: #F3F3F3;
+  box-sizing: border-box;
+  transition: .3s;
+  -webkit-box-shadow: 5px 0px 15px -10px #000000; 
+  box-shadow: 5px 0px 15px -10px #000000;
 }
 
 .dash-right {
@@ -416,8 +354,8 @@ canvas {
   overflow: auto;
 }
 
-.header-left h1 {
-  color: #1282a2;
+.header-left img{
+  width: 178px;
 }
 
 .hello {
@@ -427,34 +365,76 @@ canvas {
 }
 
 .hello h3 {
-  color: #FEFCFB;
+  color: #001F54;
   font-weight: 300;
   font-size: 1.2rem;
+  text-align: center;
 }
 
 .hello h3 span {
   font-weight: 800;
 }
 
-.btn-nav {
-  width: 40%;
+.header-left .links{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 74px;
+  gap: 12px;
+  height: 100%;
+}
+
+.btn-nav, .btn-nav-white {
+  width: 100%;
   color: white;
-  background-color: #1282a2;
+  background-color: #004076;
   border-radius: 5px;
-  text-align: center;
-  padding: 2% 5%;
+  padding: 12px;
+  box-sizing: border-box;
+  min-width: 34px;
+  min-height: 34px;
+  transition: .3s;
+}
+.btn-nav{
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+}
+.btn-nav a, .btn-nav-white a{
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.btn-nav-white:has(a:hover){
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+  outline: 1px solid #5e5e5e;
+}
+.btn-nav span, .btn-nav-white span{
+  background: #F3F3F3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  color: #001F54;
+  border-radius: 4px;
+}
+
+.header-left .btn-nav h3, .header-left .btn-nav-white h3{
+  display: flex;
+}
+
+.header-left .btn-nav, .header-left .btn-nav-white{
+  width: 200px;
 }
 
 .btn-nav-white {
-  width: 40%;
-  background-color: white;
-  border: 3px solid #1282a2;
-  border-radius: 5px;
-  text-align: center;
-  padding: 2% 5%;
+  background-color: transparent;
 }
 
-.btn-nav-white h3 {
+.btn-nav-white h3,
+.btn-nav h3{
+  display: none;
+}
+.btn-nav-white h3, .btn-nav-white span {
   color: #034078;
   padding: 0;
   margin: 0;
@@ -467,16 +447,20 @@ canvas {
 }
 
 .btn-logout {
+  margin-top: auto;
   margin: 0;
   padding: 0;
-  width: 20%;
-  background-color: #32b9cd;
-  color: white;
+  width: 100%;
+  color: #001F54;
   border-radius: 10px;
   text-align: center;
   padding: 10px 15px;
-  margin-bottom: 100px;
   cursor: pointer;
+  transition: .3s;
+}
+.btn-logout:hover {
+  background-color: #f13333;
+  color: white;
 }
 
 
