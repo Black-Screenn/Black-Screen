@@ -21,7 +21,8 @@ async function autenticar(req, res) {
       idUsuario: u.idUsuario,
       nome: u.nome,
       email: u.email,
-      fkEmpresa: u.fkEmpresa
+      fkEmpresa: u.fkEmpresa,
+      senha: u.senha
     });
   } catch (e) {
   console.error("X [AUTH] login:", e.code, e.sqlMessage || e.message);

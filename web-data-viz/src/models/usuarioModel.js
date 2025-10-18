@@ -2,7 +2,7 @@ var database = require("../database/config")
 
 function autenticar(email, senha) {
   const instrucaoSql = `
-    select idUsuario, nome, email, fkEmpresa
+    select idUsuario, nome, email, senha, fkEmpresa
     from usuario
     where email = ? and senha = ?
     limit 1
