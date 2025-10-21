@@ -1,0 +1,257 @@
+#map {
+    width: 100%;
+    height: 100dvh;
+    z-index: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+.content .top {
+    z-index: 1;
+    background: rgba(212, 212, 212, 0.651);
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(88, 88, 88, 0.17);
+    display: flex;
+    flex-direction: column;
+}
+
+.content .kpis {
+    box-sizing: border-box;
+    height: 0;
+    overflow: hidden;
+    padding: 0px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    z-index: 1;
+    overflow-y: auto;
+}
+
+.content .kpis.expanded {
+    padding: 12px;
+    height: 280px;
+}
+
+.content .kpis .kpi {
+    background: rgb(243, 243, 243);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 0;
+    width: fit-content;
+    position: relative;
+    justify-content: flex-start;
+    height: 100%;
+    box-sizing: border-box;
+    flex: 1;
+}
+
+.content .kpis .kpi::after {
+    content: '';
+    width: 101.5%;
+    height: 102%;
+    position: absolute;
+    top: -1%;
+    left: -0.7%;
+    border-radius: 10px;
+    background: linear-gradient(0deg, #b8b8b8, #ffffff);
+    opacity: 0.5;
+    z-index: -1;
+}
+
+.content .kpis .kpi h3 {
+    margin: 0;
+    color: #21315c;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.5em;
+    margin-bottom: 12px;
+}
+.content .kpis .kpi h3 span {
+    margin: 0;
+    font-size: 0.8em;
+    background: #001c41;
+    display: flex;
+    width: fit-content;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #FFF;
+}
+
+.content .kpis .kpi h1 {
+    color: #001c41;
+}
+.content .kpis .kpi .status{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.content .kpis .kpi:has(.status){
+    min-width: 240px;
+}
+.content .kpis .kpi .status .status-item .circle{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: inset -1px -1px 5px rgba(0, 0, 0, 0.2), inset 1px 1px 5px rgba(255, 255, 255, 0.5), 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.content .kpis .kpi .status .status-item .circle.green{
+    background-color: #4CAF50;
+}
+.content .kpis .kpi .status .status-item .circle.red{
+    background-color: #F44336;
+}
+.content .kpis .kpi .status .status-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;  
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #FFF;
+}
+.content .kpis .kpi .status .status-item p{
+    margin: 0;
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+.content .kpis .kpi .status .status-item p span{
+    font-weight: normal;
+    margin-left: 8px;
+    color: #333;
+    font-weight: bold;
+    font-size: 1em;
+}
+.content .kpis .kpi .rank{
+    display: flex;
+    flex-direction: column;
+}
+.content .kpis .kpi:has(.rank){
+    min-width: 370px;
+}
+.content .kpis .kpi .rank div{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+    padding: 12px;  
+}
+.content .kpis .kpi .rank div p{
+    font-weight: bold;
+    margin: 0;
+}
+.content .kpis .kpi .rank div p.atm{
+    font-weight: normal;
+    flex: 1;
+}
+.content .kpis .kpi .rank div p.alertas{
+    min-width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.content .kpis .kpi .rank div.header{
+    font-weight: bold;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 4px;
+}
+.content .kpis .kpi .rank div.top3{
+    background: #f0f0f0;
+    border-radius: 4px;
+    box-shadow: inset -1px -1px 5px rgba(0, 0, 0, 0.2), inset 1px 1px 5px rgba(255, 255, 255, 0.5), 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.content .kpis .kpi .rank div.top3.first{
+    background: #FF9B9B;
+}
+.content .kpis .kpi .rank div.top3.second{
+    background: #FFCE6B;
+}
+.content .kpis .kpi .rank div.top3.third{
+    background: #C2D1FF;
+}
+
+.btn-expand-kpi {
+    margin-top: 12px;
+    text-align: center;
+    width: fit-content;
+    align-self: center;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+    background: radial-gradient(#ffffff 60%, #b8b8b8 95%);
+}
+
+.btn-expand-kpi:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+}
+
+.pesquisa-filtros {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1;
+    height: fit-content;
+    padding: 12px;
+}
+
+.pesquisa-div {
+    position: relative;
+    width: 100%;
+}
+
+.pesquisa-div input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 40px 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    font-family: 'Barlow';
+    transition: all 0.3s ease;
+}
+
+.pesquisa-div input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.pesquisa-div span {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.pesquisa-filtros select {
+    height: fit-content;
+    padding: 10px 16px;
+    margin: 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    font-family: 'Barlow';
+    transition: all 0.3s ease;
+    background: white;
+}
