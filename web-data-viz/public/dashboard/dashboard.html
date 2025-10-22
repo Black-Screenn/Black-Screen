@@ -7,10 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlackScreen | Dashboards</title>
     
-    <link rel="stylesheet" href="./../css/dashboardHome.css">
     <link rel="stylesheet" href="./../css/dashboards.css">
     <link rel="stylesheet" href="./../css/style.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,home,keyboard_arrow_up,local_atm,notifications,search,search_insights" />
+    <link rel="stylesheet" href="./../css/dashboardHome.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,cancel,check_circle,close,docs,home,keyboard_arrow_up,local_atm,location_on,notifications,search,search_insights" />
     <script src="../js/sessao.js"></script>
     <script src="./../js/alerta.js"></script>
 
@@ -175,7 +175,50 @@
 
         <div id="modal">
             <div id="modalContainer">
-                <h1 id="caixa-name"></h1>
+                <div class="header" onclick="closeModal()">
+                    <h1 id="caixa-name"></h1>
+                    <button class="material-symbols-outlined close">close</button>
+                </div>
+                <div class="contentModal">
+                    <div class="left">
+                        <div class="item">
+                            <div class="title">
+                                <span class="material-symbols-outlined">location_on</span>
+                                <h2>Localização</h2>
+                            </div>
+                            <p id="caixa-endereco">Rua Exemplo, 123 - Bairro, Cidade/UF</p>
+                        </div>
+                        <div class="item">
+                            <div class="title">
+                                <span class="material-symbols-outlined">docs</span>
+                                <h2>Visão Geral</h2>
+                            </div>
+                            <h3>Status:</h3>
+                            <p id="caixa-status" class="status ativo">
+                                <span class="material-symbols-outlined">check_circle</span>
+                                Ativo
+                            </p>
+                            <h3>Componentes:</h3>
+                            <div class="components" id="component-container">
+                                <p class="status bom">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                    Impressora de Recibos
+                                </p>
+                                <p class="status alerta">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                    Dispensador de Cédulas
+                                </p>
+                                <p class="status falha">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                    Leitor de Cartão
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="right">
+
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -196,9 +239,8 @@
             }
         });
 
-        function openModal(c){
-            document.getElementById('modal').style.display = "flex";
-            document.getElementById('caixa-name').textContent = c.codigoCaixa;
+        function closeModal(){
+            document.getElementById('modal').style.display = "none";
         }
 
         const icon = L.icon({
@@ -244,6 +286,23 @@
                     marker.on('click', function (e){
                         document.getElementById('modal').style.display = "flex";
                         document.getElementById('caixa-name').textContent = c.codigoCaixa;
+                        document.getElementById('caixa-endereco').textContent = `${c.logradouro}, ${c.numero} - ${c.bairro}, ${c.cidade}/${c.uf}`;
+                        statusCaixa = 1;
+                        if(statusCaixa === 1){
+                            document.getElementById('caixa-status').classList.remove('inativo');
+                            document.getElementById('caixa-status').classList.add('ativo');
+                            document.getElementById('caixa-status').innerHTML = `
+                                <span class="material-symbols-outlined">check_circle</span>
+                                Ativo
+                            `;
+                        } else {
+                            document.getElementById('caixa-status').classList.remove('ativo');
+                            document.getElementById('caixa-status').classList.add('inativo');
+                            document.getElementById('caixa-status').innerHTML = `
+                                <span class="material-symbols-outlined">cancel</span>
+                                Inativo
+                            `;
+                        }
                     });
                 });
 

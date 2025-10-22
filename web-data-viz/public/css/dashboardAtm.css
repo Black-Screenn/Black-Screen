@@ -18,11 +18,11 @@
 
 .content .listaAtm::after {
     content: '';
-    width: 101%;
+    width: 100.5%;
     height: 102%;
     position: absolute;
     top: -1.25%;
-    left: -0.5%;
+    left: -0.25%;
     border-radius: 10px;
     background: linear-gradient(0deg, #b8b8b8, #ffffff);
     opacity: 0.5;
@@ -55,6 +55,11 @@
     padding: 12px;
     border: none;
     box-shadow: inset -0.5px -0.5px 4px rgba(0, 0, 0, 0.2), inset 1px 1px 5px rgba(255, 255, 255, 0.5), 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: .3s;
+}
+.content .listaAtm .header .pesquisa input:focus{
+    outline: none;
+    box-shadow: inset -0.5px -0.5px 6px rgba(0, 0, 0, 0.3), inset 1px 1px 7px rgba(255, 255, 255, 0.6), 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 .content .listaAtm .lista{
     display: flex;
