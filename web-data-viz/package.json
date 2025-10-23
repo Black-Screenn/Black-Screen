@@ -10,7 +10,9 @@
   "author": "Feito pelos desenvolvedores @ São Paulo Tech School / Bandtec Digital School",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.914.0",
     "cors": "^2.8.5",
+    "csv-stringify": "^6.6.0",
     "dotenv": "^16.6.1",
     "express": "^4.17.1",
     "express-session": "^1.18.2",
