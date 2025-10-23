@@ -22,8 +22,8 @@ var componentesRouter = require("./src/routes/componentes");
 var caixasRouter = require("./src/routes/caixas");
 var cloudRouter = require("./src/routes/cloud");
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '1gb' }));
+app.use(express.urlencoded({ limit: '1gb', extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(cors());

@@ -26,10 +26,14 @@ async function send(req, res) {
     });
 
     const bucketName = process.env.BUCKET_NAME;
+
+    dataframe[0] = JSON.parse(dataframe[0]);
+
+    console.log(dataframe[0]);
     
-    const csvContent = stringify(dataframe, {
+    const csvContent = stringify(dataframe[0], {
       header: true,
-      delimiter: ','
+      delimiter: ';'
     });
 
     const uploadCommand = new s3.PutObjectCommand({
