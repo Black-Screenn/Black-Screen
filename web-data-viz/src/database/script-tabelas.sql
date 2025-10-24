@@ -1,3 +1,5 @@
+drop database if exists BlackScreen;
+
 create database BlackScreen;
 use BlackScreen;
 
@@ -22,7 +24,7 @@ create table usuario (
 
 create table caixas (
     idCaixa int auto_increment primary key,
-    codigoCaixa varchar(10) not null,
+    codigoCaixa varchar(12) not null,
     fkEmpresa int not null,
     foreign key (fkEmpresa) references empresa (idEmpresa),
     unique key (codigoCaixa) 
@@ -85,11 +87,11 @@ insert into caixas (codigoCaixa, fkEmpresa) values
 ('CX101', 2),
 ('CX201', 3);
 
-insert into endereco (cep, logradouro, numero, complemento, bairro, cidade, uf, fkCaixa, latitude, longitude) values
-('01001-000', 'Av. Paulista', '1000', 'Térreo', 'Bela Vista', 'São Paulo', 'SP', 1, -7.948196, -34.890172),
-('02020-000', 'Rua Vergueiro', '200', 'Sala 2', 'Liberdade', 'São Paulo', 'SP', 2, -7.937091, -34.857388),
-('03030-000', 'Rua XV de Novembro', '300', null, 'Centro', 'Curitiba', 'PR', 3, -7.954592, -34.952316),
-('04040-000', 'Av. Atlântica', '400', 'Quiosque 5', 'Copacabana', 'Rio de Janeiro', 'RJ', 4, -5.853801, -36.210938);
+insert into endereco (cep, logradouro, numero, complemento, bairro, cidade, uf, fkCaixa, latitude, longitude, pais) values
+('01001-000', 'Av. Paulista', '1000', 'Térreo', 'Bela Vista', 'São Paulo', 'SP', 1, -7.948196, -34.890172, "Brasil"),
+('02020-000', 'Rua Vergueiro', '200', 'Sala 2', 'Liberdade', 'São Paulo', 'SP', 2, -7.937091, -34.857388, "Brasil"),
+('03030-000', 'Rua XV de Novembro', '300', null, 'Centro', 'Curitiba', 'PR', 3, -7.954592, -34.952316, "Brasil"),
+('04040-000', 'Av. Atlântica', '400', 'Quiosque 5', 'Copacabana', 'Rio de Janeiro', 'RJ', 4, -5.853801, -36.210938, "Brasil");
 
 insert into p_alerta (parametro, fkCaixa) values
 (75.5, 1),
@@ -124,4 +126,3 @@ join componente_alerta ca on comp.idComponente = ca.fkComponente
 join p_alerta p on ca.fkParametro = p.idDesempenho
 where emp.nome = 'BlackScreen'
 order by c.codigoCaixa, comp.componente;
-

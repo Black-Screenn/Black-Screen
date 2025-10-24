@@ -28,4 +28,31 @@ function listarPorEmpresa(fkEmpresa) {
   return db.executar(sql);
 }
 
-module.exports = { listarTodos, listarPorEmpresa };
+async function cadastrar(caixa){
+  let sql = `
+    SELECT COUNT(idCaixa) AS idCaixa FROM caixas WHERE fkEmpresa = ${caixa.idEmpresa};
+  `
+
+  res = await db.executar(sql);
+
+  sql = `
+    INSERT INTO caixas(codigoCaixa, fkEmpresa)
+      VALUES("CX-${res[0].idCaixa+1}_${caixa.idEmpresa}", ${caixa.idEmpresa});
+  `
+  await db.executar(sql);
+
+  sql = `
+    SELECT MAX(idCaixa) AS idCaixa FROM caixas WHERE fkEmpresa = ${caixa.idEmpresa};
+  `
+  return db.executar(sql).then(result => {
+    const idCaixa = result[0].idCaixa;
+    console.log(result)
+    sql = `
+      INSERT INTO endereco(cep, logradouro, bairro, cidade, uf, pais, latitude, longitude, fkCaixa)
+        VALUES("${caixa.cep}", "${caixa.logradouro}", "${caixa.bairro}", "${caixa.cidade}", "${caixa.uf}", "${caixa.pais}", ${caixa.latitude}, ${caixa.longitude},${idCaixa})
+    `;
+    return db.executar(sql).then(() => idCaixa);
+  });
+}
+
+module.exports = { listarTodos, listarPorEmpresa, cadastrar };

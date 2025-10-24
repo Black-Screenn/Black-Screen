@@ -22,4 +22,28 @@ async function listar(req, res) {
   }
 }
 
-module.exports = { listar };
+async function cadastrar(req, res) {
+  try {
+    const caixa = req.body.dataframe[0]; 
+    console.log(caixa)
+    if (caixa === undefined) {
+      return res.status(400).json({ erro: "Caixa inválido" });
+    }
+
+    if (caixa.idEmpresa == null || caixa.idEmpresa == "" ) {
+      return res.status(400).json({ erro: "ID da Empresa inválido" });
+    }
+
+    await caixaModel.cadastrar(caixa);
+    return res.status(200).json({ 
+      message: "Cadastro feito com sucesso",
+      caixa: caixa
+    });
+
+  } catch (e) {
+    console.error("X [CAIXAS] erro:", e.code, e.sqlMessage || e.message);
+    return res.status(500).json({ erro: "Falha ao consultar caixas" });
+  }
+}
+
+module.exports = { listar, cadastrar };
