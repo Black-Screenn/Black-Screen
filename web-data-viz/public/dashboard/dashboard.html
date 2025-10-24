@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="./../css/dashboards.css">
     <link rel="stylesheet" href="./../css/style.css" />
     <link rel="stylesheet" href="./../css/dashboardHome.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,cancel,check_circle,close,docs,home,keyboard_arrow_up,local_atm,location_on,notifications,search,search_insights" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,cancel,check_circle,circle_notifications,close,do_not_disturb_on,docs,health_and_safety,home,keyboard_arrow_up,local_atm,location_on,notifications,search,search_insights" />
     <script src="../js/sessao.js"></script>
     <script src="./../js/alerta.js"></script>
 
@@ -204,19 +204,118 @@
                                     <span class="material-symbols-outlined">check_circle</span>
                                     Impressora de Recibos
                                 </p>
-                                <p class="status alerta">
+                                <p class="status bom">
                                     <span class="material-symbols-outlined">check_circle</span>
+                                    Teclado
+                                </p>
+                                <p class="status bom">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                    Conexão
+                                </p>
+                                <p class="status alerta">
+                                    <span class="material-symbols-outlined">circle_notifications</span>
                                     Dispensador de Cédulas
                                 </p>
                                 <p class="status falha">
-                                    <span class="material-symbols-outlined">check_circle</span>
+                                    <span class="material-symbols-outlined">do_not_disturb_on</span>
                                     Leitor de Cartão
                                 </p>
                             </div>
+                            <h3>Alertas Recentes:</h3>
+                            <table>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Componente</th>
+                                    <th>Descrição</th>
+                                </tr>
+                                <tr>
+                                    <td>2024-06-15 14:32</td>
+                                    <td>CPU</td>
+                                    <td>Uso elevado da CPU (74%)</td>
+                                </tr>
+                                <tr>
+                                    <td>2024-06-14 09:21</td>
+                                    <td>Disco</td>
+                                    <td>Espaço em disco baixo (10% restante)</td>
+                                </tr>
+                                <tr>
+                                    <td>2024-06-13 16:45</td>
+                                    <td>Rede</td>
+                                    <td>Conexão intermitente detectada</td>
+                                </tr>
+                                
+                                <tr>
+                                    <td>2024-06-15 14:32</td>
+                                    <td>CPU</td>
+                                    <td>Uso elevado da CPU (74%)</td>
+                                </tr>
+                                <tr>
+                                    <td>2024-06-14 09:21</td>
+                                    <td>Disco</td>
+                                    <td>Espaço em disco baixo (10% restante)</td>
+                                </tr>
+                                <tr>
+                                    <td>2024-06-13 16:45</td>
+                                    <td>Rede</td>
+                                    <td>Conexão intermitente detectada</td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                     <div class="right">
-
+                        <div class="title">
+                            <span class="material-symbols-outlined">health_and_safety</span>
+                            <h2>Saúde do Sistema</h2>
+                        </div>
+                        <div class="stats cpu">
+                            <h3>CPU</h3>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 98%;"></div>
+                            </div>
+                            <div class="stat usoAtual">
+                                <div class="circle ruim"></div>
+                                <p>Uso: <span>98%</span></p>
+                            </div>
+                            <div class="stat tempAtual">
+                                <div class="circle bom"></div>
+                                <p>Temperatura: <span>55°C</span></p>
+                            </div>
+                            <div class="stat totalProcessos">
+                                <div class="circle bom"></div>
+                                <p>Total de Processos: <span>123</span></p>
+                            </div>
+                        </div>
+                        <div class="stats ram">
+                            <h3>RAM</h3>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 58%;"></div>
+                            </div>
+                            <div class="stat usoAtual">
+                                <div class="circle bom"></div>
+                                <p>Uso: <span>58%</span></p>
+                            </div>
+                        </div>
+                        <div class="stats disco">
+                            <h3>Disco</h3>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 62%;"></div>
+                            </div>
+                            <div class="stat usoAtual">
+                                <div class="circle bom"></div>
+                                <p>Uso: <span>62%</span></p>
+                            </div>
+                        </div>
+                        <div class="stats rede">
+                            <h3>Rede</h3>
+                            <div class="stat ping">
+                                <div class="circle bom"></div>
+                                <p>Uso: <span>42 ms</span></p>
+                            </div>
+                            <div class="stat percaPacotes">
+                                <div class="circle bom"></div>
+                                <p>Perca de Pacotes: <span>0 %</span></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

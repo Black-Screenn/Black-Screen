@@ -259,16 +259,24 @@
 #modal #modalContainer {
     background-color: #F3F3F3;
     padding: 24px;
+    padding-top: 0;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    width: 800px;
+    width: 900px;
+    height: 700px;
     max-width: 90vw;
+    max-height: 90vh;
     box-sizing: border-box;
+    overflow-y: auto;
 }
 #modal #modalContainer .header {
     display: flex;
     justify-content: space-between;
     margin-bottom: 16px;
+    position: sticky;
+    top: 0;
+    background-color: #F3F3F3;
+    padding-top: 24px;
 }
 #modal #modalContainer .header .close {
     cursor: pointer;
@@ -287,6 +295,7 @@
 #modal #modalContainer .contentModal {
     display: flex;
     flex-direction: row;
+    gap: 8px;
 }
 #modal #modalContainer .contentModal .left{
     display: flex;
@@ -314,7 +323,8 @@
     gap: 8px;
     margin: 0;
 }
-#modal #modalContainer .contentModal .left .item .title span{
+#modal #modalContainer .contentModal .left .item .title span,
+#modal #modalContainer .contentModal .right .title span{
     font-size: 1.5em;
     width: 38px;
     height: 38px;
@@ -336,7 +346,9 @@
     color: #333;
 }
 #modal #modalContainer .contentModal .left .item h3{
-    margin-bottom: 0px;
+    margin-bottom: 4px;
+    margin-top: 12px;
+    color: #2C2A2A;
 }
 #modal #modalContainer .contentModal .left .item p.status{
     font-weight: bold;
@@ -349,17 +361,23 @@
     width: fit-content;
     padding: 4px 8px;
     border-radius: 4px;
+    margin: 0;
+    border: 2px solid;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 #modal #modalContainer .contentModal .left .item p.status.ativo,
 #modal #modalContainer .contentModal .left .item p.status.bom{
-    background-color: #4CAF50;
+    background-color: #7AD914;
+    border-color: #9FFFA6 #6ECC0C #6ECC0C #9FFFA6;
 }
 #modal #modalContainer .contentModal .left .item p.status.inativo,
 #modal #modalContainer .contentModal .left .item p.status.falha{
     background-color: #e75e5e;
+    border-color: #FF9B9B #E04C4C #E04C4C #FF9B9B;
 }
 #modal #modalContainer .contentModal .left .item p.status.alerta{
     background-color: #FFB536;
+    border-color: #FFD88A #FFA800 #FFA800 #FFD88A;
 }
 #modal #modalContainer .contentModal .left .item p.status span{
     display: flex;
@@ -372,6 +390,136 @@
 #modal #modalContainer .contentModal .left .item .components{
     display: flex;
     flex-direction: row;
-    gap: 12px;
+    gap: 4px;
     flex-wrap: wrap;
+}
+#modal #modalContainer .contentModal .left .item table{
+    box-sizing: border-box;
+    border-collapse: collapse;
+    display: block; 
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+#modal #modalContainer .contentModal .left .item table thead {
+    display: table;
+    width: 100%;
+}
+
+#modal #modalContainer .contentModal .left .item table tbody {
+    display: block;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: #FFF;
+}
+#modal #modalContainer .contentModal .left .item table tbody::-webkit-scrollbar{
+    width: 8px;
+}
+#modal #modalContainer .contentModal .left .item table tbody::-webkit-scrollbar-thumb{
+    background-color: #072149;
+    border-radius: 4px;
+}
+#modal #modalContainer .contentModal .left .item table tbody::-webkit-scrollbar-track{
+    background-color: #e0e0e0;
+    border-radius: 4px;
+}
+#modal #modalContainer .contentModal .left .item table th {
+    background-color: #e0e0e0;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+#modal #modalContainer .contentModal .left .item table th,
+#modal #modalContainer .contentModal .left .item table td{
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+#modal #modalContainer .contentModal .left .item table th{
+    background-color: #e0e0e0;
+}
+
+#modal #modalContainer .contentModal .right{
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+#modal #modalContainer .contentModal .right .title{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: #2C2A2A;
+}
+#modal #modalContainer .contentModal .right .title span{
+    background-color: #1261C8;
+}
+#modal #modalContainer .contentModal .right .title h2{
+    margin: 0;
+    font-size: 1.4em;
+}
+#modal #modalContainer .contentModal .right .stats{
+    background-color: #DFE7FF;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 8px;
+    gap: 8px;
+    flex: 1;
+}
+#modal #modalContainer .contentModal .right .stats h3{
+    margin: 0 0 8px 0;
+    color: #2C2A2A;
+}
+#modal #modalContainer .contentModal .right .stats p{
+    margin: 4px 0;
+}
+#modal #modalContainer .contentModal .right .stats .progress-bar{
+    width: 100%;
+    height: 12px;
+    background-color: #f1f1f1;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset -1px -1px 5px rgba(0, 0, 0, 0.2), inset 1px 1px 5px rgba(255, 255, 255, 0.5);
+}
+
+#modal #modalContainer .contentModal .right .stats .progress-bar .progress{
+    height: 100%;
+    background-color: #21315c;
+    width: 0%;
+    border-radius: 10px 0 0 10px;
+    transition: width 0.5s ease-in-out;
+}
+#modal #modalContainer .contentModal .right .stats .stat{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+#modal #modalContainer .contentModal .right .stats .stat .circle{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: inset -1px -1px 5px rgba(0, 0, 0, 0.2), inset 1px 1px 5px rgba(255, 255, 255, 0.5), 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+#modal #modalContainer .contentModal .right .stats .stat .circle.bom{
+    background-color: #4CAF50;
+}
+#modal #modalContainer .contentModal .right .stats .stat .circle.ruim{
+    background-color: #F44336;
+}
+#modal #modalContainer .contentModal .right .stats .stat p{
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+#modal #modalContainer .contentModal .right .stats .stat p span{
+    color: #333;
+    font-weight: bold;
+    font-size: 1em;
 }
