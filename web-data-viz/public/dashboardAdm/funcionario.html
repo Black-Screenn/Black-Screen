@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <link rel="shortcut icon" href="../assets/imgs/blackscreenicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackScreen | Funcionários</title>
+
+    <link rel="stylesheet" href="./../css/dashboards.css">
+    <link rel="stylesheet" href="./../css/style.css" />
+    <link rel="stylesheet" href="./../css/dashboardFunc.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,cancel,check_circle,circle_notifications,close,do_not_disturb_on,docs,edit,health_and_safety,home,keyboard_arrow_up,local_atm,location_on,manage_accounts,notifications,remove,search,search_insights,work" />
+    <script src="../js/sessao.js"></script>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+
+    <style>
+    </style>
+
+<body>
+
+    <div class="janela">
+        <div class="header-left">
+            <img src="../assets/imgs/blackscreenlogo.png" alt="BlackScreen">
+
+            <div class="hello">
+                <h3>Bem vindo, <br><span id="b_usuario">usuário</span>!</h3>
+            </div>
+
+            <div class="links">
+                <div class="btn-nav-white">
+                    <a href="dashboard.html">
+                        <span class="material-symbols-outlined">
+                            home
+                        </span>
+                        <h3>
+                            Ínicio
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav">
+                    <a href="./logAlertas.html">
+                        <span class="material-symbols-outlined">
+                            work
+                        </span>
+                        <h3>
+                            Funcionários
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav-white">
+                    <a href="atm.html">
+                        <span class="material-symbols-outlined">
+                            local_atm
+                        </span>
+                        <h3>
+                            Cargos
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav-white">
+                    <a href="./perfil.html">
+                        <span class="material-symbols-outlined">
+                            account_circle
+                        </span>
+                        <h3>
+                            Meu Perfil
+                        </h3>
+                    </a>
+                </div>
+            </div>
+
+            <div class="btn-logout" onclick="limparSessao()">
+                <h3>Sair</h3>
+            </div>
+
+        </div>
+
+        <div class="content">
+            <div class="listaFunc">
+                <div class="header">
+                    <div class="pesquisa">
+                        <input type="text" placeholder="Pesquisar...">
+                        <span class="material-symbols-outlined">search</span>
+                    </div>
+                    <div class="filtro">
+                        <p>Filtro por Cargo</p>
+                        <select name="slt_cargo" id="slt_cargo">
+                            <option value="all" selected>Todos</option>
+                            <option value="analista">Analista</option>
+                            <option value="tecnico">Desenvolvedor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="filtro">
+                        <p>Filtro por Status</p>
+                        <select name="slt_status" id="slt_status">
+                            <option value="all" selected>Todos</option>
+                            <option value="ativo">Ativo</option>
+                            <option value="inativo">Inativo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="lista">
+                    <div class="lista-header">
+                        <p class="select" id="select_all"><input type="checkbox"></p>
+                        <p class="id">ID</p>
+                        <p class="nome">Nome</p>
+                        <p class="cpf">CPF</p>
+                        <p class="email">Email</p>
+                        <p class="cargo">Cargo</p>
+                        <p class="status">Estado</p>
+                        <p class="acao">Ações</p>
+                    </div>
+                    <div class="lista-content">
+                        <div class="lista-item">
+                            <p class="select select_item"><input type="checkbox"></p>
+                            <p class="id">1</p>
+                            <p class="nome">Daniel Lopes</p>
+                            <p class="cpf">123.456.789-11</p>
+                            <p class="email">daniel@email.com</p>
+                            <p class="cargo">Analista</p>
+                            <p class="status ativo"><span>Ativo</span></p>
+                            <p class="acao">
+                                <button class="btn inativar material-symbols-outlined" title="Inativar">remove</button>
+                                <button class="btn editar material-symbols-outlined" title="Editar">edit</button>
+                            </p>
+                        </div>
+                        <div class="lista-item">
+                            <p class="select select_item"><input type="checkbox"></p>
+                            <p class="id">2</p>
+                            <p class="nome">Vitória Jesus</p>
+                            <p class="cpf">123.456.789-11</p>
+                            <p class="email">vitoria@email.com</p>
+                            <p class="cargo">Analista</p>
+                            <p class="status ativo"><span>Ativo</span></p>
+                            <p class="acao">
+                                <button class="btn inativar material-symbols-outlined" title="Inativar">remove</button>
+                                <button class="btn editar material-symbols-outlined" title="Editar">edit</button>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="cadastrar">
+                <div class="acaoGeral">
+                    <div class="title">
+                        <span class="material-symbols-outlined">
+                            manage_accounts
+                        </span>
+                        <h3>Ações Gerais</h3>
+                    </div>
+                    <div class="btns">
+                        <button class="ativar" id="btn_ativar_todos" disabled>Ativar Todos</button>
+                        <button class="inativar" id="btn_inativar_todos" disabled>Inativar Todos</button>
+                    </div>
+                </div>
+                <button>Cadastrar Funcionário</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script>
+    b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
+
+    const checkboxes = document.querySelectorAll(".select_item input");
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener("change", atualizarBotoesAcaoGeral);
+    });
+
+    document.getElementById("select_all").addEventListener("change", function () {
+        const isChecked = this.querySelector("input").checked;
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+        atualizarBotoesAcaoGeral();
+    });
+
+    async function atualizarBotoesAcaoGeral() {
+        let algumSelecionado = false;
+        await checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                algumSelecionado = true;
+            }
+        });
+        document.getElementById("btn_ativar_todos").disabled = !algumSelecionado;
+        document.getElementById("btn_inativar_todos").disabled = !algumSelecionado;
+    }
+</script>
