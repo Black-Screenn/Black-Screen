@@ -9,7 +9,6 @@
     <title>BlackScreen | Alertas</title>
 
     <link rel="stylesheet" href="./../css/dashboards.css">
-    <link rel="stylesheet" href="./../css/estilo.css" />
     <link rel="stylesheet" href="./../css/dashboardAlertas.css" />
 
     <script src="../js/sessao.js"></script>
@@ -142,16 +141,23 @@
                 <h2>Alertas por dia da semana</h2>
                 <div class="grafico"><canvas id="alertasSemanais"></canvas>
                 </div>
-                
-                
-                
-                
+            </div>
+            <div class="graficoATM">
+                <div class="card">
+                    <select id="ipt_atmSelect">
+                        <option value="#">Selecione um ATM</option>
+                        <option value="atmPaulista">ATM Paulista</option>
+                        <option value="atmSaoJose">ATM São José</option>
+                        <option value="atmIguatemi">ATM Iguatemi</option>
+                    </select>
+                    <div class="grafico2"><canvas id="graficoAlertasATM"></canvas></div>
+                </div>
             </div>
         </div>
     </div>
     </div>
 
-
+    
 </body>
 
 
@@ -159,14 +165,15 @@
 
 <script>
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
-
+    
+    const diasSemana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
     const ctx = document.getElementById('alertasSemanais').getContext('2d');
 
-    new Chart(ctx, {
+    const grafico1 = new Chart(ctx, {
         title: "Alertas por dia da semana",
         type: 'bar',
         data: {
-            labels: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
+            labels: diasSemana,
             datasets: [{
                 label: 'Alertas de Hardware',
                 data: [15, 20, 30, 18, 22, 25, 14],
@@ -194,4 +201,70 @@
             }
         }
     });
+
+
+    const ctx1 = document.getElementById('graficoAlertasATM');
+    
+    const dadosATM = {
+      atmPaulista: [10, 20, 15, 5, 8, 12, 9],
+      atmSaoJose: [8, 15, 12, 6, 4, 10, 13],
+      atmIguatemi: [12, 18, 20, 10, 5, 7, 11]
+    };
+
+
+    const grafico2 = new Chart(ctx1, {
+        title: "Alertas totais por dia da semana",
+        type: 'bar',
+        data: {
+            labels: diasSemana,
+            datasets: [{
+            label: 'Nº de alertas',
+            data: [],
+            backgroundColor: '#001c41'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+            x: {
+                beginAtZero: true
+            }
+            },
+            plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            title: { 
+                display: true, 
+                text: 'Alertas totais por dia da semana', 
+                color: 'black', 
+                font: { 
+                    size: 18 
+                } }
+            }
+        }
+    });
+
+    function atualizarDashboard() {
+        const atm = ipt_atmSelect.value;
+        let dados = [];
+        if (atm == "#") {
+            // Soma todos os ATMs
+            for (let i = 0; i < dadosATM.atmPaulista.length; i++) {
+            dados.push(
+                dadosATM.atmPaulista[i] +
+                dadosATM.atmSaoJose[i] +
+                dadosATM.atmIguatemi[i]
+            );
+            }
+        } else {
+            dados = dadosATM[atm];
+        }
+
+        grafico2.data.datasets[0].data = dados;
+        grafico2.update();
+    }
+
+    atualizarDashboard();
+    ipt_atmSelect.addEventListener('change', atualizarDashboard);
 </script>

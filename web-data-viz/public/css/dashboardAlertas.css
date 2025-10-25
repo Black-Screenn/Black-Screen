@@ -26,10 +26,18 @@
 }
 
 .card .grafico{
-    width: 500px;
-    height: 250px;
+    width: 530px;
+    height: 300px;
 }
 
+.card .grafico2{
+    width: 530px;
+    height: 295px;
+}
+
+.graficoATM{
+    margin-left: 20px;
+}
 .card .resumo-hardware{
     height: 150px;
 }
@@ -66,4 +74,15 @@
 .status-ok { color: green; font-weight: bold; }
 .status-warn { color: orange; font-weight: bold; }
 .status-crit { color: red; font-weight: bold; }
+
+
+select {
+    justify-self: flex-start;
+    background-color: #001c41;
+    color: whitesmoke;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: bold;
+}
 
