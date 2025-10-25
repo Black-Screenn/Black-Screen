@@ -157,4 +157,30 @@
 <script>
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
 
+
+    const checkboxes = document.querySelectorAll(".select_item input");
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener("change", atualizarBotoesAcaoGeral);
+    });
+
+    document.getElementById("select_all").addEventListener("change", function () {
+        const isChecked = this.querySelector("input").checked;
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+        atualizarBotoesAcaoGeral();
+    });
+
+    async function atualizarBotoesAcaoGeral() {
+        let algumSelecionado = false;
+        await checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                algumSelecionado = true;
+            }
+        });
+        document.getElementById("btn_ativar_todos").disabled = !algumSelecionado;
+        document.getElementById("btn_inativar_todos").disabled = !algumSelecionado;
+    }
+        
 </script>
