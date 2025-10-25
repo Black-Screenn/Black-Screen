@@ -6,12 +6,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlackScreen | Avisos</title>
+    <title>BlackScreen | Alertas</title>
 
     <link rel="stylesheet" href="./../css/dashboards.css">
     <link rel="stylesheet" href="./../css/estilo.css" />
+    <link rel="stylesheet" href="./../css/dashboardAlertas.css" />
+
     <script src="../js/sessao.js"></script>
     <script src="./../js/alerta.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,home,local_atm,notifications,search_insights" />
@@ -23,7 +26,7 @@
 <body>
 
     <div class="janela">
-<div class="header-left">
+        <div class="header-left">
             <img src="../assets/imgs/blackscreenlogo.png" alt="BlackScreen">
 
             <div class="hello">
@@ -93,13 +96,59 @@
 
         </div>
 
-        <div class="content">
-            
-
-            
-
-
+    <div class="content-alertas">
+        <div class="grid">
+            <div class="card">
+                <div class="resumo-hardware">
+                    <h2>Alertas de Hardware (Última semana)</h2>
+                    <p>Caixas sem rede: <span class="status-crit">5</span></p>
+                    <p>Caixas ligados à mais que 7 dias: <span class="status-crit">4</span></p>
+                    <p>CPU em uso máximo: <span class="status-crit">3</span></p>
+                    <p>Disco acima de 90%: <span class="status-warn">2</span></p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="resumo-processos">
+                    <h2>Alertas de Processos (Última semana)</h2>
+                    <p>Interfáce gráfica fora do ar: <span class="status-ok">0</span></p>
+                    <p>Leitor de digitais inativo: <span class="status-warn">2</span></p>
+                    <p>Dispenser de dinheiro sem notas: <span class="status-warn">3</span></p>
+                    <p>Leitor de cartão inativo: <span class="status-crit">2</span></p>
+                </div>
+            </div>
+            <div class="card ranking">
+                <div class="alertas-atm">
+                    <table>
+                        <caption>Alertas por ATM</caption>
+                        <tr><th>ATM</th><th>Alertas</th></tr>
+                        <tr><td>ATM-1023</td><td>45</td></tr>
+                        <tr><td>ATM-0851</td><td>39</td></tr>
+                        <tr><td>ATM-2044</td><td>28</td></tr>
+                        <tr><td>ATM-0922</td><td>22</td></tr>
+                        <tr><td>ATM-1777</td><td>18</td></tr>
+                        <tr><td>ATM-2001</td><td>12</td></tr>
+                        <tr><td>ATM-3010</td><td>9</td></tr>
+                        <tr><td>ATM-4011</td><td>6</td></tr>
+                        <tr><td>ATM-5012</td><td>4</td></tr>
+                        <tr><td>ATM-6013</td><td>2</td></tr>
+                        <tr><td>ATM-7014</td><td>0</td></tr>
+                    </table>
+                </div>
+            </div>
         </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Alertas por dia da semana</h2>
+                <div class="grafico"><canvas id="alertasSemanais"></canvas>
+                </div>
+                
+                
+                
+                
+            </div>
+        </div>
+    </div>
     </div>
 
 
@@ -109,152 +158,40 @@
 </html>
 
 <script>
-    
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
 
-    // function limparFormulario() {
-    //     document.getElementById("form_postagem").reset();
-    // }
+    const ctx = document.getElementById('alertasSemanais').getContext('2d');
 
-    // function publicar() {
-    //     var idUsuario = sessionStorage.ID_USUARIO;
-
-    //     var corpo = {
-    //         titulo: form_postagem.titulo.value,
-    //         descricao: form_postagem.descricao.value
-    //     }
-
-    //     fetch(`/avisos/publicar/${idUsuario}`, {
-    //         method: "post",
-    //         headers: {
-    //             "Content-Type": "application/json"
-    //         },
-    //         body: JSON.stringify(corpo)
-    //     }).then(function (resposta) {
-
-    //         console.log("resposta: ", resposta);
-
-    //         if (resposta.ok) {
-    //             window.alert("Post realizado com sucesso pelo usuario de ID: " + idUsuario + "!");
-    //             window.location = "/dashboard/mural.html";
-    //             limparFormulario();
-    //             finalizarAguardar();
-    //         } else if (resposta.status == 404) {
-    //             window.alert("Deu 404!");
-    //         } else {
-    //             throw ("Houve um erro ao tentar realizar a postagem! Código da resposta: " + resposta.status);
-    //         }
-    //     }).catch(function (resposta) {
-    //         console.log(`#ERRO: ${resposta}`);
-    //         finalizarAguardar();
-    //     });
-
-    //     return false;
-
-    // }
-
-    // function editar(idAviso) {
-    //     sessionStorage.ID_POSTAGEM_EDITANDO = idAviso;
-    //     console.log("cliquei em editar - " + idAviso);
-    //     window.alert("Você será redirecionado à página de edição do aviso de id número: " + idAviso);
-    //     window.location = "/dashboard/edicao-aviso.html"
-
-    // }
-
-    // function deletar(idAviso) {
-    //     console.log("Criar função de apagar post escolhido - ID" + idAviso);
-    //     fetch(`/avisos/deletar/${idAviso}`, {
-    //         method: "DELETE",
-    //         headers: {
-    //             "Content-Type": "application/json"
-    //         }
-    //     }).then(function (resposta) {
-
-    //         if (resposta.ok) {
-    //             window.alert("Post deletado com sucesso pelo usuario de email: " + sessionStorage.getItem("EMAIL_USUARIO") + "!");
-    //             window.location = "/dashboard/mural.html"
-    //         } else if (resposta.status == 404) {
-    //             window.alert("Deu 404!");
-    //         } else {
-    //             throw ("Houve um erro ao tentar realizar a postagem! Código da resposta: " + resposta.status);
-    //         }
-    //     }).catch(function (resposta) {
-    //         console.log(`#ERRO: ${resposta}`);
-    //     });
-    // }
-
-    // function atualizarFeed() {
-    //     fetch("/avisos/listar").then(function (resposta) {
-    //         if (resposta.ok) {
-    //             if (resposta.status == 204) {
-    //                 var feed = document.getElementById("feed_container");
-    //                 var mensagem = document.createElement("span");
-    //                 mensagem.innerHTML = "Nenhum resultado encontrado."
-    //                 feed.appendChild(mensagem);
-    //                 throw "Nenhum resultado encontrado!!";
-    //             }
-
-    //             resposta.json().then(function (resposta) {
-    //                 console.log("Dados recebidos: ", JSON.stringify(resposta));
-
-    //                 var feed = document.getElementById("feed_container");
-    //                 feed.innerHTML = "";
-    //                 for (let i = 0; i < resposta.length; i++) {
-    //                     var publicacao = resposta[i];
-
-    //                     // criando e manipulando elementos do HTML via JavaScript
-    //                     var divPublicacao = document.createElement("div");
-    //                     var spanID = document.createElement("span");
-    //                     var spanTitulo = document.createElement("span");
-    //                     var spanNome = document.createElement("span");
-    //                     var divDescricao = document.createElement("div");
-    //                     var divButtons = document.createElement("div");
-    //                     var btnEditar = document.createElement("button");
-    //                     var btnDeletar = document.createElement("button");
-
-
-    //                     spanID.innerHTML = "ID: <b>" + publicacao.idAviso + "</b>";
-    //                     spanTitulo.innerHTML = "Título: <b>" + publicacao.titulo + "</b>";
-    //                     spanNome.innerHTML = "Autor: <b>" + publicacao.nome + "</b>";
-    //                     divDescricao.innerHTML = "Descrição: <b>" + publicacao.descricao + "</b>";
-    //                     btnEditar.innerHTML = "Editar";
-    //                     btnDeletar.innerHTML = "Deletar";
-
-    //                     divPublicacao.className = "publicacao";
-    //                     spanTitulo.id = "inputNumero" + publicacao.idAviso;
-    //                     spanNome.className = "publicacao-nome";
-    //                     spanTitulo.className = "publicacao-titulo";
-    //                     divDescricao.className = "publicacao-descricao";
-
-    //                     divButtons.className = "div-buttons"
-
-    //                     btnEditar.className = "publicacao-btn-editar"
-    //                     btnEditar.id = "btnEditar" + publicacao.idAviso;
-    //                     btnEditar.setAttribute("onclick", `editar(${publicacao.idAviso})`);
-
-    //                     btnDeletar.className = "publicacao-btn-editar"
-    //                     btnDeletar.id = "btnDeletar" + publicacao.idAviso;
-    //                     btnDeletar.setAttribute("onclick", `deletar(${publicacao.idAviso})`);
-
-    //                     divPublicacao.appendChild(spanID);
-    //                     divPublicacao.appendChild(spanNome);
-    //                     divPublicacao.appendChild(spanTitulo);
-    //                     divPublicacao.appendChild(divDescricao);
-    //                     divPublicacao.appendChild(divButtons);
-    //                     divButtons.appendChild(btnEditar);
-    //                     divButtons.appendChild(btnDeletar);
-    //                     feed.appendChild(divPublicacao);
-    //                 }
-
-    //                 finalizarAguardar();
-    //             });
-    //         } else {
-    //             throw ('Houve um erro na API!');
-    //         }
-    //     }).catch(function (resposta) {
-    //         console.error(resposta);
-    //         finalizarAguardar();
-    //     });
-    // }
-
+    new Chart(ctx, {
+        title: "Alertas por dia da semana",
+        type: 'bar',
+        data: {
+            labels: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
+            datasets: [{
+                label: 'Alertas de Hardware',
+                data: [15, 20, 30, 18, 22, 25, 14],
+                backgroundColor: '#007bff',
+                borderWidth: 0
+            },
+            {
+                label: 'Alertas de Processos',
+                data: [11, 18, 16, 24, 19, 14, 13],
+                backgroundColor: '#001c41',
+                borderWidth: 0
+            }
+            ]
+        },
+        options: {
+            scales: {
+            x: {
+                beginAtZero: true
+            }
+            },
+            plugins: {
+            legend: {
+                position: 'bottom'
+            }
+            }
+        }
+    });
 </script>
