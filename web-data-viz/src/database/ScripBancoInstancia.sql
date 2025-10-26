@@ -38,10 +38,10 @@ CREATE TABLE Usuario (
     Email VARCHAR(255) UNIQUE,
     Senha VARCHAR(255),
     Fk_Empresa INT,
-    Fk_Cargo INT, -- Coluna Adicionada
+    Fk_Cargo INT, 
     CONSTRAINT FK_Usuario_Empresa
         FOREIGN KEY (Fk_Empresa) REFERENCES Empresa(Id_Empresa),
-    CONSTRAINT FK_Usuario_Cargo -- Constraint Adicionada
+    CONSTRAINT FK_Usuario_Cargo 
         FOREIGN KEY (Fk_Cargo) REFERENCES Cargo(Id_Cargo)
 );
 
