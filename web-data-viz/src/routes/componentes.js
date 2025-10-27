@@ -19,4 +19,16 @@ router.delete("/excluir/:id", function (req, res) {
     componenteController.excluir(req, res);
 });
 
+router.put("/associar-caixa", function (req, res) {
+    componenteController.associarCaixa(req, res);
+});
+
+router.put("/desassociar-caixa", function (req, res) {
+    componenteController.desassociarCaixa(req, res);
+});
+
+router.get("/listar-por-caixa/:idCaixa", function (req, res) {
+    componenteController.listarPorCaixa(req, res);
+});
+
 module.exports = router;

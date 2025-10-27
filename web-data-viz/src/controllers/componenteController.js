@@ -2,20 +2,20 @@ var componenteModel = require("../models/componenteModel");
 
 function cadastrar(req, res) {
     var componente = req.body.componenteServer;
-    var caixa = req.body.caixaServer;
+    var fkEmpresa = req.body.empresaServer || req.headers.fk_empresa;
     var unidade = req.body.unidadeServer;
     var parametro = req.body.parametroServer;
 
     if (componente == undefined) {
         res.status(400).send("Seu componente está undefined!");
-    } else if (caixa == undefined) {
-        res.status(400).send("A caixa está undefined!");
+    } else if (fkEmpresa == undefined) {
+        res.status(400).send("A empresa está undefined!");
     } else if (unidade == undefined) {
         res.status(400).send("A unidade está undefined!");
     } else if (parametro == undefined) {
         res.status(400).send("O parâmetro está undefined!");
     } else {
-        componenteModel.cadastrar(componente, caixa, unidade, parametro)
+        componenteModel.cadastrar(componente, fkEmpresa, unidade, parametro)
             .then(
                 function (resultado) {
                     res.json(resultado);
@@ -100,9 +100,72 @@ function excluir(req, res) {
     }
 }
 
+function associarCaixa(req, res) {
+    var idComponente = req.body.idComponente;
+    var idCaixa = req.body.idCaixa;
+
+    if (idComponente == undefined) {
+        res.status(400).send("ID do componente está undefined!");
+    } else if (idCaixa == undefined) {
+        res.status(400).send("ID da caixa está undefined!");
+    } else {
+        componenteModel.associarCaixa(idComponente, idCaixa)
+            .then(function (resultado) {
+                res.json(resultado);
+            })
+            .catch(function (erro) {
+                console.log(erro);
+                console.log("Houve um erro ao associar o componente: ", erro.sqlMessage);
+                res.status(500).json(erro.sqlMessage);
+            });
+    }
+}
+
+function desassociarCaixa(req, res) {
+    var idComponente = req.body.idComponente;
+    var idCaixa = req.body.idCaixa;
+
+    if (idComponente == undefined) {
+        res.status(400).send("ID do componente está undefined!");
+    } else if (idCaixa == undefined) {
+        res.status(400).send("ID da caixa está undefined!");
+    } else {
+        componenteModel.desassociarCaixa(idComponente, idCaixa)
+            .then(function (resultado) {
+                res.json(resultado);
+            })
+            .catch(function (erro) {
+                console.log(erro);
+                console.log("Houve um erro ao desassociar o componente: ", erro.sqlMessage);
+                res.status(500).json(erro.sqlMessage);
+            });
+    }
+}
+
+function listarPorCaixa(req, res) {
+    var idCaixa = req.params.idCaixa;
+
+    if (idCaixa == undefined) {
+        res.status(400).send("ID da caixa está undefined!");
+    } else {
+        componenteModel.listarPorCaixa(idCaixa)
+            .then(function (resultado) {
+                res.json(resultado);
+            })
+            .catch(function (erro) {
+                console.log(erro);
+                console.log("Houve um erro ao listar componentes da caixa: ", erro.sqlMessage);
+                res.status(500).json(erro.sqlMessage);
+            });
+    }
+}
+
 module.exports = {
     cadastrar,
     listar,
     editar,
-    excluir
+    excluir,
+    associarCaixa,
+    desassociarCaixa,
+    listarPorCaixa
 }

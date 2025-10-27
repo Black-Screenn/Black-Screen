@@ -1,11 +1,11 @@
 var database = require("../database/config")
 
-function cadastrar(nome, caixa, unidade, parametro) {
-    console.log("ACESSEI O COMPONENTE MODEL \n \n\t\t >> Se aqui der erro de 'Error: connect ECONNREFUSED',\n \t\t >> verifique suas credenciais de acesso ao banco\n \t\t >> e se o servidor de seu BD está rodando corretamente. \n\n function cadastrar():", nome, caixa, unidade, parametro);
+function cadastrar(nome, fkEmpresa, unidade, parametro) {
+    console.log("ACESSEI O COMPONENTE MODEL \n \n\t\t >> Se aqui der erro de 'Error: connect ECONNREFUSED',\n \t\t >> verifique suas credenciais de acesso ao banco\n \t\t >> e se o servidor de seu BD está rodando corretamente. \n\n function cadastrar():", nome, fkEmpresa, unidade, parametro);
     
     var instrucaoSql = `
-        INSERT INTO Componentes (Nome_Componente, Fk_Caixa, Unidade) 
-        VALUES ('${nome}', ${caixa}, '${unidade}');
+        INSERT INTO Componentes (Nome_Componente, Unidade, Fk_Empresa) 
+        VALUES ('${nome}', '${unidade}', ${fkEmpresa});
     `; 
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
     
@@ -29,14 +29,17 @@ function listar(fkEmpresa) {
         SELECT 
             c.Id_Componente,
             c.Nome_Componente,
-            c.Fk_Caixa,
             c.Unidade,
-            cx.codigoCaixa,
-            p.Valor_Parametrizado
+            c.Fk_Empresa,
+            p.Valor_Parametrizado,
+            GROUP_CONCAT(DISTINCT cx.Id_Caixa) as Caixas_Ids,
+            GROUP_CONCAT(DISTINCT cx.codigoCaixa) as Caixas_Codigos
         FROM Componentes c
-        INNER JOIN Caixa cx ON c.Fk_Caixa = cx.Id_Caixa
         LEFT JOIN Parametros p ON c.Id_Componente = p.Fk_Componente
-        WHERE cx.Fk_Empresa = ${fkEmpresa}
+        LEFT JOIN Caixa_Componente cc ON c.Id_Componente = cc.Fk_Componente
+        LEFT JOIN Caixa cx ON cc.Fk_Caixa = cx.Id_Caixa
+        WHERE c.Fk_Empresa = ${fkEmpresa}
+        GROUP BY c.Id_Componente, c.Nome_Componente, c.Unidade, c.Fk_Empresa, p.Valor_Parametrizado
         ORDER BY c.Id_Componente DESC;
     `;
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
@@ -84,9 +87,56 @@ function excluir(idComponente) {
     });
 }
 
+function associarCaixa(idComponente, idCaixa) {
+    console.log("ACESSEI O COMPONENTE MODEL - ASSOCIAR CAIXA \n \n\t\t >> ID Componente:", idComponente, "ID Caixa:", idCaixa);
+    
+    var instrucaoSql = `
+        INSERT INTO Caixa_Componente (Fk_Caixa, Fk_Componente) 
+        VALUES (${idCaixa}, ${idComponente})
+        ON DUPLICATE KEY UPDATE Fk_Caixa = ${idCaixa};
+    `;
+    console.log("Executando a instrução SQL: \n" + instrucaoSql);
+    return database.executar(instrucaoSql);
+}
+
+function desassociarCaixa(idComponente, idCaixa) {
+    console.log("ACESSEI O COMPONENTE MODEL - DESASSOCIAR CAIXA \n \n\t\t >> ID Componente:", idComponente, "ID Caixa:", idCaixa);
+    
+    var instrucaoSql = `
+        DELETE FROM Caixa_Componente 
+        WHERE Fk_Componente = ${idComponente} AND Fk_Caixa = ${idCaixa};
+    `;
+    console.log("Executando a instrução SQL: \n" + instrucaoSql);
+    return database.executar(instrucaoSql);
+}
+
+function listarPorCaixa(idCaixa) {
+    console.log("ACESSEI O COMPONENTE MODEL - LISTAR POR CAIXA \n \n\t\t >> ID Caixa:", idCaixa);
+    
+    var instrucaoSql = `
+        SELECT 
+            c.Id_Componente,
+            c.Nome_Componente,
+            c.Unidade,
+            c.Fk_Empresa,
+            p.Valor_Parametrizado,
+            cc.Data_Associacao
+        FROM Componentes c
+        INNER JOIN Caixa_Componente cc ON c.Id_Componente = cc.Fk_Componente
+        LEFT JOIN Parametros p ON c.Id_Componente = p.Fk_Componente
+        WHERE cc.Fk_Caixa = ${idCaixa}
+        ORDER BY c.Nome_Componente;
+    `;
+    console.log("Executando a instrução SQL: \n" + instrucaoSql);
+    return database.executar(instrucaoSql);
+}
+
 module.exports = {
     cadastrar,
     listar,
     editar,
-    excluir
+    excluir,
+    associarCaixa,
+    desassociarCaixa,
+    listarPorCaixa
 }

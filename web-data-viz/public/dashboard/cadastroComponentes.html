@@ -113,19 +113,13 @@
                         <input type="text" placeholder="Pesquisar componente...">
                         <span class="material-symbols-outlined">search</span>
                     </div>
-                    <div class="filtro">
-                        <p>Filtro por Caixa</p>
-                        <select name="slt_caixa" id="slt_caixa">
-                            <option value="all" selected>Todos</option>
-                        </select>
-                    </div>
                 </div>
                 <div class="lista">
                     <div class="lista-header">
                         <p class="select" id="select_all"><input type="checkbox"></p>
                         <p class="id">ID</p>
                         <p class="nome">Nome do Componente</p>
-                        <p class="email">Caixa</p>
+                        <p class="email">ATMs Associados</p>
                         <p class="cargo">Unidade</p>
                         <p class="status">Parâmetro</p>
                         <p class="acao">Ações</p>
@@ -190,12 +184,6 @@
                         <input type="text" id="nome_cadastro" placeholder="Ex: CPU, RAM, Disco" required>
                     </div>
                     <div class="inputGroup">
-                        <label for="caixa_cadastro">Caixa (ATM)</label>
-                        <select name="caixa_cadastro" id="caixa_cadastro" required>
-                            <option value="">Selecione uma caixa</option>
-                        </select>
-                    </div>
-                    <div class="inputGroup">
                         <label for="unidade_cadastro">Unidade de Medida</label>
                         <input type="text" id="unidade_cadastro" placeholder="Ex: GB, %, °C" required>
                     </div>
@@ -221,39 +209,10 @@
     const listaComponentes = document.querySelector(".lista-content");
     let checkboxes = [];
     let componentesData = [];
+    
     onload = () => {
-        carregarCaixas();
         carregarComponentes();
     };
-
-    function carregarCaixas() {
-        fetch("/caixas/listar", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Fk_Empresa": sessionStorage.FK_EMPRESA
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                const filtroCaixa = document.getElementById("slt_caixa");
-                const selectCaixa = document.getElementById("caixa_cadastro");
-                
-                data.forEach(caixa => {
-                    const optionFiltro = document.createElement("option");
-                    optionFiltro.value = caixa.id;
-                    optionFiltro.textContent = caixa.codigoCaixa || `Caixa ${caixa.id}`;
-                    filtroCaixa.appendChild(optionFiltro);
-                    const optionCadastro = document.createElement("option");
-                    optionCadastro.value = caixa.id;
-                    optionCadastro.textContent = caixa.codigoCaixa || `Caixa ${caixa.id}`;
-                    selectCaixa.appendChild(optionCadastro);
-                });
-            })
-            .catch(error => {
-                console.error("Erro ao carregar caixas:", error);
-            });
-    }
 
     function carregarComponentes() {
         fetch("/componentes/listar", {
@@ -271,11 +230,15 @@
                 data.forEach(componente => {
                     const item = document.createElement("div");
                     item.classList.add("lista-item");
+                    
+                    // Exibir ATMs associados
+                    const atmsAssociados = componente.Caixas_Codigos || 'Nenhum ATM';
+                    
                     item.innerHTML = `
                         <p class="select select_item"><input type="checkbox" data-id="${componente.Id_Componente}"></p>
                         <p class="id">${componente.Id_Componente}</p>
                         <p class="nome">${componente.Nome_Componente}</p>
-                        <p class="email">${componente.codigoCaixa || `Caixa ${componente.Fk_Caixa}`}</p>
+                        <p class="email">${atmsAssociados}</p>
                         <p class="cargo">${componente.Unidade || 'N/A'}</p>
                         <p class="status">${componente.Valor_Parametrizado || 'N/A'}</p>
                         <p class="acao">
@@ -312,20 +275,6 @@
         });
     });
 
-    const filtroCaixa = document.getElementById("slt_caixa");
-    filtroCaixa.addEventListener("change", function () {
-        const caixaSelecionada = this.value;
-        const itens = document.querySelectorAll(".lista-item");
-        itens.forEach(item => {
-            const caixa = item.querySelector(".email").textContent;
-            if (caixaSelecionada === "all" || caixa.includes(caixaSelecionada)) {
-                item.style.display = "";
-            } else {
-                item.style.display = "none";
-            }
-        });
-    });
-
     document.querySelectorAll(".closeModal, .cancel").forEach(element => {
         element.addEventListener("click", () => {
             document.getElementById("modal_alterar").style.display = "none";
@@ -337,18 +286,16 @@
         document.getElementById("modal_alterar").style.display = "none";
         document.getElementById("modal_cadastrar").style.display = "flex";
         document.getElementById("nome_cadastro").value = "";
-        document.getElementById("caixa_cadastro").value = "";
         document.getElementById("unidade_cadastro").value = "";
         document.getElementById("parametro_cadastro").value = "";
     }
 
     document.getElementById("btn_cadastrar").addEventListener("click", () => {
         const nome = document.getElementById("nome_cadastro").value;
-        const caixa = document.getElementById("caixa_cadastro").value;
         const unidade = document.getElementById("unidade_cadastro").value;
         const parametro = document.getElementById("parametro_cadastro").value;
 
-        if (!nome || !caixa || !unidade || !parametro) {
+        if (!nome || !unidade || !parametro) {
             console.warn("Preencha todos os campos!");
             return;
         }
@@ -360,7 +307,7 @@
             },
             body: JSON.stringify({
                 componenteServer: nome,
-                caixaServer: caixa,
+                empresaServer: sessionStorage.FK_EMPRESA,
                 unidadeServer: unidade,
                 parametroServer: parametro
             })
