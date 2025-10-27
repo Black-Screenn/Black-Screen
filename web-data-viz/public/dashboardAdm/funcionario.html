@@ -95,9 +95,6 @@
                         <p>Filtro por Cargo</p>
                         <select name="slt_cargo" id="slt_cargo">
                             <option value="all" selected>Todos</option>
-                            <option value="analista">Analista</option>
-                            <option value="tecnico">Desenvolvedor</option>
-                            <option value="admin">Admin</option>
                         </select>
                     </div>
                     <div class="filtro">
@@ -157,10 +154,7 @@
                     </div>
                     <div class="inputGroup">
                         <label for="cargo">Cargo</label>
-                        <select name="cargo" id="cargo">
-                            <option value="analista">Analista</option>
-                            <option value="tecnico">Desenvolvedor</option>
-                            <option value="admin">Admin</option>
+                        <select name="cargo" id="cargo_editar">
                         </select>
                     </div>
                     <div class="btnGroup">
@@ -190,9 +184,6 @@
                     <div class="inputGroup">
                         <label for="cargo_cadastro">Cargo</label>
                         <select name="cargo_cadastro" id="cargo_cadastro">
-                            <option value="analista">Analista</option>
-                            <option value="tecnico">Desenvolvedor</option>
-                            <option value="admin">Admin</option>
                         </select>
                     </div>
                     <div class="btnGroup">
@@ -247,6 +238,40 @@
 
                 checkboxes.forEach(checkbox => {
                     checkbox.addEventListener("change", atualizarBotoesAcaoGeral);
+                });
+
+                listarCargos();
+            });
+    };
+
+    function listarCargos() {
+        fetch("/cargos/listar", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Fk_Empresa": sessionStorage.FK_EMPRESA
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const selectCargo = document.getElementById("cargo_cadastro");
+                const selectCargoEditar = document.getElementById("cargo_editar");
+                const selectFiltroCargo = document.getElementById("slt_cargo");
+                data.forEach(cargo => {
+                    const option = document.createElement("option");
+                    option.value = cargo.Id_Cargo;
+                    option.textContent = cargo.Nome_Cargo;
+                    selectCargo.appendChild(option);
+
+                    const optionEditar = document.createElement("option");
+                    optionEditar.value = cargo.Id_Cargo;
+                    optionEditar.textContent = cargo.Nome_Cargo;
+                    selectCargoEditar.appendChild(optionEditar);
+
+                    const optionFiltro = document.createElement("option");
+                    optionFiltro.value = cargo.Id_Cargo;
+                    optionFiltro.textContent = cargo.Nome_Cargo;
+                    selectFiltroCargo.appendChild(optionFiltro);
                 });
             });
     };

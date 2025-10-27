@@ -149,6 +149,87 @@
                 </div>
             </div>
         </div>
+
+        
+        <div class="modal" id="modal_alterar">
+            <div class="modalContainer">
+                <span class="material-symbols-outlined closeModal">
+                    close
+                </span>
+                <h2>Editar Cargo</h2>
+                <div class="form">
+                    <div class="inputGroup">
+                        <label for="nome_editar">Nome do Cargo</label>
+                        <input type="text" id="nome_editar" required>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="permissao_editar">Permissões</label>
+                        <div class="permissoes">
+                            <div>
+                                <input type="checkbox" id="permissao_editar_1" value="Métricas dos ATMs">
+                                <label for="permissao_editar_1">Métricas dos ATMs</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="permissao_editar_2" value="Componentes dos ATMs">
+                                <label for="permissao_editar_2">Componentes dos ATMs</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="permissao_editar_3" value="Alertas">
+                                <label for="permissao_editar_3">Alertas</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="permissao_editar_4" value="Usuários">
+                                <label for="permissao_editar_4">Usuários</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btnGroup">
+                        <button class="cancel">Cancelar</button>
+                        <button class="save" id="btn_salvar">Salvar Alterações</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="modal_cadastrar">
+            <div class="modalContainer">
+                <span class="material-symbols-outlined closeModal">
+                    close
+                </span>
+                <h2>Adicionar Cargo</h2>
+                <div class="form">
+                    <div class="inputGroup">
+                        <label for="nome_cadastro">Nome do Cargo</label>
+                        <input type="text" id="nome_cadastro" required>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="permissao_cadastro">Permissões</label>
+                        <div class="permissoes">
+                            <div>
+                                <input type="checkbox" id="permissao_1" value="Métricas dos ATMs">
+                                <label for="permissao_1">Métricas dos ATMs</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="permissao_2" value="Componentes dos ATMs">
+                                <label for="permissao_2">Componentes dos ATMs</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="permissao_3" value="Alertas">
+                                <label for="permissao_3">Alertas</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="permissao_4" value="Usuários">
+                                <label for="permissao_4">Usuários</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btnGroup">
+                        <button class="cancel">Cancelar</button>
+                        <button class="save" id="btn_cadastrar">Cadastrar Funcionário</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 
@@ -171,6 +252,38 @@
         });
         atualizarBotoesAcaoGeral();
     });
+
+    window.onload = () => {
+        fetch("cargos/listar", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            const listaContent = document.querySelector(".lista-content");
+            data.forEach(cargo => {
+                const listaItem = document.createElement("div");
+                listaItem.classList.add("lista-item");
+
+                listaItem.innerHTML = `
+                    <p class="select select_item"><input type="checkbox"></p>
+                    <p class="id">${cargo.Id_Cargo}</p>
+                    <p class="cargo">${cargo.Nome_Cargo}</p>
+                    <p class="permissao">${cargo.Permissoes}</p>
+                    <p class="status ${cargo.Estado === 'Ativo' ? 'ativo' : 'inativo'}"><span>${cargo.Estado}</span></p>
+                    <p class="acao">
+                        <button class="btn ${cargo.Estado === 'Ativo' ? 'inativar' : 'ativar'} material-symbols-outlined" title="${cargo.Estado === 'Ativo' ? 'Inativar' : 'Ativar'}">${cargo.Estado === 'Ativo' ? 'remove' : 'check_circle'}</button>
+                        <button class="btn editar material-symbols-outlined" title="Editar">edit</button>
+                    </p>
+                `;
+                listaContent.appendChild(listaItem);
+        })
+        atualizarBotoesAcaoGeral();
+    })
+    };
 
     async function atualizarBotoesAcaoGeral() {
         let algumSelecionado = false;

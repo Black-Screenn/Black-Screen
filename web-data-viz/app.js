@@ -20,6 +20,7 @@ var empresasRouter = require("./src/routes/empresas");
 var componentesRouter = require("./src/routes/componentes");
 var caixasRouter = require("./src/routes/caixas");
 var cloudRouter = require("./src/routes/cloud");
+var cargoRouter = require("./src/routes/cargos");
 
 app.use(express.json({ limit: '1gb' }));
 app.use(express.urlencoded({ limit: '1gb', extended: false }));
@@ -41,6 +42,7 @@ app.use("/empresas", empresasRouter);
 app.use("/componentes", componentesRouter);
 app.use("/caixas", caixasRouter);
 app.use("/cloud", cloudRouter);
+app.use("/cargos", cargoRouter);
 
 app.listen(PORTA_APP, function () {
     console.log(`

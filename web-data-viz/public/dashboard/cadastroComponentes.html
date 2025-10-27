@@ -5,62 +5,99 @@
     <link rel="shortcut icon" href="../assets/imgs/blackscreenicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlackScreen | Dashboards</title>
-    
-    <link rel="stylesheet" href="../css/style.css" />
-    <link rel="stylesheet" href="../css/dashboards.css">
-    
+    <title>BlackScreen | Componentes</title>
+
+    <link rel="stylesheet" href="./../css/dashboards.css">
+    <link rel="stylesheet" href="./../css/style.css" />
+    <link rel="stylesheet" href="./../css/dashboardFunc.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,cancel,check_circle,circle_notifications,close,do_not_disturb_on,docs,edit,health_and_safety,home,keyboard_arrow_up,local_atm,location_on,manage_accounts,notifications,remove,search,search_insights,work" />
     <script src="../js/sessao.js"></script>
-    <script src="./../js/alerta.js"></script>
 
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
 
-    <!-- scripts do Chart.js - 2022-1 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- <body onload=" atualizarFeed()"> -->
+    <style>
+    </style>
 
 <body>
+
     <div class="janela">
-        <div class="header-left">
-            <h1></h1>
-            <img src="../assets/imgs/blackscreenlogo.png" alt="BlackSCreen" style="width: 300px;">
+                <div class="header-left">
+            <img src="../assets/imgs/blackscreenlogo.png" alt="BlackScreen">
 
             <div class="hello">
-                <h3>Bem vindo, <span id="b_usuario">usuário</span>!</h3>
+                <h3>Bem vindo, <br><span id="b_usuario">usuário</span>!</h3>
             </div>
 
-            <div class="btn-nav">
-                    <h3>Cadastro de componentes</h3>
-                </a>
-            </div>
+            <div class="links">
+                <div class="btn-nav-white">
+                    <a href="dashboard.html">
+                        <span class="material-symbols-outlined">
+                            home
+                        </span>
+                        <h3>
+                            Ínicio
+                        </h3>
+                    </a>
+                </div>
+    
+                <div class="btn-nav-white">
+                    <a href="./logAlertas.html">
+                        <span class="material-symbols-outlined">
+                            notifications
+                        </span>
+                        <h3>
+                            Alertas
+                        </h3>
+                    </a>
+                </div>
 
-            <div class="btn-nav-white">
-                <a href="dashboard.html">
-                    <h3>Gráficos</h3>
-                </a>
+                <div class="btn-nav-white">
+                    <a href="atm.html">
+                        <span class="material-symbols-outlined">
+                            local_atm
+                        </span>
+                        <h3>
+                            ATMs
+                        </h3>
+                    </a>
+                </div>
 
-            </div>
-
-            <div class="btn-nav-white">
-                <a href="./logAlertas.html">
-                    <h3>Log de alertas</h3>
-                </a>
-            </div>
-
-            <div class="btn-nav-white">
-                <a href="./mapa.html">
-                    <h3>Mapa</h3>
-                </a>
-            </div>
-
-            <div class="btn-nav-white">
-                <a href="./perfil.html">
-                    <h3>Meu Perfil</h3>
-                </a>
+                <div class="btn-nav">
+                    <a href="./cadastroComponentes.html">
+                        <span class="material-symbols-outlined">
+                            health_and_safety
+                        </span>
+                        <h3>
+                            Componentes
+                        </h3>
+                    </a>
+                </div>
+    
+                <div class="btn-nav-white">
+                    <a href="./insight.html">
+                        <span class="material-symbols-outlined">
+                            search_insights
+                        </span>
+                        <h3>
+                            Insights
+                        </h3>
+                    </a>
+                </div>
+    
+                <div class="btn-nav-white">
+                    <a href="./perfil.html">
+                        <span class="material-symbols-outlined">
+                            account_circle
+                        </span>
+                        <h3>
+                            Meu Perfil
+                        </h3>
+                    </a>
+                </div>
             </div>
 
             <div class="btn-logout" onclick="limparSessao()">
@@ -69,44 +106,111 @@
 
         </div>
 
-        <div class="dash">
-  <div class="cadastro-container">
-    <h1 class="title">Cadastro de Componentes</h1>
-    <div class="form-box">
-      <div class="logo-container">
-        <img class="img-login-cadastro" src="../assets/imgs/blackscreenlogo.png" alt="Logo BlackScreen">
-      </div>
+        <div class="content">
+            <div class="listaFunc">
+                <div class="header">
+                    <div class="pesquisa">
+                        <input type="text" placeholder="Pesquisar componente...">
+                        <span class="material-symbols-outlined">search</span>
+                    </div>
+                    <div class="filtro">
+                        <p>Filtro por Caixa</p>
+                        <select name="slt_caixa" id="slt_caixa">
+                            <option value="all" selected>Todos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="lista">
+                    <div class="lista-header">
+                        <p class="select" id="select_all"><input type="checkbox"></p>
+                        <p class="id">ID</p>
+                        <p class="nome">Nome do Componente</p>
+                        <p class="email">Caixa</p>
+                        <p class="cargo">Unidade</p>
+                        <p class="status">Parâmetro</p>
+                        <p class="acao">Ações</p>
+                    </div>
+                    <div class="lista-content">
+                    </div>
+                </div>
+            </div>
+            <div class="cadastrar">
+                <div class="acaoGeral">
+                    <div class="title">
+                        <span class="material-symbols-outlined">
+                            manage_accounts
+                        </span>
+                        <h3>Ações Gerais</h3>
+                    </div>
+                    <div class="btns">
+                        <button class="ativar" id="btn_excluir_selecionados" disabled>Excluir Selecionados</button>
+                    </div>
+                </div>
+                <button onclick="cadastrarComponente()">Cadastrar Componente</button>
+            </div>
+        </div>
+        
+        <div class="modal" id="modal_alterar">
+            <div class="modalContainer">
+                <span class="material-symbols-outlined closeModal">
+                    close
+                </span>
+                <h2>Editar Componente</h2>
+                <div class="form">
+                    <div class="inputGroup">
+                        <label for="nome">Nome do Componente</label>
+                        <input type="text" id="nome" required>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="unidade">Unidade</label>
+                        <input type="text" id="unidade" placeholder="Ex: GB, %, °C" required>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="parametro">Valor Parametrizado</label>
+                        <input type="number" id="parametro" placeholder="Valor crítico de alerta" required>
+                    </div>
+                    <div class="btnGroup">
+                        <button class="cancel">Cancelar</button>
+                        <button class="save" id="editar_btn">Salvar Alterações</button>
+                    </div>
+                </div>
 
-      
-      <form id="contactForm" class="text-black">
-        <div class="form-floating mb-3">
-          <label for="nome_input">Nome</label>
-          <input class="form-control" id="nome_input" type="text" required />
+            </div>
         </div>
-        <div class="form-floating mb-3">
-          <label for="unidade_input">Unidade</label>
-          <input class="form-control" id="unidade_input" type="text" required />
-        </div>
-        <div class="d-grid mb-3" style="margin-top: 25px;" >
-          <button class="btn btn-primary btn-lg" id="submitButton" type="button" onclick="cadastrar()">Cadastrar</button>
-        </div>
-      </form>
 
-      <div id="div_aguardar" class="loading-div">
-        <img src="../assets/circle-loading.gif" id="loading-gif">
-      </div>
-
-      <div class="card_erro" id="cardErro">
-        <div class="alerta_erro">
-          <span id="mensagem_erro"></span>
+        <div class="modal" id="modal_cadastrar">
+            <div class="modalContainer">
+                <span class="material-symbols-outlined closeModal">
+                    close
+                </span>
+                <h2>Cadastrar Componente</h2>
+                <div class="form">
+                    <div class="inputGroup">
+                        <label for="nome_cadastro">Nome do Componente</label>
+                        <input type="text" id="nome_cadastro" placeholder="Ex: CPU, RAM, Disco" required>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="caixa_cadastro">Caixa (ATM)</label>
+                        <select name="caixa_cadastro" id="caixa_cadastro" required>
+                            <option value="">Selecione uma caixa</option>
+                        </select>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="unidade_cadastro">Unidade de Medida</label>
+                        <input type="text" id="unidade_cadastro" placeholder="Ex: GB, %, °C" required>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="parametro_cadastro">Valor Parametrizado (Crítico)</label>
+                        <input type="number" id="parametro_cadastro" placeholder="Valor que dispara alerta" required>
+                    </div>
+                    <div class="btnGroup">
+                        <button class="cancel">Cancelar</button>
+                        <button class="save" id="btn_cadastrar">Cadastrar Componente</button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-</div>
-        </div>
-    </div>
-
 </body>
 
 </html>
@@ -114,133 +218,291 @@
 <script>
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
 
-    function cadastrar() {
-  const cardErro = document.getElementById("cardErro");
-  const mensagem_erro = document.getElementById("mensagem_erro");
-    aguardar();
+    const listaComponentes = document.querySelector(".lista-content");
+    let checkboxes = [];
+    let componentesData = [];
+    onload = () => {
+        carregarCaixas();
+        carregarComponentes();
+    };
 
-    
-    var nomeVar = nome_input.value;
-    var unidadeVar = unidade_input.value;
-    // var idEmpresaVincular
-
-    // Verificando se há algum campo em branco
-    if (
-      nomeVar == "" ||
-      unidadeVar == "" 
-    ) {
-      cardErro.style.display = "block";
-      mensagem_erro.innerHTML =
-        "(Preencha todos o campos para continuar!)";
-
-      finalizarAguardar();
-      return false;
-    } else{
-      setInterval(sumirMensagem, 5000);
+    function carregarCaixas() {
+        fetch("/caixas/listar", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Fk_Empresa": sessionStorage.FK_EMPRESA
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const filtroCaixa = document.getElementById("slt_caixa");
+                const selectCaixa = document.getElementById("caixa_cadastro");
+                
+                data.forEach(caixa => {
+                    const optionFiltro = document.createElement("option");
+                    optionFiltro.value = caixa.id;
+                    optionFiltro.textContent = caixa.codigoCaixa || `Caixa ${caixa.id}`;
+                    filtroCaixa.appendChild(optionFiltro);
+                    const optionCadastro = document.createElement("option");
+                    optionCadastro.value = caixa.id;
+                    optionCadastro.textContent = caixa.codigoCaixa || `Caixa ${caixa.id}`;
+                    selectCaixa.appendChild(optionCadastro);
+                });
+            })
+            .catch(error => {
+                console.error("Erro ao carregar caixas:", error);
+            });
     }
-    // Verificando se o código de ativação é de alguma empresa cadastrada
-    /* for (let i = 0; i < listaEmpresasCadastradas.length; i++) {
-      if (listaEmpresasCadastradas[i].codigo_ativacao == codigoVar) {
-        idEmpresaVincular = listaEmpresasCadastradas[i].id
-        console.log("Código de ativação válido.");
-        break;
-      } else {
-        cardErro.style.display = "block";
-        mensagem_erro.innerHTML = "(Mensagem de erro para código inválido)";
-        finalizarAguardar();
-      }
-    }*/
 
-    // Enviando o valor da nova input
-    fetch("/componentes/cadastrar", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        // crie um atributo que recebe o valor recuperado aqui
-        // Agora vá para o arquivo routes/usuario.js
-        componenteServer: nomeVar,
-        unidadeServer: unidadeVar
-        //idEmpresaVincularServer: idEmpresaVincular
-      }),
-    })
-      .then(function (resposta) {
-        console.log("resposta: ", resposta);
+    function carregarComponentes() {
+        fetch("/componentes/listar", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Fk_Empresa": sessionStorage.FK_EMPRESA
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                componentesData = data;
+                listaComponentes.innerHTML = "";
+                
+                data.forEach(componente => {
+                    const item = document.createElement("div");
+                    item.classList.add("lista-item");
+                    item.innerHTML = `
+                        <p class="select select_item"><input type="checkbox" data-id="${componente.Id_Componente}"></p>
+                        <p class="id">${componente.Id_Componente}</p>
+                        <p class="nome">${componente.Nome_Componente}</p>
+                        <p class="email">${componente.codigoCaixa || `Caixa ${componente.Fk_Caixa}`}</p>
+                        <p class="cargo">${componente.Unidade || 'N/A'}</p>
+                        <p class="status">${componente.Valor_Parametrizado || 'N/A'}</p>
+                        <p class="acao">
+                            <button class="btn editar material-symbols-outlined" title="Editar" onclick="editarComponente(${componente.Id_Componente})">edit</button>
+                            <button class="btn inativar material-symbols-outlined" title="Excluir" onclick="excluirComponente(${componente.Id_Componente})">remove</button>
+                        </p>
+                    `;
+                    listaComponentes.appendChild(item);
+                });
 
-        if (resposta.ok) {
-          cardErro.style.display = "block";
+                atualizarBotoesAcaoGeral();
+                checkboxes = document.querySelectorAll(".select_item input");
 
-          mensagem_erro.innerHTML =
-            "Cadastro realizado com sucesso!";
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener("change", atualizarBotoesAcaoGeral);
+                });
+            })
+            .catch(error => {
+                console.error("Erro ao carregar componentes:", error);
+            });
+    }
 
-          setTimeout(() => {
-            window.location = "dashboard.html";
-          }, "2000");
-
-          limparFormulario();
-          finalizarAguardar();
-        } else {
-          throw "Houve um erro ao tentar realizar o cadastro!";
-        }
-      })
-      .catch(function (resposta) {
-        console.log(`#ERRO: ${resposta}`);
-        finalizarAguardar();
-      });
-
-    return false;
-  }
-
-  // Listando empresas cadastradas 
- /* function listar() {
-    fetch("/empresas/listar", {
-      method: "GET",
-    })
-      .then(function (resposta) {
-        resposta.json().then((empresas) => {
-          empresas.forEach((empresa) => {
-            listaEmpresasCadastradas.push(empresa);
-
-            console.log("listaEmpresasCadastradas")
-            console.log(listaEmpresasCadastradas[0].codigo_ativacao)
-          });
+    const pesquisar = document.querySelector(".pesquisa input");
+    pesquisar.addEventListener("input", function () {
+        const termo = this.value.toLowerCase();
+        const itens = document.querySelectorAll(".lista-item");
+        itens.forEach(item => {
+            const nome = item.querySelector(".nome").textContent.toLowerCase();
+            if (nome.includes(termo)) {
+                item.style.display = "";
+            } else {
+                item.style.display = "none";
+            }
         });
-      })
-      .catch(function (resposta) {
-        console.log(`#ERRO: ${resposta}`);
-      });
-  }*/
+    });
 
-  function sumirMensagem() {
-    cardErro.style.display = "none";
-  }
-    // function listarInfosDeUm() {
-    //     console.log("Criar função de trazer informações de post escolhido");
-    // }
+    const filtroCaixa = document.getElementById("slt_caixa");
+    filtroCaixa.addEventListener("change", function () {
+        const caixaSelecionada = this.value;
+        const itens = document.querySelectorAll(".lista-item");
+        itens.forEach(item => {
+            const caixa = item.querySelector(".email").textContent;
+            if (caixaSelecionada === "all" || caixa.includes(caixaSelecionada)) {
+                item.style.display = "";
+            } else {
+                item.style.display = "none";
+            }
+        });
+    });
 
-    // function editar() {
-    //     fetch(`/avisos/editar/${sessionStorage.getItem("ID_POSTAGEM_EDITANDO")}`, {
-    //         method: "PUT",
-    //         headers: {
-    //             "Content-Type": "application/json"
-    //         },
-    //         body: JSON.stringify({
-    //             descricao: textarea_descricao.value
-    //         })
-    //     }).then(function (resposta) {
+    document.querySelectorAll(".closeModal, .cancel").forEach(element => {
+        element.addEventListener("click", () => {
+            document.getElementById("modal_alterar").style.display = "none";
+            document.getElementById("modal_cadastrar").style.display = "none";
+        });
+    });
 
-    //         if (resposta.ok) {
-    //             window.alert("Post atualizado com sucesso pelo usuario de email: " + sessionStorage.getItem("EMAIL_USUARIO") + "!");
-    //             window.location = "/dashboard/mural.html"
-    //         } else if (resposta.status == 404) {
-    //             window.alert("Deu 404!");
-    //         } else {
-    //             throw ("Houve um erro ao tentar realizar a postagem! Código da resposta: " + resposta.status);
-    //         }
-    //     }).catch(function (resposta) {
-    //         console.log(`#ERRO: ${resposta}`);
-    //     });
-    // }
+    function cadastrarComponente() {
+        document.getElementById("modal_alterar").style.display = "none";
+        document.getElementById("modal_cadastrar").style.display = "flex";
+        document.getElementById("nome_cadastro").value = "";
+        document.getElementById("caixa_cadastro").value = "";
+        document.getElementById("unidade_cadastro").value = "";
+        document.getElementById("parametro_cadastro").value = "";
+    }
 
+    document.getElementById("btn_cadastrar").addEventListener("click", () => {
+        const nome = document.getElementById("nome_cadastro").value;
+        const caixa = document.getElementById("caixa_cadastro").value;
+        const unidade = document.getElementById("unidade_cadastro").value;
+        const parametro = document.getElementById("parametro_cadastro").value;
+
+        if (!nome || !caixa || !unidade || !parametro) {
+            console.warn("Preencha todos os campos!");
+            return;
+        }
+
+        fetch("/componentes/cadastrar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                componenteServer: nome,
+                caixaServer: caixa,
+                unidadeServer: unidade,
+                parametroServer: parametro
+            })
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Componente cadastrado com sucesso!");
+                    document.getElementById("modal_cadastrar").style.display = "none";
+                    carregarComponentes();
+                } else {
+                    return response.json().then(data => {
+                        console.error("Erro ao cadastrar componente:", data.erro || "Erro desconhecido");
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Erro:", error);
+            });
+    });
+
+    function editarComponente(id) {
+        const componente = componentesData.find(c => c.Id_Componente === id);
+        if (!componente) {
+            console.error("Componente não encontrado!");
+            return;
+        }
+
+        document.getElementById("modal_cadastrar").style.display = "none";
+        document.getElementById("modal_alterar").style.display = "flex";
+        document.getElementById("nome").value = componente.Nome_Componente;
+        document.getElementById("unidade").value = componente.Unidade || "";
+        document.getElementById("parametro").value = componente.Valor_Parametrizado || "";
+
+        document.getElementById("editar_btn").onclick = function () {
+            const nome = document.getElementById("nome").value;
+            const unidade = document.getElementById("unidade").value;
+            const parametro = document.getElementById("parametro").value;
+
+            if (!nome || !unidade || !parametro) {
+                console.warn("Preencha todos os campos!");
+                return;
+            }
+
+            fetch("/componentes/editar", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    idComponente: id,
+                    componenteServer: nome,
+                    unidadeServer: unidade,
+                    parametroServer: parametro
+                })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log("Componente editado com sucesso!");
+                        document.getElementById("modal_alterar").style.display = "none";
+                        carregarComponentes();
+                    } else {
+                        return response.json().then(data => {
+                            console.error("Erro ao editar componente:", data.erro || "Erro desconhecido");
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro:", error);
+                });
+        };
+    }
+
+    function excluirComponente(id) {
+        if (!confirm("Tem certeza que deseja excluir este componente?")) {
+            return;
+        }
+
+        fetch(`/componentes/excluir/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Componente excluído com sucesso!");
+                    carregarComponentes();
+                } else {
+                    return response.json().then(data => {
+                        console.error("Erro ao excluir componente:", data.erro || "Erro desconhecido");
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Erro:", error);
+            });
+    }
+
+    document.getElementById("select_all").addEventListener("change", function () {
+        const isChecked = this.querySelector("input").checked;
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+        atualizarBotoesAcaoGeral();
+    });
+
+    document.getElementById("btn_excluir_selecionados").addEventListener("click", function () {
+        const selecionados = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.getAttribute("data-id"));
+
+        if (selecionados.length === 0) {
+            console.warn("Nenhum componente selecionado!");
+            return;
+        }
+
+        if (!confirm(`Tem certeza que deseja excluir ${selecionados.length} componente(s)?`)) {
+            return;
+        }
+
+        Promise.all(selecionados.map(id => 
+            fetch(`/componentes/excluir/${id}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" }
+            })
+        ))
+            .then(() => {
+                console.log("Componentes excluídos com sucesso!");
+                carregarComponentes();
+            })
+            .catch(error => {
+                console.error("Erro:", error);
+            });
+    });
+
+    async function atualizarBotoesAcaoGeral() {
+        let algumSelecionado = false;
+        await checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                algumSelecionado = true;
+            }
+        });
+        document.getElementById("btn_excluir_selecionados").disabled = !algumSelecionado;
+    }
 </script>
