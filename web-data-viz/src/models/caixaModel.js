@@ -30,7 +30,7 @@ function listarPorEmpresa(fkEmpresa) {
 
 async function cadastrar(caixa){
   let sql = `
-    SELECT COUNT(idCaixa) AS Id_Caixa FROM Caixa WHERE Fk_Empresa = ${caixa.idEmpresa};
+    SELECT COUNT(Id_Caixa) AS Id_Caixa FROM Caixa WHERE Fk_Empresa = ${caixa.idEmpresa};
   `
 
   res = await db.executar(sql);
@@ -55,8 +55,8 @@ async function cadastrar(caixa){
     const idCaixa = result[0].idCaixa;
     console.log(result)
     sql = `
-      INSERT INTO Caixa(codigoCaixa, fkEmpresa, FK_Caixa_Endereco)
-        VALUES("CX-${res[0].idCaixa+1}_${caixa.idEmpresa}", ${caixa.idEmpresa}, ${idEndereco});
+      INSERT INTO Caixa(codigoCaixa, Fk_Empresa, Fk_Endereco_Maquina)
+        VALUES("CX-${idCaixa+1}_${caixa.idEmpresa}", ${caixa.idEmpresa}, ${idEndereco});
     `
     return db.executar(sql).then(() => idCaixa);
   });
