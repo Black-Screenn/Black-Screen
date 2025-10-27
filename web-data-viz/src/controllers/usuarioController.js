@@ -18,11 +18,11 @@ async function autenticar(req, res) {
 
     return res.json({
       ok: true,
-      idUsuario: u.idUsuario,
-      nome: u.nome,
-      email: u.email,
-      fkEmpresa: u.fkEmpresa,
-      senha: u.senha
+      Id_Usuario: u.Id_Usuario,
+      Nome: u.Nome,
+      Email: u.Email,
+      Fk_Empresa: u.Fk_Empresa,
+      Senha: u.Senha
     });
   } catch (e) {
   console.error("X [AUTH] login:", e.code, e.sqlMessage || e.message);
