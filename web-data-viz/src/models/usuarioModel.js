@@ -17,8 +17,8 @@ function cadastrar(nome, email, senha) {
     insert into Usuario (Nome, Email, Senha)
     values (?, ?, ?)
   `;
-    console.log("Executando a instrução SQL: \n" + instrucaoSql);
-  return db.executar(sql, [nome, email, senha]);
+    console.log("Executando a instrução SQL: \n" + sql);
+  return database.executar(sql, [nome, email, senha]);
 }
 
 function validarSenha(idUsuario, senhaAtual) {
@@ -29,7 +29,7 @@ function validarSenha(idUsuario, senhaAtual) {
     limit 1
   `;
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
-  return db.executar(sql, [idUsuario, senhaAtual]);
+  return database.executar(sql, [idUsuario, senhaAtual]);
 }
 
 function trocar(idUsuario, novaSenha) {
@@ -39,13 +39,13 @@ function trocar(idUsuario, novaSenha) {
     where Id_Usuario = ?
   `;
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
-    return db.executar(sql, [novaSenha, idUsuario]);
+    return database.executar(sql, [novaSenha, idUsuario]);
 }
 
 function excluir(idUsuario) {
     const sql = `delete from Usuario where Id_Usuario = ?`;
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
-    return db.executar(sql, [idUsuario]);
+    return database.executar(sql, [idUsuario]);
 }
 
 module.exports = {
