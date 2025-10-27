@@ -377,9 +377,9 @@
                 lista.forEach(c => {
                     if (c.latitude == null || c.longitude == null) return;
 
-                    marker = L.marker([c.latitude, c.longitude], {icon: icon})
+                    marker = L.marker([c.Latitude, c.Longitude], {icon: icon})
                         .bindPopup(
-                            `<b>${c.codigoCaixa}</b><br>${c.logradouro}, ${c.numero}<br>${c.bairro} - ${c.cidade}/${c.uf}<br> <i>Empresa dona: </i>${c.eNome}<br> <i>Código da empresa: </i> ${c.idEmpresa}`
+                            `<b>${c.codigoCaixa}</b><br>${c.Logradouro}, ${c.numero}<br>${c.Bairro} - ${c.Cidade}/${c.UF}<br> <i>Empresa dona: </i>${c.eNome}<br> <i>Código da empresa: </i> ${c.Id_Empresa}`
                         )
                         .addTo(group);
                     marker.on('mouseover',function(ev) {
@@ -392,7 +392,7 @@
                     marker.on('click', function (e){
                         document.getElementById('modal').style.display = "flex";
                         document.getElementById('caixa-name').textContent = c.codigoCaixa;
-                        document.getElementById('caixa-endereco').textContent = `${c.logradouro}, ${c.numero} - ${c.bairro}, ${c.cidade}/${c.uf}`;
+                        document.getElementById('caixa-endereco').textContent = `${c.Logradouro} - ${c.Bairro}, ${c.Cidade}/${c.UF}`;
                         statusCaixa = 1;
                         if(statusCaixa === 1){
                             document.getElementById('caixa-status').classList.remove('inativo');

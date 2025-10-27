@@ -7,15 +7,16 @@ const SQL_BASE = `
     c.Fk_Empresa,
     e.Logradouro, e.Bairro, e.Cidade, e.UF,
     e.Latitude, e.Longitude,
-    emp.Nome_Empresa        as eNome
+    emp.Nome_Empresa        as eNome,
+    emp.Id_Empresa
   from Caixa c
-  join Enderecos e   on e.fkCaixa   = c.idCaixa
+  join Enderecos e on e.Fk_Endereco_Maquina = c.Id_Caixa
   join Empresa emp  on emp.Id_Empresa = c.Fk_Empresa
   where e.Latitude is not null and e.Longitude is not null
 `;
 
 function listarTodos() {
-  const sql = SQL_BASE + " order by c.idCaixa";
+  const sql = SQL_BASE + " order by c.Id_Caixa";
   return db.executar(sql);
 }
 
@@ -24,7 +25,7 @@ function listarPorEmpresa(fkEmpresa) {
   if (!Number.isInteger(fk)) {
     return Promise.reject(new Error("fkEmpresa inválida"));
   }
-  const sql = SQL_BASE + ` and c.Fk_Empresa = ${fk} order by c.idCaixa`;
+  const sql = SQL_BASE + ` and c.Fk_Empresa = ${fk} order by c.Id_Caixa`;
   return db.executar(sql);
 }
 
