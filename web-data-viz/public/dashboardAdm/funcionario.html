@@ -114,39 +114,12 @@
                         <p class="select" id="select_all"><input type="checkbox"></p>
                         <p class="id">ID</p>
                         <p class="nome">Nome</p>
-                        <p class="cpf">CPF</p>
                         <p class="email">Email</p>
                         <p class="cargo">Cargo</p>
                         <p class="status">Estado</p>
                         <p class="acao">Ações</p>
                     </div>
                     <div class="lista-content">
-                        <div class="lista-item">
-                            <p class="select select_item"><input type="checkbox"></p>
-                            <p class="id">1</p>
-                            <p class="nome">Daniel Lopes</p>
-                            <p class="cpf">123.456.789-11</p>
-                            <p class="email">daniel@email.com</p>
-                            <p class="cargo">Analista</p>
-                            <p class="status ativo"><span>Ativo</span></p>
-                            <p class="acao">
-                                <button class="btn inativar material-symbols-outlined" title="Inativar">remove</button>
-                                <button class="btn editar material-symbols-outlined" title="Editar">edit</button>
-                            </p>
-                        </div>
-                        <div class="lista-item">
-                            <p class="select select_item"><input type="checkbox"></p>
-                            <p class="id">2</p>
-                            <p class="nome">Vitória Jesus</p>
-                            <p class="cpf">123.456.789-11</p>
-                            <p class="email">vitoria@email.com</p>
-                            <p class="cargo">Analista</p>
-                            <p class="status ativo"><span>Ativo</span></p>
-                            <p class="acao">
-                                <button class="btn inativar material-symbols-outlined" title="Inativar">remove</button>
-                                <button class="btn editar material-symbols-outlined" title="Editar">edit</button>
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -163,7 +136,70 @@
                         <button class="inativar" id="btn_inativar_todos" disabled>Inativar Todos</button>
                     </div>
                 </div>
-                <button>Cadastrar Funcionário</button>
+                <button onclick="cadastrarFunc()">Cadastrar Funcionário</button>
+            </div>
+        </div>
+        
+        <div class="modal" id="modal_alterar">
+            <div class="modalContainer">
+                <span class="material-symbols-outlined closeModal">
+                    close
+                </span>
+                <h2>Editar Funcionário</h2>
+                <div class="form">
+                    <div class="inputGroup">
+                        <label for="nome">Nome Completo</label>
+                        <input type="text" id="nome" required>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="cargo">Cargo</label>
+                        <select name="cargo" id="cargo">
+                            <option value="analista">Analista</option>
+                            <option value="tecnico">Desenvolvedor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="btnGroup">
+                        <button class="cancel">Cancelar</button>
+                        <button class="save" id="editar_btn">Salvar Alterações</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="modal" id="modal_cadastrar">
+            <div class="modalContainer">
+                <span class="material-symbols-outlined closeModal">
+                    close
+                </span>
+                <h2>Cadastrar Funcionário</h2>
+                <div class="form">
+                    <div class="inputGroup">
+                        <label for="nome_cadastro">Nome Completo</label>
+                        <input type="text" id="nome_cadastro" required>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="email_cadastro">Email</label>
+                        <input type="email" id="email_cadastro" required>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="cargo_cadastro">Cargo</label>
+                        <select name="cargo_cadastro" id="cargo_cadastro">
+                            <option value="analista">Analista</option>
+                            <option value="tecnico">Desenvolvedor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="btnGroup">
+                        <button class="cancel">Cancelar</button>
+                        <button class="save" id="btn_cadastrar">Cadastrar Funcionário</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -174,11 +210,145 @@
 <script>
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
 
-    const checkboxes = document.querySelectorAll(".select_item input");
-    
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener("change", atualizarBotoesAcaoGeral);
+    const listaFuncionarios = document.querySelector(".lista-content");
+
+    let checkboxes = [];
+
+    onload = () => {
+        fetch("/usuarios/listar", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Fk_Empresa": sessionStorage.FK_EMPRESA
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(funcionario => {
+                    status = 'Ativo';
+                    const item = document.createElement("div");
+                    item.classList.add("lista-item");
+                    item.innerHTML = `
+                        <p class="select select_item"><input type="checkbox"></p>
+                        <p class="id">${funcionario.Id_Usuario}</p>
+                        <p class="nome">${funcionario.Nome}</p>
+                        <p class="email">${funcionario.Email}</p>
+                        <p class="cargo">${funcionario.Nome_Cargo}</p>
+                        <p class="status ${status.toLowerCase()}"><span>${status}</span></p>
+                        <p class="acao">
+                            <button class="btn inativar material-symbols-outlined" title="Inativar">remove</button>
+                            <button class="btn editar material-symbols-outlined" title="Editar" onclick="editarFunc(${funcionario.Id_Usuario}, '${funcionario.Nome}', '${funcionario.Email}')">edit</button>
+                        </p>
+                    `;
+                    listaFuncionarios.appendChild(item);
+                });
+                atualizarBotoesAcaoGeral();
+                checkboxes = document.querySelectorAll(".select_item input");
+
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener("change", atualizarBotoesAcaoGeral);
+                });
+            });
+    };
+
+    const pesquisar = document.querySelector(".pesquisa input");
+    pesquisar.addEventListener("input", function () {
+        const termo = this.value.toLowerCase();
+        const itens = document.querySelectorAll(".lista-item");
+        itens.forEach(item => {
+            const nome = item.querySelector(".nome").textContent.toLowerCase();
+            const email = item.querySelector(".email").textContent.toLowerCase();
+            if (nome.includes(termo) || email.includes(termo)) {
+                item.style.display = "";
+            } else {
+                item.style.display = "none";
+            }
+        });
     });
+
+    const filtroCargo = document.getElementById("slt_cargo");
+    filtroCargo.addEventListener("change", function () {
+        const cargoSelecionado = this.value;
+        const itens = document.querySelectorAll(".lista-item");
+        itens.forEach(item => {
+            const cargo = item.querySelector(".cargo").textContent.toLowerCase();
+            if (cargoSelecionado === "all" || cargo === cargoSelecionado) {
+                item.style.display = "";
+            } else {
+                item.style.display = "none";
+            }
+        });
+    });
+
+    const editarFuncionarioButtons = document.querySelectorAll(".btn.editar");
+    editarFuncionarioButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            document.getElementById("modal_alterar").style.display = "flex";
+        });
+    });
+
+    document.querySelectorAll(".closeModal, .cancel").forEach(element => {
+        element.addEventListener("click", () => {
+            document.getElementById("modal_alterar").style.display = "none";
+            document.getElementById("modal_cadastrar").style.display = "none";
+        });
+    });
+
+    function cadastrarFunc() {
+        document.getElementById("modal_alterar").style.display = "none";
+        document.getElementById("modal_cadastrar").style.display = "flex";
+    }
+
+    document.getElementById("btn_cadastrar").addEventListener("click", () => {
+        fetch("/usuarios/cadastrar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                nomeServer: document.getElementById("nome_cadastro").value,
+                emailServer: document.getElementById("email_cadastro").value,
+                cargoServer: document.getElementById("cargo_cadastro").value,
+                senhaServer: "senha123",
+                empresaServer: sessionStorage.FK_EMPRESA
+            })
+        }).then(response => {
+            if (response.ok) {
+                alert("Funcionário cadastrado com sucesso!");
+                location.reload();
+            } else {
+                alert("Erro ao cadastrar funcionário.");
+            }
+        });
+    });
+
+    function editarFunc(id, nome, email) {
+        console.log("Editar funcionário com ID:", id);
+        document.getElementById("modal_alterar").style.display = "flex";
+        document.getElementById("nome").value = nome;
+        document.getElementById("email").value = email;
+        document.getElementById("editar_btn").onclick = function () {
+            fetch("/usuarios/editar", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    idUsuario: id,
+                    nomeServer: document.getElementById("nome").value,
+                    emailServer: document.getElementById("email").value,
+                    cargoServer: document.getElementById("cargo").value
+                })
+            }).then(response => {
+                if (response.ok) {
+                    alert("Funcionário editado com sucesso!");
+                    location.reload();
+                } else {
+                    alert("Erro ao editar funcionário.");
+                }
+            });
+        };
+    }
 
     document.getElementById("select_all").addEventListener("change", function () {
         const isChecked = this.querySelector("input").checked;

@@ -14,7 +14,7 @@ async function autenticar(req, res) {
     }
 
     const u = resultado[0];
-    req.session.usuario = { Id_Usuario: u.Id_Usuario, Nome: u.Nome, Senha: u.Senha, Fk_Empresa: u.Fk_Empresa };
+    req.session.usuario = { Id_Usuario: u.Id_Usuario, Nome: u.Nome, Senha: u.Senha, Fk_Empresa: u.Fk_Empresa, Cargo: u.Nome_Cargo };
 
     return res.json({
       ok: true,
@@ -22,7 +22,8 @@ async function autenticar(req, res) {
       Nome: u.Nome,
       Email: u.Email,
       Senha: u.Senha,
-      Fk_Empresa: u.Fk_Empresa
+      Fk_Empresa: u.Fk_Empresa,
+      Cargo: u.Nome_Cargo,
     });
   } catch (e) {
   console.error("X [AUTH] login:", e.code, e.sqlMessage || e.message);
@@ -44,6 +45,8 @@ function cadastrar(req, res) {
     var nome = req.body.nomeServer;
     var email = req.body.emailServer;
     var senha = req.body.senhaServer;
+    var cargo = req.body.cargoServer;
+    var empresa = req.body.empresaServer;
 
     if (nome == undefined) {
         res.status(400).send("Seu nome está undefined!");
@@ -53,7 +56,7 @@ function cadastrar(req, res) {
         res.status(400).send("Sua senha está undefined!");
     } else {
 
-        usuarioModel.cadastrar(nome, email, senha)
+        usuarioModel.cadastrar(nome, email, senha, cargo, empresa)
             .then(
                 function (resultado) {
                     res.json(resultado);
@@ -124,9 +127,26 @@ function excluir(req, res) {
     }
 }
 
+function listar(req, res) {
+    var empresa = req.headers["fk_empresa"];
+    usuarioModel.listar(empresa)
+        .then(function (resultado) {
+            res.json(resultado);
+        })
+        .catch(function (erro) {
+            console.log(erro);
+            console.log(
+                "\nHouve um erro ao buscar os usuários! Erro: ",
+                erro.sqlMessage
+            );
+            res.status(500).json(erro.sqlMessage);
+        });
+}
+
 module.exports = {
     autenticar,
     cadastrar,
     trocar,
-    excluir
+    excluir,
+    listar
 }

@@ -20,4 +20,8 @@ router.delete("/excluir", function (req, res) {
     usuarioController.excluir(req, res);
 });
 
+router.get("/listar", function (req, res) {
+    usuarioController.listar(req, res);
+});
+
 module.exports = router;
