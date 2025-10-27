@@ -90,7 +90,8 @@
 }
 .content .listaCargo .lista .lista-content{
     overflow-y: auto;
-    max-height: 240px;
+    height: 100%;
+    max-height: 58dvh;
     background-color: #FFF;
     border-bottom-right-radius: 8px;
     border-bottom-right-radius: 8px;
@@ -363,4 +364,35 @@
 .modal .modalContainer .form .btnGroup button.save:hover {
     background-color: #66bb6a;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+.popUp {
+    z-index: 10001;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #fff;
+    border: 1px solid transparent;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    transition: .3s;
+}
+.popUp .alerta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.popUp .alerta span {
+    font-size: 2em;
+}
+.popUp.show {
+    transform: translateY(-100px);
+}
+.popUp.hide {
+    transform: translateY(0);
 }
