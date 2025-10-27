@@ -2,7 +2,8 @@ const caixaModel = require("../models/caixaModel");
 
 async function listar(req, res) {
   try {
-    const fk = req.session?.usuario?.fkEmpresa; 
+    const fk = req.headers["fk_empresa"];
+    console.log("fkEmpresa na sessão:", fk);
 
     if (fk === undefined) {
       return res.status(401).json({ erro: "Sessão inválida" });

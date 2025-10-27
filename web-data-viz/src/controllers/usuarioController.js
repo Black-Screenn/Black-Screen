@@ -14,15 +14,15 @@ async function autenticar(req, res) {
     }
 
     const u = resultado[0];
-    req.session.usuario = { idUsuario: u.idUsuario, nome: u.nome, fkEmpresa: u.fkEmpresa };
+    req.session.usuario = { Id_Usuario: u.Id_Usuario, Nome: u.Nome, Senha: u.Senha, Fk_Empresa: u.Fk_Empresa };
 
     return res.json({
       ok: true,
       Id_Usuario: u.Id_Usuario,
       Nome: u.Nome,
       Email: u.Email,
-      Fk_Empresa: u.Fk_Empresa,
-      Senha: u.Senha
+      Senha: u.Senha,
+      Fk_Empresa: u.Fk_Empresa
     });
   } catch (e) {
   console.error("X [AUTH] login:", e.code, e.sqlMessage || e.message);

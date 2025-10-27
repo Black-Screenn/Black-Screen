@@ -2,16 +2,16 @@ const db = require("../database/config");
 
 const SQL_BASE = `
   select
-    c.idCaixa       as id,
+    c.Id_Caixa       as id,
     c.codigoCaixa,
-    c.fkEmpresa,
-    e.logradouro, e.numero, e.bairro, e.cidade, e.uf,
-    e.latitude, e.longitude,
-    emp.nome        as eNome
-  from caixas c
-  join endereco e   on e.fkCaixa   = c.idCaixa
-  join empresa emp  on emp.idEmpresa = c.fkEmpresa
-  where e.latitude is not null and e.longitude is not null
+    c.Fk_Empresa,
+    e.Logradouro, e.Bairro, e.Cidade, e.UF,
+    e.Latitude, e.Longitude,
+    emp.Nome_Empresa        as eNome
+  from Caixa c
+  join Enderecos e   on e.fkCaixa   = c.idCaixa
+  join Empresa emp  on emp.Id_Empresa = c.Fk_Empresa
+  where e.Latitude is not null and e.Longitude is not null
 `;
 
 function listarTodos() {

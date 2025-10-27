@@ -362,8 +362,15 @@
         // const heat = L.heatLayer([
         //     [-23.55052, -46.633308, 0.5]
         // ], {radius: 25}).addTo(map);
+        const fkEmpresa = sessionStorage.getItem("FK_EMPRESA");
 
-        fetch('/caixas')
+        fetch('/caixas', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'FK_EMPRESA': fkEmpresa
+            },
+        })
             .then(r => r.json())
             .then(lista => {
                 const group = L.featureGroup();
