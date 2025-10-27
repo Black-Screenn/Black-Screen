@@ -9,9 +9,10 @@
     <title>BlackScreen | Insights</title>
 
     <link rel="stylesheet" href="./../css/dashboards.css">
-    <link rel="stylesheet" href="./../css/estilo.css" />
+    <link rel="stylesheet" href="./../css/dashboardAlertas.css" />
     <script src="../js/sessao.js"></script>
     <script src="./../js/alerta.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,home,local_atm,notifications,search_insights" />
@@ -23,7 +24,7 @@
 <body>
 
     <div class="janela">
-<div class="header-left">
+        <div class="header-left">
             <img src="../assets/imgs/blackscreenlogo.png" alt="BlackScreen">
 
             <div class="hello">
@@ -93,13 +94,54 @@
 
         </div>
 
-        <div class="content">
-            
+        <div class="content-insights">
+            <div class="titulo"><p>Visão Geral - Mensal</p></div>
+            <div class="grid-insights">
+                <div class="card">
+                    <div class="resumo-metrica">
+                        <h2>Pico de CPU neste mês</h2>
+                        <p><span class="status-crit">80%</span></p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="resumo-metrica">
+                        <h2>Pico de RAM neste mês</h2>
+                        <p><span class="status-crit">90%</span></p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="resumo-metrica">
+                        <h2>Maior volume de Bytes enviados</h2>
+                        <p><span class="status-ok">60 MB</span></p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="resumo-metrica">
+                        <h2>Maior volume de Bytes recebidos</h2>
+                        <p><span class="status-ok">40 MB</span></p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="resumo-metrica">
+                        <h2>Maior tempo de caixa ligado</h2>
+                        <p><span class="status-ok">800h</span></p>
+                    </div>
+                </div>
+            </div>
 
-            
-
-
+        <div class="grid-insights">
+            <div class="card">
+                <h2></h2>
+                <div class="grafico"><canvas id="alertasSemanais"></canvas>
+                </div>
+            </div>
+            <div class="graficoATM">
+                <div class="card">
+                    <div class="grafico2"><canvas id="graficoAlertasATM"></canvas></div>
+                </div>
+            </div>
         </div>
+    </div>
     </div>
 
 
