@@ -193,6 +193,15 @@
                 </div>
             </div>
         </div>
+        
+        <div class="popUp">
+            <div class="alerta">
+                <span class="material-symbols-outlined">
+                    check_circle
+                </span>
+                <p id="mensagem_popUp">Mensagem de sucesso!</p>
+            </div>
+        </div>
     </div>
 </body>
 
@@ -205,7 +214,9 @@
 
     let checkboxes = [];
 
-    onload = () => {
+    function  listarFuncionarios() {
+        const listaFuncionarios = document.querySelector(".lista-content");
+        listaFuncionarios.innerHTML = "";
         fetch("/usuarios/listar", {
             method: "GET",
             headers: {
@@ -243,6 +254,7 @@
                 listarCargos();
             });
     };
+    listarFuncionarios();
 
     function listarCargos() {
         fetch("/cargos/listar", {
@@ -339,10 +351,11 @@
             })
         }).then(response => {
             if (response.ok) {
-                alert("Funcionário cadastrado com sucesso!");
-                location.reload();
+                showPopUpMessage("Funcionário cadastrado com sucesso!", "sucesso");
+                document.getElementById("modal_cadastrar").style.display = "none";
+                listaFuncionarios();
             } else {
-                alert("Erro ao cadastrar funcionário.");
+                showPopUpMessage("Erro ao cadastrar funcionário.", "erro");
             }
         });
     });
@@ -366,10 +379,11 @@
                 })
             }).then(response => {
                 if (response.ok) {
-                    alert("Funcionário editado com sucesso!");
-                    location.reload();
+                    showPopUpMessage("Funcionário editado com sucesso!", "sucesso");
+                    document.getElementById("modal_alterar").style.display = "none";
+                    listaFuncionarios();
                 } else {
-                    alert("Erro ao editar funcionário.");
+                    showPopUpMessage("Erro ao editar funcionário.", "erro");
                 }
             });
         };
@@ -392,5 +406,27 @@
         });
         document.getElementById("btn_ativar_todos").disabled = !algumSelecionado;
         document.getElementById("btn_inativar_todos").disabled = !algumSelecionado;
+    }
+
+    function showPopUpMessage(mensagem, tipo) {
+        const popUp = document.querySelector('.popUp');
+        const mensagemPopUp = document.getElementById('mensagem_popUp');
+        const tipoAlerta = popUp.querySelector('.alerta span');
+        mensagemPopUp.textContent = mensagem;
+        popUp.classList.add('show');
+        popUp.classList.remove('hide');
+        if(tipo === 'sucesso') {
+            tipoAlerta.textContent = 'check_circle';
+            popUp.querySelector('.alerta').style.color = 'green';
+            popUp.style.borderLeft = '4px solid #4CAF50';
+        } else if(tipo === 'erro') {
+            tipoAlerta.textContent = 'error';
+            popUp.querySelector('.alerta').style.color = 'red';
+            popUp.style.borderLeft = '4px solid #f44336';
+        }
+        setTimeout(() => {
+            popUp.classList.remove('show');
+            popUp.classList.add('hide');
+        }, 3000);
     }
 </script>
