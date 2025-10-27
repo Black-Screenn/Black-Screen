@@ -130,7 +130,7 @@
             </div>
 
         <div class="grid-insights">
-            <div class="graficoATM">
+            <div class="graficoTendencias">
                 <div class="card">
                     <select id="ipt_metricaSelect">
                         <option value="cpu">Uso de CPU (%)</option>
@@ -141,6 +141,21 @@
                         <option value="uptime">Uptime (h)</option>
                     </select>
                     <div class="grafico2"><canvas id="graficoTendencias"></canvas></div>
+                </div>
+            </div>
+            <div class="card ranking-processos">
+                <div class="comportamento-processos">
+                    <table>
+                        <caption>Análise do comportamento dos processos do caixa eletrônico em Setembro</caption>
+                        <tr><th>Nome do processo</th><th>Nº de falhas</th></tr>
+                        <tr><td>Manipulador de transações</td><td>17</td></tr>
+                        <tr><td>Leitor de cartões</td><td>13</td></tr>
+                        <tr><td>Leitor de digitais</td><td>8</td></tr>
+                        <tr><td>Dispenser de dinheiro</td><td>6</td></tr>
+                        <tr><td>Interface gráfica</td><td>2</td></tr>
+                        <tr><td>Atualizador de Software</td><td>2</td></tr>
+                        <tr><td>Gerenciador de rede</td><td>0</td></tr>
+                    </table>
                 </div>
             </div>
         </div>

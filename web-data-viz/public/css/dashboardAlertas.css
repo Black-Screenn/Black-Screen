@@ -124,3 +124,26 @@ select {
 .resumo-metrica p {
     font-size: 30px;
 }
+
+.graficoTendencias{
+    margin-right: 20px;
+}
+
+.card .comportamento-processos{
+    width: 530px;
+    height: 327.8px;
+}
+
+.ranking-processos table caption{
+    font-weight: bold;
+    font-size: 20px;
+}
+.ranking-processos table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.ranking-processos th, .ranking-processos td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
