@@ -375,7 +375,7 @@
         // ], {radius: 25}).addTo(map);
         const fkEmpresa = sessionStorage.getItem("FK_EMPRESA");
 
-        fetch('/caixas', {
+        fetch('/caixas/listar', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
