@@ -10,7 +10,7 @@ const SQL_BASE = `
     emp.Nome_Empresa        as eNome,
     emp.Id_Empresa
   from Caixa c
-  join Enderecos e on e.Fk_Endereco_Maquina = c.Id_Caixa
+  join Enderecos e on e.Id_Endereco = c.Fk_Endereco_Maquina
   join Empresa emp  on emp.Id_Empresa = c.Fk_Empresa
   where e.Latitude is not null and e.Longitude is not null
 `;

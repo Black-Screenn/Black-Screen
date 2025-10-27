@@ -375,11 +375,11 @@
             .then(lista => {
                 const group = L.featureGroup();
                 lista.forEach(c => {
-                    if (c.latitude == null || c.longitude == null) return;
+                    if (c.Latitude == null || c.Longitude == null) return;
 
                     marker = L.marker([c.Latitude, c.Longitude], {icon: icon})
                         .bindPopup(
-                            `<b>${c.codigoCaixa}</b><br>${c.Logradouro}, ${c.numero}<br>${c.Bairro} - ${c.Cidade}/${c.UF}<br> <i>Empresa dona: </i>${c.eNome}<br> <i>Código da empresa: </i> ${c.Id_Empresa}`
+                            `<b>${c.codigoCaixa}</b><br>${c.Logradouro}<br>${c.Bairro} - ${c.Cidade}/${c.UF}<br> <i>Empresa dona: </i>${c.eNome}<br> <i>Código da empresa: </i> ${c.Id_Empresa}`
                         )
                         .addTo(group);
                     marker.on('mouseover',function(ev) {
