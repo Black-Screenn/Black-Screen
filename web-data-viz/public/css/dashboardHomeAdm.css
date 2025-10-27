@@ -1,0 +1,196 @@
+.content {
+    padding: 24px;
+    overflow-y: auto;
+    background-color: #f5f5f5;
+    box-sizing: border-box;
+}
+
+.dashboard-header {
+    margin-bottom: 24px;
+}
+
+.dashboard-header h1 {
+    font-size: 1.8em;
+    color: #0a1128;
+    margin: 0;
+}
+
+.dashboard-header p {
+    color: #666;
+    margin: 8px 0 0 0;
+}
+
+.metrics-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.metric-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.metric-card .material-symbols-outlined {
+    font-size: 2.5em;
+    padding: 12px;
+    border-radius: 8px;
+    color: #034078;
+}
+
+.metric-info h3 {
+    font-size: 0.9em;
+    color: #666;
+    margin: 0;
+}
+
+.metric-info p {
+    font-size: 1.8em;
+    font-weight: 600;
+    color: #0a1128;
+    margin: 4px 0;
+}
+
+.metric-info .period {
+    font-size: 0.8em;
+    color: #888;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.chart-card {
+    background: white;
+    padding: 24px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-top: 16px;
+}
+
+.employees-by-role-bar {
+    grid-column: 1;
+}
+
+.employees-status {
+    grid-column: 2;
+}
+
+@media (max-width: 1024px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .employees-by-role-bar,
+    .employees-status {
+        grid-column: 1;
+    }
+}
+
+.chart-card h3 {
+    color: #0a1128;
+    margin: 0 0 16px 0;
+    font-size: 1.1em;
+}
+
+.quick-actions {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.quick-actions h2 {
+    color: #0a1128;
+    margin: 0 0 16px 0;
+    font-size: 1.2em;
+}
+
+.actions-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.action-card:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.action-card .material-symbols-outlined {
+    font-size: 2em;
+    color: #034078;
+    margin-bottom: 8px;
+}
+
+.action-card h3 {
+    color: #0a1128;
+    margin: 0;
+    font-size: 1em;
+    text-align: center;
+}
+
+/* Specific metric card colors */
+.total-employees .material-symbols-outlined {
+    background-color: rgba(3, 64, 120, 0.1);
+}
+
+.active-employees .material-symbols-outlined {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+}
+
+.total-roles .material-symbols-outlined {
+    background-color: rgba(255, 152, 0, 0.1);
+    color: #FF9800;
+}
+
+.new-hires .material-symbols-outlined {
+    background-color: rgba(156, 39, 176, 0.1);
+    color: #9C27B0;
+}
+
+@media (max-width: 768px) {
+    .metrics-container {
+        grid-template-columns: 1fr;
+    }
+
+    .charts-container {
+        grid-template-columns: 1fr;
+    }
+
+    .actions-container {
+        grid-template-columns: 1fr;
+    }
+}

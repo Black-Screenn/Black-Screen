@@ -388,10 +388,11 @@
     padding: 16px 24px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    display: none;
+    display: flex;
     align-items: center;
     gap: 12px;
     transition: .3s;
+    transform: translateY(-200px);
 }
 .popUp .alerta {
     display: flex;
@@ -400,10 +401,4 @@
 }
 .popUp .alerta span {
     font-size: 2em;
-}
-.popUp.show {
-    transform: translateY(-100px);
-}
-.popUp.hide {
-    transform: translateY(0);
 }

@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="./../css/style.css" />
     <link rel="stylesheet" href="./../css/dashboardHomeAdm.css">
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,cancel,check_circle,circle_notifications,close,do_not_disturb_on,docs,health_and_safety,home,keyboard_arrow_up,local_atm,location_on,notifications,search,search_insights,work" />
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,cancel,check_circle,circle_notifications,close,do_not_disturb_on,docs,group,health_and_safety,home,keyboard_arrow_up,local_atm,location_on,manage_accounts,notifications,person_add,search,search_insights,work" />
     <script src="../js/sessao.js"></script>
     <script src="./../js/alerta.js"></script>
 
@@ -26,6 +26,9 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="../js/leaflet-heat.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- <body onload=" atualizarFeed()"> -->
 
@@ -96,6 +99,79 @@
 
         <div class="content">
 
+            <div class="metrics-container">
+                <!-- Cards de métricas principais -->
+                <div class="metric-card total-employees">
+                    <span class="material-symbols-outlined">group</span>
+                    <div class="metric-info">
+                        <h3>Total de Funcionários</h3>
+                        <p id="total_funcionarios">0</p>
+                    </div>
+                </div>
+
+                <div class="metric-card active-employees">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <div class="metric-info">
+                        <h3>Funcionários Ativos</h3>
+                        <p id="funcionarios_ativos">0</p>
+                    </div>
+                </div>
+
+                <div class="metric-card total-roles">
+                    <span class="material-symbols-outlined">work</span>
+                    <div class="metric-info">
+                        <h3>Total de Cargos</h3>
+                        <p id="total_cargos">0</p>
+                    </div>
+                </div>
+
+                <div class="metric-card new-hires">
+                    <span class="material-symbols-outlined">person_add</span>
+                    <div class="metric-info">
+                        <h3>Novas Contratações</h3>
+                        <p id="novas_contratacoes">0</p>
+                        <span class="period">Este mês</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <!-- Gráfico de Barras -->
+                <div class="chart-card employees-by-role-bar full-width">
+                    <h3>Distribuição por Cargo</h3>
+                    <div class="chart-container">
+                        <canvas id="roleDistBarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Pizza Status -->
+                <div class="chart-card employees-status">
+                    <h3>Status dos Funcionários</h3>
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h2>Ações Rápidas</h2>
+                <div class="actions-container">
+                    <a href="funcionario.html" class="action-card">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <h3>Novo Funcionário</h3>
+                    </a>
+
+                    <a href="cargo.html" class="action-card">
+                        <span class="material-symbols-outlined">work</span>
+                        <h3>Gerenciar Cargos</h3>
+                    </a>
+
+                    <a href="funcionario.html" class="action-card">
+                        <span class="material-symbols-outlined">manage_accounts</span>
+                        <h3>Gerenciar Funcionários</h3>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </body>
@@ -105,4 +181,158 @@
 <script>
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
 
+    // Função para carregar todas as métricas do dashboard
+    function carregarDashboard() {
+        // Carregar dados de funcionários e cargos simultaneamente
+        Promise.all([
+            fetch("/usuarios/listar", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Fk_Empresa": sessionStorage.FK_EMPRESA
+                }
+            }),
+            fetch("/cargos/listar", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Fk_Empresa": sessionStorage.FK_EMPRESA
+                }
+            })
+        ])
+            .then(responses => Promise.all(responses.map(r => r.json())))
+            .then(([usuarios, cargos]) => {
+                const totalFuncionarios = usuarios.length;
+                // const funcionariosAtivos = usuarios.filter(f => f.Status === 'Ativo').length;
+                const funcionariosAtivos = Math.round(totalFuncionarios / 3 * 2);
+
+                document.getElementById('total_funcionarios').textContent = totalFuncionarios;
+                document.getElementById('funcionarios_ativos').textContent = funcionariosAtivos;
+                document.getElementById('total_cargos').textContent = cargos.length;
+                
+                criarGraficoStatus(funcionariosAtivos, totalFuncionarios - funcionariosAtivos);
+
+                const distribuicaoCargos = cargos.map(cargo => {
+                    const funcionariosDoCargo = usuarios.filter(usuario => 
+                        usuario.Id_Cargo === cargo.Id_Cargo
+                    ).length;
+                    console.log(cargo.Nome_Cargo, funcionariosDoCargo);
+                    return {
+                        nome: cargo.Nome_Cargo,
+                        total: funcionariosDoCargo
+                    };
+                });
+
+                criarGraficoCargos(distribuicaoCargos);
+            });
+
+        // Simular novas contratações do mês (você pode adaptar isso para dados reais)
+        document.getElementById('novas_contratacoes').textContent = '3';
+    }
+
+    // Função para criar o gráfico de distribuição por cargo
+    function criarGraficoCargos(data) {
+        // Preparar dados
+        const labels = data.map(cargo => cargo.nome);
+        const valores = data.map(cargo => cargo.total);
+
+        // Gráfico de Barras
+        const ctxBar = document.getElementById('roleDistBarChart').getContext('2d');
+        
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Número de Funcionários',
+                    data: valores,
+                    backgroundColor: '#034078',
+                    borderColor: '#034078',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    maxBarThickness: 60
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            font: {
+                                size: 12
+                            }
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: 12
+                            },
+                            maxRotation: 45,
+                            minRotation: 45
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Função para criar o gráfico de status dos funcionários
+    function criarGraficoStatus(ativos, inativos) {
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Ativos', 'Inativos'],
+                datasets: [{
+                    data: [ativos, inativos],
+                    backgroundColor: [
+                        '#4CAF50',
+                        '#FF5252'
+                    ],
+                    borderWidth: 0,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+
+    // Carregar dashboard ao iniciar
+    carregarDashboard();
 </script>

@@ -413,8 +413,6 @@
         const mensagemPopUp = document.getElementById('mensagem_popUp');
         const tipoAlerta = popUp.querySelector('.alerta span');
         mensagemPopUp.textContent = mensagem;
-        popUp.classList.add('show');
-        popUp.classList.remove('hide');
         if(tipo === 'sucesso') {
             tipoAlerta.textContent = 'check_circle';
             popUp.querySelector('.alerta').style.color = 'green';
@@ -424,9 +422,9 @@
             popUp.querySelector('.alerta').style.color = 'red';
             popUp.style.borderLeft = '4px solid #f44336';
         }
+        popUp.style.transform = 'translateY(0px)';
         setTimeout(() => {
-            popUp.classList.remove('show');
-            popUp.classList.add('hide');
+            popUp.style.transform = 'translateY(-200px)';
         }, 3000);
     }
 </script>

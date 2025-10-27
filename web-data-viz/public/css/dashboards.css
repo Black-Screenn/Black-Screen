@@ -294,6 +294,7 @@ canvas {
 }
 
 .header-left {
+  position: sticky;
   top: 0;
   left: 0;
   z-index: 999;

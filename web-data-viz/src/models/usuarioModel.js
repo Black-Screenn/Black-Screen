@@ -50,7 +50,7 @@ function excluir(idUsuario) {
 }
 
 function listar(empresa) {
-    var instrucaoSql = `SELECT u.Id_Usuario, u.Nome, u.Email, c.Nome_Cargo, e.Nome_Empresa FROM Usuario u JOIN Cargo c ON u.Fk_Cargo = c.Id_Cargo JOIN Empresa e ON u.Fk_Empresa = e.Id_Empresa WHERE u.Fk_Empresa = ${empresa} ORDER BY u.Id_Usuario;`;
+    var instrucaoSql = `SELECT u.Id_Usuario, u.Nome, u.Email, c.Id_Cargo, c.Nome_Cargo, e.Nome_Empresa FROM Usuario u JOIN Cargo c ON u.Fk_Cargo = c.Id_Cargo JOIN Empresa e ON u.Fk_Empresa = e.Id_Empresa WHERE u.Fk_Empresa = ${empresa} ORDER BY u.Id_Usuario;`;
 
     return database.executar(instrucaoSql);
 }
