@@ -36,10 +36,17 @@ async function cadastrar(caixa){
   res = await db.executar(sql);
 
   sql = `
-    INSERT INTO Caixa(codigoCaixa, fkEmpresa)
-      VALUES("CX-${res[0].idCaixa+1}_${caixa.idEmpresa}", ${caixa.idEmpresa});
-  `
+    INSERT INTO Enderecos(Cep, Logradouro, Bairro, Cidade, UF, Pais, Latitude, Longitude )
+      VALUES("${caixa.cep}", "${caixa.logradouro}", "${caixa.bairro}", "${caixa.cidade}", "${caixa.uf}", "${caixa.pais}", ${caixa.latitude}, ${caixa.longitude})
+  `;
+  
   await db.executar(sql);
+
+  sql = `
+    SELECT MAX(Id_Endereco) AS idEndereco FROM Enderecos;
+  `
+  const enderecoResult = await db.executar(sql);
+  const idEndereco = enderecoResult[0].idEndereco;
 
   sql = `
     SELECT MAX(Id_Caixa) AS idCaixa FROM Caixa WHERE Fk_Empresa = ${caixa.idEmpresa};
@@ -48,9 +55,9 @@ async function cadastrar(caixa){
     const idCaixa = result[0].idCaixa;
     console.log(result)
     sql = `
-      INSERT INTO Enderecos(Cep, Logradouro, Bairro, Cidade, UF, Pais, Latitude, Longitude, Fk_Caixa)
-        VALUES("${caixa.cep}", "${caixa.logradouro}", "${caixa.bairro}", "${caixa.cidade}", "${caixa.uf}", "${caixa.pais}", ${caixa.latitude}, ${caixa.longitude},${idCaixa})
-    `;
+      INSERT INTO Caixa(codigoCaixa, fkEmpresa, FK_Caixa_Endereco)
+        VALUES("CX-${res[0].idCaixa+1}_${caixa.idEmpresa}", ${caixa.idEmpresa}, ${idEndereco});
+    `
     return db.executar(sql).then(() => idCaixa);
   });
 }
