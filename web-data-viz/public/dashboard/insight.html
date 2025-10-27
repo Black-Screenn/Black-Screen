@@ -112,32 +112,35 @@
                 <div class="card">
                     <div class="resumo-metrica">
                         <h2>Maior volume de Bytes enviados</h2>
-                        <p><span class="status-ok">60 MB</span></p>
+                        <p><span class="status-ok">345 MB</span></p>
                     </div>
                 </div>
                 <div class="card">
                     <div class="resumo-metrica">
                         <h2>Maior volume de Bytes recebidos</h2>
-                        <p><span class="status-ok">40 MB</span></p>
+                        <p><span class="status-ok">459 MB</span></p>
                     </div>
                 </div>
                 <div class="card">
                     <div class="resumo-metrica">
                         <h2>Maior tempo de caixa ligado</h2>
-                        <p><span class="status-ok">800h</span></p>
+                        <p><span class="status-crit">480h</span></p>
                     </div>
                 </div>
             </div>
 
         <div class="grid-insights">
-            <div class="card">
-                <h2></h2>
-                <div class="grafico"><canvas id="alertasSemanais"></canvas>
-                </div>
-            </div>
             <div class="graficoATM">
                 <div class="card">
-                    <div class="grafico2"><canvas id="graficoAlertasATM"></canvas></div>
+                    <select id="ipt_metricaSelect">
+                        <option value="cpu">Uso de CPU (%)</option>
+                        <option value="ram">Uso de RAM (%)</option>
+                        <option value="disco">Uso de Disco (%)</option>
+                        <option value="bytesRecebidos">Bytes Recebidos (MB)</option>
+                        <option value="bytesEnviados">Bytes Enviados (MB)</option>
+                        <option value="uptime">Uptime (h)</option>
+                    </select>
+                    <div class="grafico2"><canvas id="graficoTendencias"></canvas></div>
                 </div>
             </div>
         </div>
@@ -154,4 +157,82 @@
     
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
 
+    const ctx = document.getElementById('graficoTendencias').getContext('2d');
+    const diasSetembro = ['05/09', '10/09', '15/09', '20/09', '25/09', '30/09'];
+
+    // Dados simulados para cada ATM
+    const metricas = {
+        cpu: {
+            ATMPaulista: [53, 62, 80, 67, 60, 50],
+            ATMSaoJose: [42, 38, 49, 58, 39, 49],
+            ATMIguatemi: [29, 27, 50, 35, 38, 40]
+        },
+        ram: {
+            ATMPaulista: [55, 58, 60, 62, 59, 57],
+            ATMSaoJose: [50, 52, 54, 56, 90, 51],
+            ATMIguatemi: [45, 48, 50, 52, 49, 47]
+        },
+        disco: {
+            ATMPaulista: [40, 42, 45, 47, 44, 41],
+            ATMSaoJose: [35, 37, 39, 41, 38, 36],
+            ATMIguatemi: [30, 32, 35, 37, 34, 32]
+        },
+        bytesRecebidos: {
+            ATMPaulista: [300, 320, 459, 400, 450, 390],   
+            ATMSaoJose: [250, 270, 290, 310, 330, 350],
+            ATMIguatemi: [200, 220, 240, 260, 280, 300]
+        },
+        bytesEnviados: {
+            ATMPaulista: [280, 300, 320, 330, 340, 345],   
+            ATMSaoJose: [240, 260, 280, 300, 320, 330],
+            ATMIguatemi: [200, 220, 240, 260, 280, 300]
+        },
+        uptime: {
+            ATMPaulista: [120, 240, 360, 480, 120, 240],  
+            ATMSaoJose: [100, 220, 340, 120, 240, 120],
+            ATMIguatemi: [80, 200, 90, 210, 70, 190]
+        }
+        };
+ 
+
+    const config = {
+        type: 'line',
+        data: {
+            labels: diasSetembro,
+            datasets: [{ 
+                label: 'ATM Paulista', 
+                data: metricas.cpu.ATMPaulista, 
+                borderColor: '#70AEFF', 
+                fill: false 
+            },
+            { 
+                label: 'ATM São José', 
+                data: metricas.cpu.ATMSaoJose, 
+                borderColor: '#001c49', 
+                fill: false 
+            },
+            { 
+                label: 'ATM Iguatemi', 
+                data: metricas.cpu.ATMIguatemi, 
+                borderColor: '#007bff', 
+                fill: false 
+            }]
+        },
+        options: {
+            scales: { y: { beginAtZero: true } },
+            plugins: { tooltip: { mode: 'index', intersect: false } }
+        }
+    };
+
+    const graficoTendencias = new Chart(ctx, config);
+
+    document.getElementById('ipt_metricaSelect').addEventListener('change', atualizarDashboard);
+    
+    function atualizarDashboard() {
+        const metrica = this.value;
+        graficoTendencias.data.datasets[0].data = metricas[metrica].ATMPaulista;
+        graficoTendencias.data.datasets[1].data = metricas[metrica].ATMSaoJose;
+        graficoTendencias.data.datasets[2].data = metricas[metrica].ATMIguatemi;
+        graficoTendencias.update();
+    };
 </script>
