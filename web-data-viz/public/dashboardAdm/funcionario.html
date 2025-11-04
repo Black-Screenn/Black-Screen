@@ -366,28 +366,29 @@
         document.getElementById("nome").value = nome;
         document.getElementById("email").value = email;
         document.getElementById("editar_btn").onclick = function () {
-            fetch("/usuarios/editar", {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    idUsuario: id,
-                    nomeServer: document.getElementById("nome").value,
-                    emailServer: document.getElementById("email").value,
-                    cargoServer: document.getElementById("cargo").value
-                })
-            }).then(response => {
-                if (response.ok) {
-                    showPopUpMessage("Funcionário editado com sucesso!", "sucesso");
-                    document.getElementById("modal_alterar").style.display = "none";
-                    listaFuncionarios();
-                } else {
-                    showPopUpMessage("Erro ao editar funcionário.", "erro");
-                }
-            });
-        };
-    }
+                fetch("/cargos/usuarios/editar", {
+                    
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        Id_Usuario:id,
+                        nomeServer: document.getElementById("nome").value,
+                        emailServer: document.getElementById("email").value,
+                        cargoServer: document.getElementById("cargo_editar").value
+                    })
+                }).then(response => {
+                    if (response.ok) {
+                        showPopUpMessage("Funcionário editado com sucesso!", "sucesso");
+                        document.getElementById("modal_alterar").style.display = "none";
+                        listaFuncionarios();
+                    } else {
+                        showPopUpMessage("Erro ao editar funcionário.", "erro");
+                    }
+                });
+            };
+        }
 
     document.getElementById("select_all").addEventListener("change", function () {
         const isChecked = this.querySelector("input").checked;

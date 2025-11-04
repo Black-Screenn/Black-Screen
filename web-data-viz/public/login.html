@@ -155,7 +155,7 @@
                     sessionStorage.FK_EMPRESA = json.Fk_Empresa;
                     sessionStorage.CARGO = json.Cargo;
 
-                    if (json.Cargo === "Administrador") {
+                    if (json.Cargo === "Admin") {
                         sessionStorage.IS_ADMIN = true;
                         setTimeout(function () {
                             window.location = "dashboardAdm/dashboard.html";

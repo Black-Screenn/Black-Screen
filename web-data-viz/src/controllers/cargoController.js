@@ -33,7 +33,30 @@ function listar(req, res) {
         });
 }
 
+
+function modificar(req, res) {
+    var idUsuario = req.body.Id_Usuario;
+    var cargo = req.body.cargoServer;
+    var email = req.body.emailServer;
+    var nome = req.body.nomeServer;
+
+    cargoModel.modificar(idUsuario, cargo,email, nome) 
+        .then(function (resultado) {
+            res.json(resultado);
+        })
+        .catch(function (erro) {
+            console.log(erro);
+            console.log(
+                "\nHouve um erro ao modificar o cargo! Erro: ",
+                erro.sqlMessage
+            );
+            res.status(500).json(erro.sqlMessage);
+        });
+}
+
+
 module.exports = {
     cadastrar,
-    listar
+    listar,
+    modificar
 }
