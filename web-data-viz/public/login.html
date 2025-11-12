@@ -161,12 +161,17 @@
                             window.location = "dashboardAdm/dashboard.html";
                         }, 1000);
                     } else if (json.Cargo === "Analista") {
-                        {
+                        
                             setTimeout(function () {
                                 window.location = "dashboard/dashboard.html";
                             }, 1000);
                             sessionStorage.IS_ADMIN = false;
-                        }
+                        
+                    }   else if(json.Cargo === "Tecnico de Suporte"){
+                         setTimeout(function () {
+                                window.location = "dashboard/dashboard.html";
+                            }, 1000);
+                            sessionStorage.IS_ADMIN = false;
                     }
 
                 });

@@ -26,22 +26,26 @@ function listar(fkEmpresa) {
     console.log("ACESSEI O COMPONENTE MODEL - LISTAR \n \n\t\t >> Empresa:", fkEmpresa);
     
     var instrucaoSql = `
-        SELECT 
-            c.Id_Componente,
-            c.Nome_Componente,
-            c.Unidade,
-            c.Fk_Empresa,
-            p.Valor_Parametrizado,
-            GROUP_CONCAT(DISTINCT cx.Id_Caixa) as Caixas_Ids,
-            GROUP_CONCAT(DISTINCT cx.codigoCaixa) as Caixas_Codigos
-        FROM Componentes c
-        LEFT JOIN Parametros p ON c.Id_Componente = p.Fk_Componente
-        LEFT JOIN Caixa_Componente cc ON c.Id_Componente = cc.Fk_Componente
-        LEFT JOIN Caixa cx ON cc.Fk_Caixa = cx.Id_Caixa
-        WHERE c.Fk_Empresa = ${fkEmpresa}
-        GROUP BY c.Id_Componente, c.Nome_Componente, c.Unidade, c.Fk_Empresa, p.Valor_Parametrizado
-        ORDER BY c.Id_Componente DESC;
-    `;
+       SELECT 
+    c.Id_Componente,
+    c.Nome_Componente,
+    c.Unidade,
+    cx.Fk_Empresa,
+    p.Valor_Parametrizado,
+    GROUP_CONCAT(DISTINCT cx.Id_Caixa) AS Caixas_Ids,
+    GROUP_CONCAT(DISTINCT cx.codigoCaixa) AS Caixas_Codigos
+    FROM Componentes c
+    LEFT JOIN Parametros p ON c.Id_Componente = p.Fk_Componente
+    LEFT JOIN Caixa cx ON c.Fk_Caixa = cx.Id_Caixa
+    WHERE cx.Fk_Empresa = ${fkEmpresa}
+    GROUP BY 
+        c.Id_Componente, 
+        c.Nome_Componente, 
+        c.Unidade, 
+        cx.Fk_Empresa, 
+        p.Valor_Parametrizado
+ORDER BY c.Id_Componente DESC;
+   `;
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
     return database.executar(instrucaoSql);
 }

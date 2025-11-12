@@ -1,0 +1,75 @@
+.container_tela {
+    width: 100%;
+    height: 100%;    
+}
+
+.perosna-kpi {
+    background-color: #004076;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-self: center;
+    height: 100%;
+    width: 100%;
+    gap: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);   
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.perosna-kpi:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgb(0, 0, 0);
+    background-color: white; 
+}
+
+.icon_kpi {
+    width: 60px;
+    height: 50px;
+    font-size: 55px !important;
+    color: red;
+    background-color: #ffd2d2be;
+    margin-left: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+.perosna-kpi .metric-info h3,
+.perosna-kpi .metric-info h4 {
+    font-weight: 500;
+    color: white !important; 
+}
+
+
+.perosna-kpi:hover .metric-info h3,
+.perosna-kpi:hover .metric-info h4 {
+    color: rgb(0, 0, 0) !important; 
+}
+
+.perosna-kpi .metric-info p {
+    color: white !important;
+}
+
+.perosna-kpi:hover .metric-info p {
+    color: black !important;
+}
+
+
+h1 {
+    color: #004076;
+    font-style: italic;
+    font-weight: 300;
+}
+
+.classCompontes{
+    display: flex;
+    flex-direction: column;
+    
+}
+.componente{
+    height: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-self: center;
+    margin: 0px;
+}
