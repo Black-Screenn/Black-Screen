@@ -129,9 +129,6 @@
                     </a>
                 </div>
             </div>
-
-
-
             <div class="btn-logout" onclick="limparSessao()">
                 <h3>Sair</h3>
             </div>
@@ -143,22 +140,24 @@
             <div class="metrics-container container_Header">
                
                 <div class="perosna-kpi">
-                    <span class="material-symbols-outlined icon_kpi">trending_up</span>
+                    <span class="material-symbols-outlined icon_kpi">support_agent</span>
                     <div class="metric-info">
-                        <h3>Componentes com mais alertas</h3>
+                        <h3>Chamado em aberto</h3>
                           <div class="classCompontes">
                             
                           </div>  
                     </div>
                 </div>
 
-                <div class="metric-card active-employees">
-                    <span class="material-symbols-outlined">check_circle</span>
+                <div class="perosna-kpi">
+                    <span class="material-symbols-outlined icon_kpi">support_agent</span>
                     <div class="metric-info">
-                        <h3>Funcionários Ativos</h3>
-                        <p id="funcionarios_ativos">0</p>
+                        <h3>Chamado em aberto</h3>
+                          <div class="classCompontes">
+                            
+                          </div>  
                     </div>
-                </div>
+                </div>  
 
                 <div class="metric-card total-roles">
                     <span class="material-symbols-outlined">work</span>
@@ -224,7 +223,58 @@
 
 </html>
 <script>
-    function buscarJira(){
+    function buscarDataEHoraChamados(){
+        fetch("http://localhost:8080/chamadosJira",{
+            method: "GET"
+        }).then(Response =>{
+            return Response.json();
+        }).then(respostaData=>{
+            
+            let dataPadrao = {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+                };
+
+const dataEHoraFormatada = new Intl.DateTimeFormat('pt-BR', dataPadrao);
+
+const chamadoHora = respostaData.issues;
+
+chamadoHora.forEach(chamadosHora => {
+
+    const stringCriacao = chamadosHora.fields.created;
+    const stringAlteracao = chamadosHora.fields.updated;
+    const statusAtual = chamadosHora.fields.status.name;
+    const nomeComponenteAlerta = chamadosHora.fields.summary;
+    const dataAtual = new Date();
+
+    const objDataCriacao = new Date(stringCriacao);
+    const objDataAtualizacao = new Date(stringAlteracao);
+    const dataCriacao = dataEHoraFormatada.format(objDataCriacao);
+    const dataUpdate = dataEHoraFormatada.format(objDataAtualizacao);
+
+    const comphora = dataAtual - objDataCriacao;
+
+    const tempo = 5*60*1000
+
+    console.log(chamadosHora)
+    if(statusAtual == "Aberto"){
+            console.log(statusAtual)
+            if(comphora > tempo ){
+                console.log("Data da criação do chamado muito elevado")
+            }
+        }
+
+
+
+                
+                
+            })
+        })
+    }
+    function buscandoComponenteJiraKpi(){
         fetch("http://localhost:8080/chamadosJira",{
             method: "GET"
             
@@ -238,7 +288,6 @@
             let ram =0;
             let disco =0;
             let componentes_nome = document.querySelector('.classCompontes');
-            
             chamados.forEach(chamado => {
                 statusNome = chamado.fields.status.name;
                 nomeComponente = chamado.fields.summary;
@@ -278,12 +327,19 @@
 
 
         for (const item of ranking) {
-        container.innerHTML += `
-            <h4 class="componente ${item.classe}">${item.nome}: ${item.valor}</h4>
-        `;
+            if(item.valor <=7){
+                container.innerHTML += `
+                    <h4 class="componente ${item.classe}">${item.nome}: ${item.valor}  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFF55"><path d="M400-240q-33 0-56.5-23.5T320-320v-50q-57-39-88.5-100T200-600q0-117 81.5-198.5T480-880q117 0 198.5 81.5T760-600q0 69-31.5 129.5T640-370v50q0 33-23.5 56.5T560-240H400Zm0-80h160v-92l34-24q41-28 63.5-71.5T680-600q0-83-58.5-141.5T480-800q-83 0-141.5 58.5T280-600q0 49 22.5 92.5T366-436l34 24v92Zm0 240q-17 0-28.5-11.5T360-120v-40h240v40q0 17-11.5 28.5T560-80H400Zm80-520Z"/></svg></h4>
+                `;
+            }else if(item.valor >8){
+                container.innerHTML += `
+                    <h4 class="componente ${item.classe}">${item.nome}: ${item.valor}<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#EA3323"><path d="M200-160v-80h64l79-263q8-26 29.5-41.5T420-560h120q26 0 47.5 15.5T617-503l79 263h64v80H200Zm148-80h264l-72-240H420l-72 240Zm92-400v-200h80v200h-80Zm238 99-57-57 142-141 56 56-141 142Zm42 181v-80h200v80H720ZM282-541 141-683l56-56 142 141-57 57ZM40-360v-80h200v80H40Zm440 120Z"/></svg> </h4>
+                `;
+            }
         }             
             });
         })
     }
-    setTimeout(buscarJira,2000);
+    setTimeout(buscarDataEHoraChamados,2000)
+    setTimeout(buscandoComponenteJiraKpi,2000);
 </script>

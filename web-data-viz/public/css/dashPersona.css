@@ -19,16 +19,16 @@
 .perosna-kpi:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgb(0, 0, 0);
-    background-color: white; 
+    background-color: #008cff73; 
 }
 
 .icon_kpi {
-    width: 60px;
-    height: 50px;
+    width: 62px;
+    height: 63px;
     font-size: 55px !important;
-    color: red;
-    background-color: #ffd2d2be;
-    margin-left: 20px;
+    color: rgb(0, 0, 0);
+    background-color: #ffffff;
+    margin-left: 15px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
@@ -38,12 +38,13 @@
 .perosna-kpi .metric-info h4 {
     font-weight: 500;
     color: white !important; 
+    font-size: 20px;
 }
 
 
 .perosna-kpi:hover .metric-info h3,
 .perosna-kpi:hover .metric-info h4 {
-    color: rgb(0, 0, 0) !important; 
+    color: rgb(0, 0, 0) !important;
 }
 
 .perosna-kpi .metric-info p {
@@ -59,17 +60,25 @@ h1 {
     color: #004076;
     font-style: italic;
     font-weight: 300;
+    font-size: 55px;
 }
 
 .classCompontes{
     display: flex;
     flex-direction: column;
+    width: 132px;
     
 }
 .componente{
-    height: 20px;
+    height: 23px;
     display: flex;
     flex-direction: row;
     justify-self: center;
     margin: 0px;
+    gap: 10px;
+}
+.componente svg{
+    filter: drop-shadow(2px 2px 2px rgb(0, 0, 0));
+    vertical-align: middle;
+  margin-left: 8px;
 }
