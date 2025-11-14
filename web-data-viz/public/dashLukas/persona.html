@@ -416,7 +416,8 @@
             let cpu = 0;
             let ram = 0;
             let disco = 0;
-            let qtdAtm=0;
+            let qtdAtm = 0;
+            let atmId=[]
             let componentes_nome = document.querySelector('.classCompontes');
             let ATM_Alerta = document.querySelector('.ATM_Alerta')
             console.log(chamados)
@@ -427,13 +428,14 @@
                 chave = chamado.key;
                 idMaquina = chamado.fields.description.content[0].content[0].text;
                  if (idMaquina.includes("ID ATM:")){
-                    if(idMaquina === idMaquina && qtdAtm>=1){
-                        qtdAtm = qtdAtm;
-                    }else if(idMaquina != idMaquina && qtdAtm >=0){
-                        qtdAtm++;
+                    if(!atmId.includes(idMaquina)){
+                        qtdAtm++; 
+                        atmId.push(idMaquina);
                     }
 
                 }
+                    
+
                 if (statusNome == "Aberto" || statusNome == "Itens Pendentes") {
                      if (nomeComponente == "CPU") {
                         cpu++
@@ -447,12 +449,14 @@
 
 
                 }
+                
                 let ranking = [
                     { nome: 'CPU', valor: cpu, classe: 'componente1' },
                     { nome: 'RAM', valor: ram, classe: 'componente2' },
                     { nome: 'DISCO', valor: disco, classe: 'componente3' }
                 ];
 
+                
                 ranking.sort((a, b) => {
                     return b.valor - a.valor;
                 });
@@ -461,7 +465,7 @@
 
                 container.innerHTML = '';
 
-
+               
                 for (const item of ranking) {
                     if (item.valor <7) {
                         container.innerHTML += `
@@ -473,8 +477,9 @@
                 `;
                     }
                 }
+                
             });
-            if( qtdAtm++ > 0){
+            if( qtdAtm > 0){
 
                 ATM_Alerta.innerHTML+=`
                 <h4 class="atms">ATM(S):  ${qtdAtm}</h4>
@@ -484,6 +489,7 @@
                 <h4 class="atms"><strong>Nenhum ATM com alerta</strong></h4>
                 `
                 }
+                              
         })
     };
     setTimeout(buscarDataEHoraChamados, 2000);
