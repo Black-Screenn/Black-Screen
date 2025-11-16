@@ -182,7 +182,19 @@ h1 {
 
 }
 
-
+.grafico{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 91%;
+    height: 88%;
+    padding: 0;
+    padding: auto;
+}
+.grafico h3{
+    margin: 0;
+    padding-bottom:-50px ;
+}
 
 
 
@@ -193,6 +205,7 @@ h1 {
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 10px; 
+    
 }
 
 
@@ -214,3 +227,15 @@ h1 {
     background: #555;
 }
 
+#myChart{
+    height: auto;
+    margin-top: -30px;
+}
+
+#chart{
+    height: 100%;
+  
+}
+.apexcharts-legend{
+     flex-direction: row-reverse;   
+}

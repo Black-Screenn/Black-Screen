@@ -30,7 +30,7 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="../js/leaflet-heat.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <style>
     </style>
@@ -189,10 +189,10 @@
                 </div>
 
                 <!-- Gráfico de Pizza Status -->
-                <div class="chart-card employees-status">
+                <div class="grafico chart-card employees-status">
                     <h3>Panorama Geral Tickets</h3>
                     <div class="chart-container">
-                        <canvas id="myChart"></canvas>
+                        <div id="myChart"></div>
                     </div>
                 </div>
             </div>
@@ -200,12 +200,13 @@
 
 
 
-            <div class="charts-grid">
+            <div class="graficBarra charts-grid">
 
-                <div class="container_jira container chart-card employees-by-role-bar full-width">
-                    <h3>Chamados em Aberto no jira</h3>
-                    <div class="chart-container">
-                        <div class="kpi_metrica">
+                <div class=" containerBarra container_jira container chart-card employees-by-role-bar full-width">
+                    <h3>Componentes Metricas</h3>
+                    <div >
+                        <div id="kpi_metrica">
+                            <div  id="chart"></div>
                         </div>
                     </div>
                 </div>
@@ -214,7 +215,7 @@
                 <div class="chart-card employees-status">
                     <h3>Panorama Geral Tickets</h3>
                     <div class="chart-container">
-                        <canvas id="myChart"></canvas>
+                        
                     </div>
                 </div>
             </div>
@@ -247,6 +248,156 @@
 </html>
 <script>
     graficoPizza = null;
+    let dataPadrao = {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    };
+
+
+    function buscarPorComponenteDash() {
+        fetch("http://localhost:8080/chamadosJira", {
+            method: "GET"
+        }).then(Response => {
+            if (!Response.ok) {
+                throw new Error(`Erro de rede: ${Response.status}`);
+            }
+            return Response.json();
+        }).then(respostaJira => {
+
+            let ArrayChamados = [];
+            respostaDoJira = respostaJira.issues
+            
+            const hoje = new Date();
+        const inicioSemanaAtual = new Date(hoje);
+        inicioSemanaAtual.setDate(hoje.getDate() - hoje.getDay()); 
+        inicioSemanaAtual.setHours(0, 0, 0, 0);
+        
+        const inicioSemanaAnterior = new Date(inicioSemanaAtual);
+        inicioSemanaAnterior.setDate(inicioSemanaAtual.getDate() - 7); 
+        const fimSemanaAnterior = new Date(inicioSemanaAtual);
+        fimSemanaAnterior.setMilliseconds(-1);
+
+            respostaDoJira.forEach(dadosJira => {
+               
+                let dataDeCriacao = dadosJira.fields.created;
+                let nomeDoAtm = dadosJira.fields.description.content[0].content[0].text;
+                let nomeDoComponente = dadosJira.fields.summary
+                let todosChamados = dadosJira.fields.status.name
+                
+                if (nomeDoComponente.includes("TESTANDO VIA JAVA")) {
+               return; 
+               }
+               const objDataCriacao = new Date(dataDeCriacao);
+                
+               let periodo = null;
+            if (objDataCriacao >= inicioSemanaAtual && objDataCriacao <= hoje) {
+                periodo = 'atual';
+            } else if (objDataCriacao >= inicioSemanaAnterior && objDataCriacao <= fimSemanaAnterior) {
+                periodo = 'anterior';
+            }
+               
+               
+               if (periodo) {
+                let chamado = {
+                    componente: nomeDoComponente,
+                    periodo: periodo,
+                    status: todosChamados
+                };
+                ArrayChamados.push(chamado);
+            }
+        });
+
+                
+
+               const contagemPorComponente= {};
+
+        ArrayChamados.forEach(chamado => {
+            if (!contagemPorComponente[chamado.componente]) {
+                contagemPorComponente[chamado.componente] = {
+                    atual: 0,
+                    anterior: 0
+                };
+            }
+            
+            if (chamado.periodo === 'atual') {
+                contagemPorComponente[chamado.componente].atual++;
+            } else if (chamado.periodo === 'anterior') {
+                contagemPorComponente[chamado.componente].anterior++;
+            }
+        });
+
+         const componentes = Object.keys(contagemPorComponente);
+        const dadosSemanaAtual = componentes.map(comp => contagemPorComponente[comp].atual);
+        const dadosSemanaAnterior = componentes.map(comp => contagemPorComponente[comp].anterior);
+
+
+       var BarraChamados = {
+            series: [{
+                name: 'Semana Atual',
+                data: dadosSemanaAtual
+            }, {
+                name: 'Semana Anterior',
+                data: dadosSemanaAnterior
+            }],
+            chart: {
+                type: 'bar',
+                height: 430
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    dataLabels: {
+                        position: 'top',
+                    },
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                offsetX: -6,
+                style: {
+                    fontSize: '12px',
+                    colors: ['#fff']
+                }
+            },
+            stroke: {
+                show: true,
+                width: 1,
+                colors: ['#fff']
+            },
+            tooltip: {
+                shared: true,
+                intersect: false
+            },
+            xaxis: {
+                categories: componentes,
+                title: {
+                    
+                }
+            },
+            yaxis: {
+                title: {
+                   
+                }
+            },
+            legend: {
+                position: 'top',
+                horizontalAlign: 'right'
+            },
+            colors: ['#00E396', '#008FFB'] 
+        };
+
+      
+      
+    
+        var chart = new ApexCharts(document.querySelector("#chart"), BarraChamados);
+        chart.render();
+
+        })
+    }
+
 
 
     function buscarDataEHoraChamados() {
@@ -256,34 +407,33 @@
             return Response.json();
         }).then(respostaData => {
 
-            let dataPadrao = {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
-            };
+
 
             const dataEHoraFormatada = new Intl.DateTimeFormat('pt-BR', dataPadrao);
             const chamadoHora = respostaData.issues;
+
+
+            const classCompontes_alertas = document.querySelector('.classCompontes_alertas');
+
 
             const kpi_metrica = document.querySelector('.kpi_metrica');
 
             kpi_metrica.innerHTML = '';
 
             let totalDeChamadosAbertos = 0;
-            let totalDeChamadosConcluidos=0;
+            let totalDeChamadosConcluidos = 0;
             let totalDeChamadosReabertos = 0;
-            const ctx = document.getElementById('myChart');
-            const classCompontes_alertas = document.querySelector('.classCompontes_alertas');
-        
+
+            const chartElement = document.querySelector('#myChart');
+
+
             let statusAtual;
             let cores;
             chamadoHora.forEach(chamadosHora => {
-                if(statusAtual === "Concluído"){
-                        totalDeChamadosConcluidos++
-                    }
-                    
+                if (statusAtual === "Concluído") {
+                    totalDeChamadosConcluidos++
+                }
+
                 const stringCriacao = chamadosHora.fields.created;
                 const stringAlteracao = chamadosHora.fields.updated;
                 statusAtual = chamadosHora.fields.status.name;
@@ -300,13 +450,13 @@
                 const tempo = 5 * 60 * 1000;
 
                 idMaquina = chamadosHora.fields.description.content[0].content[0].text;
-                 cores = [
-                     'rgb(255,0,0)',  
-                       
-                     'rgb(0, 64, 118)'   
-                        ];
-                
-                if (statusAtual == "Aberto"|| statusAtual == "Reaberto") {
+                cores = [
+                    'rgb(255,0,0)',
+
+                    'rgb(0, 64, 118)'
+                ];
+
+                if (statusAtual == "Aberto" || statusAtual == "Reaberto") {
                     if (compHora > tempo) {
 
                         const emDias = compHora / milissegundosPorDia;
@@ -327,27 +477,27 @@
                         </div>
                     </div>
                 `;
-                console.log(idMaquina)
-                
+
+
 
                         kpi_metrica.appendChild(chamadoDiv);
 
-                    if(statusAtual == "Aberto"){
-                        totalDeChamadosAbertos++
-                    }else if(statusAtual =="Reaberto"){
-                        totalDeChamadosReabertos++;
-                    }
-                    
-                        
+                        if (statusAtual == "Aberto") {
+                            totalDeChamadosAbertos++
+                        } else if (statusAtual == "Reaberto") {
+                            totalDeChamadosReabertos++;
+                        }
+
+
                     }
                 }
-                
+
             });
             if (statusAtual == "Concluído" || statusAtual == "Aberto" || statusAtual == "Reaberto") {
-                chamadosTotais=0;
-                chamadosTotais +=totalDeChamadosReabertos;
-                chamadosTotais+=totalDeChamadosAbertos;
-                
+                chamadosTotais = 0;
+                chamadosTotais += totalDeChamadosReabertos;
+                chamadosTotais += totalDeChamadosAbertos;
+
 
                 let chamadosGrafico =
                     [
@@ -357,45 +507,50 @@
                 if (graficoPizza) {
                     graficoPizza.destroy();
                 }
-                graficoPizza = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Abertos e Reabertos', 'Concluidos'],
-                        datasets: [{
-                            label: 'Chamados',
-                            data: [chamadosGrafico[0], chamadosGrafico[1]],
-                            backgroundColor: cores,
-                            borderColor: 'white',
-                            borderWidth: 2
-                        }]
+
+                var options = {
+                    series: [chamadosGrafico[0], chamadosGrafico[1]],
+                    chart: {
+                        type: 'donut',
+                        width: '380px'
                     },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'top',
+                    labels: ['Abertos e Reabertos', 'Concluídos'],
+                    colors: cores,
+                    legend: {
+                        position: 'top'
+                    },
+                    title: {
+                        text: 'Status dos Chamados',
+                        align: 'center'
+                    },
+                    responsive: [{
+                        breakpoint: 480,
+                        options: {
+                            chart: {
+                                width: 200
                             },
-                            title: {
-                                display: true,
-                                text: 'Status dos Chamados'
+                            legend: {
+                                position: 'bottom'
                             }
                         }
-                    }
-                });
-                
+                    }]
+                };
 
+
+                graficoPizza = new ApexCharts(chartElement, options);
+                graficoPizza.render();
             }
-            
-            
+
+
 
             if (totalDeChamadosAbertos === 0 && totalDeChamadosReabertos === 0) {
-                
+
                 innerHTML = '<p class="sem-alertas">Nenhum chamado em alerta no momento.</p>';
             }
-            else{
-                totalDeChamadosAbertos+=totalDeChamadosReabertos;
+            else {
+                totalDeChamadosAbertos += totalDeChamadosReabertos;
 
-                classCompontes_alertas.innerHTML+=`
+                classCompontes_alertas.innerHTML += `
                     <div class="tituloAlerta">chamado(s) sem solução</div>
                     <div class="infoAlerta">${totalDeChamadosAbertos}</div>
                 `
@@ -417,27 +572,26 @@
             let ram = 0;
             let disco = 0;
             let qtdAtm = 0;
-            let atmId=[]
+            let atmId = []
             let componentes_nome = document.querySelector('.classCompontes');
             let ATM_Alerta = document.querySelector('.ATM_Alerta')
-            console.log(chamados)
             chamados.forEach(chamado => {
-                
+
                 statusNome = chamado.fields.status.name;
                 nomeComponente = chamado.fields.summary;
                 chave = chamado.key;
                 idMaquina = chamado.fields.description.content[0].content[0].text;
-                 if (idMaquina.includes("ID ATM:")){
-                    if(!atmId.includes(idMaquina)){
-                        qtdAtm++; 
+                if (idMaquina.includes("ID ATM:")) {
+                    if (!atmId.includes(idMaquina)) {
+                        qtdAtm++;
                         atmId.push(idMaquina);
                     }
 
                 }
-                    
+
 
                 if (statusNome == "Aberto" || statusNome == "Itens Pendentes") {
-                     if (nomeComponente == "CPU") {
+                    if (nomeComponente == "CPU") {
                         cpu++
                     }
                     else if (nomeComponente == "RAM") {
@@ -449,14 +603,14 @@
 
 
                 }
-                
+
                 let ranking = [
                     { nome: 'CPU', valor: cpu, classe: 'componente1' },
                     { nome: 'RAM', valor: ram, classe: 'componente2' },
                     { nome: 'DISCO', valor: disco, classe: 'componente3' }
                 ];
 
-                
+
                 ranking.sort((a, b) => {
                     return b.valor - a.valor;
                 });
@@ -465,9 +619,9 @@
 
                 container.innerHTML = '';
 
-               
+
                 for (const item of ranking) {
-                    if (item.valor <7) {
+                    if (item.valor < 7) {
                         container.innerHTML += `
                     <h4 class="componente ${item.classe}">${item.nome}: ${item.valor}  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFF55"><path d="M400-240q-33 0-56.5-23.5T320-320v-50q-57-39-88.5-100T200-600q0-117 81.5-198.5T480-880q117 0 198.5 81.5T760-600q0 69-31.5 129.5T640-370v50q0 33-23.5 56.5T560-240H400Zm0-80h160v-92l34-24q41-28 63.5-71.5T680-600q0-83-58.5-141.5T480-800q-83 0-141.5 58.5T280-600q0 49 22.5 92.5T366-436l34 24v92Zm0 240q-17 0-28.5-11.5T360-120v-40h240v40q0 17-11.5 28.5T560-80H400Zm80-520Z"/></svg></h4>
                 `;
@@ -477,21 +631,22 @@
                 `;
                     }
                 }
-                
-            });
-            if( qtdAtm > 0){
 
-                ATM_Alerta.innerHTML+=`
+            });
+            if (qtdAtm > 0) {
+
+                ATM_Alerta.innerHTML += `
                 <h4 class="atms">ATM(S):  ${qtdAtm}</h4>
                 `
-                }else{
-                    ATM_Alerta.innerHTML+=`
+            } else {
+                ATM_Alerta.innerHTML += `
                 <h4 class="atms"><strong>Nenhum ATM com alerta</strong></h4>
                 `
-                }
-                              
+            }
+
         })
     };
     setTimeout(buscarDataEHoraChamados, 2000);
     setTimeout(buscandoComponenteJiraKpi, 2000);
+    setTimeout(buscarPorComponenteDash, 2000);
 </script>
