@@ -431,7 +431,8 @@
                 <div class="insights_ia">
                     ${insights}
                 </div>
-            </div>
+                </div>
+                <h3>Todos os insights gerado por IA devem ser seguidos com responsábilidade e não dispensa a analise de um especialista. </h3>
         `;
         }
     }
@@ -545,19 +546,44 @@
 
                 var options = {
                     series: [chamadosGrafico[0], chamadosGrafico[1]],
+
                     chart: {
                         type: 'donut',
                         width: '380px'
                     },
+
                     labels: ['Abertos e Reabertos', 'Concluídos'],
                     colors: cores,
+
                     legend: {
                         position: 'top'
                     },
+
                     title: {
                         text: 'Status dos Chamados',
                         align: 'center'
                     },
+
+                    plotOptions: {
+                        pie: {
+                            donut: {
+                                size: '65%',
+                                labels: {
+                                    show: true,
+                                    total: {
+                                        show: true,
+                                        label: 'Total',
+                                        fontSize: '15   px',
+                                        color: '#000',
+                                        formatter: function (w) {
+                                            return w.globals.series.reduce((a, b) => a + b, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+
                     responsive: [{
                         breakpoint: 480,
                         options: {
@@ -656,11 +682,11 @@
 
 
                 for (const item of ranking) {
-                    if (item.valor < 7) {
+                    if (item.valor < 10) {
                         container.innerHTML += `
                     <h4 class="componente ${item.classe}">${item.nome}: ${item.valor}  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFF55"><path d="M400-240q-33 0-56.5-23.5T320-320v-50q-57-39-88.5-100T200-600q0-117 81.5-198.5T480-880q117 0 198.5 81.5T760-600q0 69-31.5 129.5T640-370v50q0 33-23.5 56.5T560-240H400Zm0-80h160v-92l34-24q41-28 63.5-71.5T680-600q0-83-58.5-141.5T480-800q-83 0-141.5 58.5T280-600q0 49 22.5 92.5T366-436l34 24v92Zm0 240q-17 0-28.5-11.5T360-120v-40h240v40q0 17-11.5 28.5T560-80H400Zm80-520Z"/></svg></h4>
                 `;
-                    } else if (item.valor >= 7) {
+                    } else if (item.valor >= 11) {
                         container.innerHTML += `
                     <h4 class="componente ${item.classe}">${item.nome}: ${item.valor}<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#EA3323"><path d="M200-160v-80h64l79-263q8-26 29.5-41.5T420-560h120q26 0 47.5 15.5T617-503l79 263h64v80H200Zm148-80h264l-72-240H420l-72 240Zm92-400v-200h80v200h-80Zm238 99-57-57 142-141 56 56-141 142Zm42 181v-80h200v80H720ZM282-541 141-683l56-56 142 141-57 57ZM40-360v-80h200v80H40Zm440 120Z"/></svg> </h4>
                 `;
@@ -681,8 +707,8 @@
 
         })
     };
-    
-    
+
+
     setTimeout(buscarDataEHoraChamados, 2000);
     setTimeout(buscandoComponenteJiraKpi, 2000);
     setTimeout(buscarPorComponenteDash, 2000);

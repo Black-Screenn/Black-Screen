@@ -8,14 +8,7 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
 exports.prompt = async function (req, res) {
 
     try {
-        console.log('componenteModel:', componenteModel);
-        console.log('keys:', Object.keys(componenteModel.buscarParametroPorComponente || {}));
-        console.log('typeof buscarParametroPorComponente:', typeof (componenteModel || {}).buscarParametroPorComponente);
-
-
-
-
-
+        
         const { dadosJira, componentes, dadosSemanaAtual, dadosSemanaAnterior } = req.body;
 
         const parametrosBanco = await componenteModel.buscarParametroPorComponente();
