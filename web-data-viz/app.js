@@ -45,7 +45,7 @@ app.use("/componentes", componentesRouter);
 app.use("/caixas", caixasRouter);
 app.use("/cloud", cloudRouter);
 app.use("/cargos", cargoRouter);
-app.use("/iniciarGemini",geminiRouter)
+app.use("/gemini", geminiRouter)  
 
 app.listen(PORTA_APP, function () {
     console.log(`

@@ -188,7 +188,7 @@
                     </div>
                 </div>
 
-                <!-- Gráfico de Pizza Status -->
+
                 <div class="grafico chart-card employees-status">
                     <h3>Panorama Geral Tickets</h3>
                     <div class="chart-container">
@@ -203,19 +203,19 @@
             <div class="graficBarra charts-grid">
 
                 <div class=" containerBarra container_jira container chart-card employees-by-role-bar full-width">
-                    <h3>Componentes Metricas</h3>
-                    <div >
+                    <h3> Metricas Componentes </h3>
+                    <div>
                         <div id="kpi_metrica">
-                            <div  id="chart"></div>
+                            <div id="chart"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Gráfico de Pizza Status -->
+
                 <div class="chart-card employees-status">
-                    <h3>Panorama Geral Tickets</h3>
+                    <h3>Insights Gerado Por Inteligencia Artificial</h3>
                     <div class="chart-container">
-                        
+                        <div class="insights-container"></div>
                     </div>
                 </div>
             </div>
@@ -269,137 +269,172 @@
 
             let ArrayChamados = [];
             respostaDoJira = respostaJira.issues
-            
+
             const hoje = new Date();
-        const inicioSemanaAtual = new Date(hoje);
-        inicioSemanaAtual.setDate(hoje.getDate() - hoje.getDay()); 
-        inicioSemanaAtual.setHours(0, 0, 0, 0);
-        
-        const inicioSemanaAnterior = new Date(inicioSemanaAtual);
-        inicioSemanaAnterior.setDate(inicioSemanaAtual.getDate() - 7); 
-        const fimSemanaAnterior = new Date(inicioSemanaAtual);
-        fimSemanaAnterior.setMilliseconds(-1);
+            const inicioSemanaAtual = new Date(hoje);
+            inicioSemanaAtual.setDate(hoje.getDate() - hoje.getDay());
+            inicioSemanaAtual.setHours(0, 0, 0, 0);
+
+            const inicioSemanaAnterior = new Date(inicioSemanaAtual);
+            inicioSemanaAnterior.setDate(inicioSemanaAtual.getDate() - 7);
+            const fimSemanaAnterior = new Date(inicioSemanaAtual);
+            fimSemanaAnterior.setMilliseconds(-1);
 
             respostaDoJira.forEach(dadosJira => {
-               
+
                 let dataDeCriacao = dadosJira.fields.created;
                 let nomeDoAtm = dadosJira.fields.description.content[0].content[0].text;
                 let nomeDoComponente = dadosJira.fields.summary
                 let todosChamados = dadosJira.fields.status.name
-                
+
                 if (nomeDoComponente.includes("TESTANDO VIA JAVA")) {
-               return; 
-               }
-               const objDataCriacao = new Date(dataDeCriacao);
-                
-               let periodo = null;
-            if (objDataCriacao >= inicioSemanaAtual && objDataCriacao <= hoje) {
-                periodo = 'atual';
-            } else if (objDataCriacao >= inicioSemanaAnterior && objDataCriacao <= fimSemanaAnterior) {
-                periodo = 'anterior';
-            }
-               
-               
-               if (periodo) {
-                let chamado = {
-                    componente: nomeDoComponente,
-                    periodo: periodo,
-                    status: todosChamados
-                };
-                ArrayChamados.push(chamado);
-            }
-        });
-
-                
-
-               const contagemPorComponente= {};
-
-        ArrayChamados.forEach(chamado => {
-            if (!contagemPorComponente[chamado.componente]) {
-                contagemPorComponente[chamado.componente] = {
-                    atual: 0,
-                    anterior: 0
-                };
-            }
-            
-            if (chamado.periodo === 'atual') {
-                contagemPorComponente[chamado.componente].atual++;
-            } else if (chamado.periodo === 'anterior') {
-                contagemPorComponente[chamado.componente].anterior++;
-            }
-        });
-
-         const componentes = Object.keys(contagemPorComponente);
-        const dadosSemanaAtual = componentes.map(comp => contagemPorComponente[comp].atual);
-        const dadosSemanaAnterior = componentes.map(comp => contagemPorComponente[comp].anterior);
-
-
-       var BarraChamados = {
-            series: [{
-                name: 'Semana Atual',
-                data: dadosSemanaAtual
-            }, {
-                name: 'Semana Anterior',
-                data: dadosSemanaAnterior
-            }],
-            chart: {
-                type: 'bar',
-                height: 430
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: true,
-                    dataLabels: {
-                        position: 'top',
-                    },
+                    return;
                 }
-            },
-            dataLabels: {
-                enabled: true,
-                offsetX: -6,
-                style: {
-                    fontSize: '12px',
+                const objDataCriacao = new Date(dataDeCriacao);
+
+                let periodo = null;
+                if (objDataCriacao >= inicioSemanaAtual && objDataCriacao <= hoje) {
+                    periodo = 'atual';
+                } else if (objDataCriacao >= inicioSemanaAnterior && objDataCriacao <= fimSemanaAnterior) {
+                    periodo = 'anterior';
+                }
+
+
+                if (periodo) {
+                    let chamado = {
+                        componente: nomeDoComponente,
+                        periodo: periodo,
+                        status: todosChamados
+                    };
+                    ArrayChamados.push(chamado);
+                }
+            });
+
+
+
+            const contagemPorComponente = {};
+
+            ArrayChamados.forEach(chamado => {
+                if (!contagemPorComponente[chamado.componente]) {
+                    contagemPorComponente[chamado.componente] = {
+                        atual: 0,
+                        anterior: 0
+                    };
+                }
+
+                if (chamado.periodo === 'atual') {
+                    contagemPorComponente[chamado.componente].atual++;
+                } else if (chamado.periodo === 'anterior') {
+                    contagemPorComponente[chamado.componente].anterior++;
+                }
+            });
+
+            const componentes = Object.keys(contagemPorComponente);
+            const dadosSemanaAtual = componentes.map(comp => contagemPorComponente[comp].atual);
+            const dadosSemanaAnterior = componentes.map(comp => contagemPorComponente[comp].anterior);
+
+
+            var BarraChamados = {
+                series: [{
+                    name: 'Semana Atual',
+                    data: dadosSemanaAtual
+                }, {
+                    name: 'Semana Anterior',
+                    data: dadosSemanaAnterior
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 430
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        dataLabels: {
+                            position: 'top',
+                        },
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    offsetX: -6,
+                    style: {
+                        fontSize: '12px',
+                        colors: ['#fff']
+                    }
+                },
+                stroke: {
+                    show: true,
+                    width: 1,
                     colors: ['#fff']
-                }
-            },
-            stroke: {
-                show: true,
-                width: 1,
-                colors: ['#fff']
-            },
-            tooltip: {
-                shared: true,
-                intersect: false
-            },
-            xaxis: {
-                categories: componentes,
-                title: {
-                    
-                }
-            },
-            yaxis: {
-                title: {
-                   
-                }
-            },
-            legend: {
-                position: 'top',
-                horizontalAlign: 'right'
-            },
-            colors: ['#00E396', '#008FFB'] 
-        };
+                },
+                tooltip: {
+                    shared: true,
+                    intersect: false
+                },
+                xaxis: {
+                    categories: componentes,
+                    title: {
 
-      
-      
-    
-        var chart = new ApexCharts(document.querySelector("#chart"), BarraChamados);
-        chart.render();
+                    }
+                },
+                yaxis: {
+                    title: {
+
+                    }
+                },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'right'
+                },
+                colors: ['#5C9BD5', '#004076']
+            };
+
+
+
+
+            var chart = new ApexCharts(document.querySelector("#chart"), BarraChamados);
+            chart.render();
+
+            enviarDadosParaIA(ArrayChamados, componentes, dadosSemanaAtual, dadosSemanaAnterior);
 
         })
     }
-
-
-
+    function enviarDadosParaIA(dadosJira, componentes, dadosSemanaAtual, dadosSemanaAnterior) {
+        fetch("http://localhost:3333/gemini/prompt", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                dadosJira: dadosJira,
+                componentes: componentes,
+                dadosSemanaAtual: dadosSemanaAtual,
+                dadosSemanaAnterior: dadosSemanaAnterior
+            })
+        })
+            .then(response => response.json())
+            .then(resultado => {
+                exibirInsights(resultado.insights);
+            })
+            .catch(error => {
+                console.error("Erro ao buscar insights do gemini", error);
+            });
+    }
+    function exibirInsights(insights) {
+        const container = document.querySelector('.insights-container');
+        if (container) {
+            container.innerHTML = `
+            <div>
+                <h1>
+                    Análise Técnica 
+                </h1>
+                <div class="insights_ia">
+                    ${insights}
+                </div>
+            </div>
+        `;
+        }
+    }
     function buscarDataEHoraChamados() {
         fetch("http://localhost:8080/chamadosJira", {
             method: "GET"
@@ -646,6 +681,8 @@
 
         })
     };
+    
+    
     setTimeout(buscarDataEHoraChamados, 2000);
     setTimeout(buscandoComponenteJiraKpi, 2000);
     setTimeout(buscarPorComponenteDash, 2000);
