@@ -246,6 +246,7 @@
 </body>
 
 </html>
+
 <script>
     graficoPizza = null;
     let dataPadrao = {
@@ -256,14 +257,41 @@
         minute: "2-digit"
     };
 
+    function lerCsvBucket(csv){
+        fetch("https://s3-trusted-blackscreen.s3.us-east-1.amazonaws.com/df_capturaProcesso.csv",{
+            method:"GET"
+        }).then(Response =>{
+            return Response.text();
+        }).then(respostaBucket => {
+            
+            var csv = respostaBucket.split("\n")
+            var resultado = []
+            var headers = csv[0].split(",")
+
+            for(i=1; i < csv.length; i++){
+                var obj = {};
+                var linhaAtual=csv[i].split(",")
+                for(j=0; j <headers.length; j++){
+
+                    obj[headers[j]] = linhaAtual[j]
+                }
+                resultado.push(obj)
+            }
+            var jsonFinal = JSON.stringify(resultado);
+            console.log(resultado)
+        })
+        
+     
+    }
+
+
+
+
 
     function buscarPorComponenteDash() {
-        fetch("http://localhost:8080/chamadosJira", {
+        fetch('http://localhost:8080/chamadosJira', {
             method: "GET"
         }).then(Response => {
-            if (!Response.ok) {
-                throw new Error(`Erro de rede: ${Response.status}`);
-            }
             return Response.json();
         }).then(respostaJira => {
 
@@ -399,7 +427,7 @@
 
         })
     }
-    function enviarDadosParaIA(dadosJira, componentes, dadosSemanaAtual, dadosSemanaAnterior) {
+   function enviarDadosParaIA(dadosJira, componentes, dadosSemanaAtual, dadosSemanaAnterior) {
         fetch("http://localhost:3333/gemini/prompt", {
             method: "POST",
             headers: {
@@ -437,7 +465,7 @@
         }
     }
     function buscarDataEHoraChamados() {
-        fetch("http://localhost:8080/chamadosJira", {
+        fetch('http://localhost:8080/chamadosJira', {
             method: "GET"
         }).then(Response => {
             return Response.json();
@@ -620,7 +648,7 @@
         })
     };
     function buscandoComponenteJiraKpi() {
-        fetch("http://localhost:8080/chamadosJira", {
+        fetch('http://localhost:8080/chamadosJira', {
             method: "GET"
 
         }).then(Response => {
@@ -709,6 +737,7 @@
     };
 
 
+    setTimeout(lerCsvBucket, 2000)
     setTimeout(buscarDataEHoraChamados, 2000);
     setTimeout(buscandoComponenteJiraKpi, 2000);
     setTimeout(buscarPorComponenteDash, 2000);
