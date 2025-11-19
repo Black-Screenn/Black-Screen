@@ -193,5 +193,50 @@
     </body>
 
     <script>
+        function carregarATMs() {
+        fetch("/caixas/listar", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Fk_Empresa": sessionStorage.FK_EMPRESA
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                atmsData = data;
+                const listaContent = document.querySelector(".lista-content");
+                listaContent.innerHTML = "";
+                
+                if (data.length === 0) {
+                    listaContent.innerHTML = "<p style='padding: 20px; text-align: center;'>Nenhum ATM cadastrado.</p>";
+                    return;
+                }
 
+                data.forEach(atm => {
+                    const item = document.createElement("div");
+                    item.classList.add("lista-item");
+                    
+                    const endereco = `${atm.Logradouro}, ${atm.Bairro}`;
+                    const cidadeUF = `${atm.Cidade}/${atm.UF}`;
+                    
+                    item.innerHTML = `
+                        <p class="id">${atm.id}</p>
+                        <p class="atm">${atm.codigoCaixa}</p>
+                        <p class="address">${endereco}</p>
+                        <p class="country">${cidadeUF}</p>
+                        <p class="alertas" id="comp_count_${atm.id}">-</p>
+                        <p class="acao">
+                            <u class="link" href="./visao_detalhada.html"> Visão Detalhada </u> 
+                        </p>
+                    `;
+                    listaContent.appendChild(item);
+                    
+                    // Carregar quantidade de componentes
+                    carregarQtdComponentes(atm.id);
+                });
+            })
+            .catch(error => {
+                console.error("Erro ao carregar ATMs:", error);
+            });
+    }
     </script>
