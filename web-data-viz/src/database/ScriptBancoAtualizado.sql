@@ -47,7 +47,8 @@ CREATE TABLE Usuario (
 
 CREATE TABLE Caixa (
     Id_Caixa INT AUTO_INCREMENT PRIMARY KEY,
-    codigoCaixa VARCHAR(12) UNIQUE,
+    Macaddress VARCHAR(36) UNIQUE,
+    codigoCaixa VARCHAR(52),
     Fk_Endereco_Maquina INT,
     Fk_Empresa INT,
     CONSTRAINT FK_Caixa_Endereco
