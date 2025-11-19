@@ -105,3 +105,13 @@ CREATE TABLE CargoPermissao (
     CONSTRAINT FK_CargoPermissao_Permissao
         FOREIGN KEY (Fk_Permissao) REFERENCES Permissao(Id_Permissao)
 );
+
+CREATE TABLE Relatorio (
+    Id_Relatorio INT PRIMARY KEY AUTO_INCREMENT,
+    Fk_Empresa INT,
+    Link_Relatorio VARCHAR(2048),
+    Conteudo_Texto TEXT, 
+    Avaliacao FLOAT DEFAULT 0.0,
+    Data_Geracao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (Fk_Empresa) REFERENCES Empresa(Id_Empresa)
+);

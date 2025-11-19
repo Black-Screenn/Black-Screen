@@ -1,13 +1,14 @@
 const { GoogleGenAI } = require('@google/genai');
-
 const MarkdownIt = require('markdown-it');
-const md = new MarkdownIt();
-
 const puppeteer = require('puppeteer');
+const crypto = require('crypto');
+
+const { uploadRelatorioS3 } = require('./cloudController.js');
+const { cadastrar, listar } = require('../models/relatorioModel.js');
 
 const genAI = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY});
-
 const modelo = "gemini-2.5-flash";
+const md = new MarkdownIt();
 
 async function agenteAnalise(dadosJSON) {
     console.log("[GERAR RELATORIO] [1/4] Iniciando Módulo de Análise");
@@ -15,12 +16,13 @@ async function agenteAnalise(dadosJSON) {
     const instrucaoSistemaAnalise = `
         **AVISO: SUA ÚNICA TAREFA É REFORMATAR DADOS. VOCÊ É UM ESCRITURÁRIO DE DADOS.**
         
-        Sua única função é converter o JSON em um relatório Markdown puramente factual.
+        Sua única função é fazer relatório em Markdown puramente factual.
         
         **REGRAS DE PROIBIÇÃO (MUITO IMPORTANTE):**
         1.  **NÃO USE** as palavras: "Sumário Executivo", "Conclusões", "Recomendações", "Resumo", "Próximos Passos".
         2.  **NÃO USE** palavras de julgamento: "Crítico", "Alerta", "Saudável", "Problema", "Risco", "Exigindo atenção", "Intervenção imediata".
         3.  **NÃO ANALISE** ou dê "Observações". Apenas liste os fatos.
+        4. **NÃO RETORNE** Json ou Código.
         
         Outros agentes farão a análise e as recomendações. Você será penalizado por adicionar qualquer opinião.
 
@@ -32,8 +34,9 @@ async function agenteAnalise(dadosJSON) {
         5.  Liste os alertas brutos da ETL.
         6.  Crie uma seção "## ATMs Sem Alertas".
         7.  Nesta seção, **NÃO LISTE MÉTRICAS**. Se houver 10 ou menos, liste apenas os IDs. Se hove mais de 10, informe apenas a contagem (Ex: "1022 ATMs operando normalmente").
+        8. SUA SAIDA É APENAS EM **MARKDOWN**
 
-        **Padrão de Saida:**
+        **SIGA RIGOROSAMENTE ESSE PADRAO DE SAIDA:**
         ## Sumário Factual
         * Total de ATMs Monitorados (Amostra): 4
         * Total com Alertas: 2
@@ -70,6 +73,7 @@ async function agenteAnalise(dadosJSON) {
     `;
 
     const promptUsuario = `
+        Você é o primeiro modulo do meu relatório, eu preciso que você pegue esse JSON, e refatore ele e me retorne o inicio do relatório sem qualquer julgamento, pois será responsabilidade dos proximos modulos. É importante que ele comece com um subtítulo (##) "Relatório de Monitoramento".
         \`\`\`json
         ${JSON.stringify(dadosJSON, null, 2)}
         \`\`\`
@@ -183,6 +187,8 @@ async function agenteSumarizacao(relatorioCompleto) {
 
 async function gerarRelatorio(req, res) {
     try {
+        fkEmpresa = req.body.fkEmpresa;
+
         if (req.url === '/favicon.ico') {
             return res.status(204).end();
         }
@@ -388,6 +394,12 @@ async function gerarRelatorio(req, res) {
 
         await browser.close();
         console.log("[GERAR RELATÓRIO Sucesso] Enviando PDF");
+
+        const dadosUnicos = Date.now().toString() + Math.random().toString();
+        const hash = crypto.createHash('md5').update(dadosUnicos).digest('hex');
+
+        link = uploadRelatorioS3(pdfBuffer, "relatorio_"+hash, fkEmpresa);
+        cadastrar(link, fkEmpresa, relatorioFinal)
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename=relatorio.pdf'); 
