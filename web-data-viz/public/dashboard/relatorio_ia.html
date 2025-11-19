@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <link rel="shortcut icon" href="../assets/imgs/blackscreenicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackScreen | Relatórios</title>
+
+    <link rel="stylesheet" href="./../css/dashboards.css">
+    <link rel="stylesheet" href="./../css/dashboardRelatorio.css" />
+    <script src="../js/sessao.js"></script>
+    <script src="./../js/alerta.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,arrow_forward,assignment,assignment_add,assignment_turned_in,close,health_and_safety,home,local_atm,notifications,search,search_insights,star,star_half,visibility" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="janela">
+        <div class="header-left">
+            <img src="../assets/imgs/blackscreenlogo.png" alt="BlackScreen">
+
+            <div class="hello">
+                <h3>Bem vindo, <br><span id="b_usuario">usuário</span>!</h3>
+            </div>
+
+            <div class="links">
+                <div class="btn-nav-white">
+                    <a href="dashboard.html">
+                        <span class="material-symbols-outlined">
+                            home
+                        </span>
+                        <h3>
+                            Ínicio
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav-white">
+                    <a href="./logAlertas.html">
+                        <span class="material-symbols-outlined">
+                            notifications
+                        </span>
+                        <h3>
+                            Alertas
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav-white">
+                    <a href="atm.html">
+                        <span class="material-symbols-outlined">
+                            local_atm
+                        </span>
+                        <h3>
+                            ATMs
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav-white">
+                    <a href="./cadastroComponentes.html">
+                        <span class="material-symbols-outlined">
+                            health_and_safety
+                        </span>
+                        <h3>
+                            Componentes
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav">
+                    <a href="./insight.html">
+                        <span class="material-symbols-outlined">
+                            search_insights
+                        </span>
+                        <h3>
+                            Relatórios
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav-white">
+                    <a href="./perfil.html">
+                        <span class="material-symbols-outlined">
+                            account_circle
+                        </span>
+                        <h3>
+                            Meu Perfil
+                        </h3>
+                    </a>
+                </div>
+            </div>
+
+            <div class="btn-logout" onclick="limparSessao()">
+                <h3>Sair</h3>
+            </div>
+
+        </div>
+
+        <div class="content">
+            <div class="metrics-container">
+                <!-- Cards de métricas principais -->
+                <div class="metric-card total-relatorios">
+                    <span class="material-symbols-outlined">assignment</span>
+                    <div class="metric-info">
+                        <h3>Relatórios Gerados IA</h3>
+                        <p id="total_relatorios">0</p>
+                    </div>
+                </div>
+
+                <div class="metric-card relatorios_bons">
+                    <span class="material-symbols-outlined icon">assignment_turned_in</span>
+                    <div class="metric-info">
+                        <h3>Média Nota</h3>
+                        <p id="relatorios_bons" class="material-symbols-outlined">
+                            <span class="material-symbols-outlined fill">
+                                star
+                            </span>
+                            <span class="material-symbols-outlined fill">
+                                star
+                            </span>
+                            <span class="material-symbols-outlined">
+                                star_half
+                            </span>
+                            <span class="material-symbols-outlined">
+                                star
+                            </span>
+                            <span class="material-symbols-outlined">
+                                star
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <button class="metric-card" onclick="modalGerarRelatorio()">
+                    <span class="material-symbols-outlined">assignment_add</span>
+                    <div class="metric-info">
+                        <p>Gerar Novo Relatório</p>
+                        <h3>Clique para Gerar</h3>
+                    </div>
+                </button>
+            </div>
+            <div class="lista_relatorios">
+                <div class="header">
+                    <div class="search_bar">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" placeholder="Pesquisar...">
+                    </div>
+                    <div class="filtros">
+                        <select name="slt_filtro_geral" id="slt_filtro_geral">
+                            <option value="all" selected>Todos</option>
+                            <option value="maior_que">Acima de 3.5</option>
+                            <option value="menor_que">Abaixo de 3.5</option>
+                        </select>
+                        <select name="slt_filtro_periodo" id="slt_filtro_periodo">
+                            <option value="all" selected>Todo Periodo</option>
+                            <option value="semana">Última Semana</option>
+                            <option value="mes">Último Mês</option>
+                            <option value="ano">Último Ano</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="header_lista">
+                    <div class="periodo">
+                        <p>Periodo
+                        </p>
+                    </div>
+
+                    <div class="titulo">
+                        <p>Titulo</p>
+                    </div>
+
+                    <div class="nota">
+                        <p>Nota</p>
+                    </div>
+
+                    <p class="visualizar">
+                        Visualizar
+                    </p>
+                </div>
+
+                <div class="lista">
+                    <div class="card">
+                        <div class="periodo">
+                            <p>01/11/2025
+                                <span class="material-symbols-outlined">arrow_forward</span>
+                                03/11/2025
+                            </p>
+                        </div>
+
+                        <div class="titulo">
+                            <h3>Alto uso no ATM Paulista</h3>
+                            <p>Subtitle</p>
+                        </div>
+
+                        <div class="nota">
+                            <p class="material-symbols-outlined nota_star">
+                                <span class="material-symbols-outlined fill">
+                                    star
+                                </span>
+                                <span class="material-symbols-outlined fill">
+                                    star
+                                </span>
+                                <span class="material-symbols-outlined">
+                                    star_half
+                                </span>
+                                <span class="material-symbols-outlined">
+                                    star
+                                </span>
+                                <span class="material-symbols-outlined">
+                                    star
+                                </span>
+                            </p>
+                        </div>
+
+                        <button>
+                            Visualizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="modal" id="modalGerarRelatorio">
+        <div class="modalContainer">
+            <div class="modalHeader">
+                <h2>Gerar Novo Relatório</h2>
+                <span class="material-symbols-outlined closeModal" onclick="fecharModal()">close</span>
+            </div>
+            <div class="modalBody">
+                <div id="divGerarRelatorio">
+                    <div class="periodo">
+                        <input type="date" id="data_inicio" name="data_inicio" required>
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                        <input type="date" id="data_fim" name="data_fim" required>
+                    </div>
+
+                    <label for="componentes">Componentes a Incluir:</label>
+                    <div class="componentes">
+                        <div class="componente">
+                            <input type="checkbox" id="cpu" name="cpu">
+                            <label for="cpu">CPU</label>
+                        </div>
+                        <div class="componente">
+                            <input type="checkbox" id="ram" name="ram">
+                            <label for="ram">RAM</label>
+                        </div>
+                        <div class="componente">
+                            <input type="checkbox" id="disco" name="disco">
+                            <label for="disco">Disco</label>
+                        </div>
+                        <div class="componente">
+                            <input type="checkbox" id="rede" name="rede">
+                            <label for="rede">Rede</label>
+                        </div>
+                    </div>
+
+                    <label for="info_adicional">Informações Adicionais (Opcionais):</label>
+                    <textarea id="info_adicional" name="info_adicional" rows="4"
+                        placeholder="Compare o uso de CPU dos ATMs em São Paulo com os do Rio de Janeiro no último mês."></textarea>
+
+                    <button type="submit" class="generate-report-btn">
+                        <span class="material-symbols-outlined">assignment_add</span>
+                        <h3>Gerar Relatório</h3>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+
+</html>
+
+<script>
+
+    b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
+
+    document.getElementById("total_relatorios").innerText = "1"
+
+    if (document.getElementById("total_relatorios").innerText == 0) {
+        document.querySelector(".content").innerHTML = `
+        <div class="no-data">
+            <span class="material-symbols-outlined icon">assignment</span>
+            <h2>Nenhum relatório gerado ainda.</h2>
+            <p>Clique no botão "Gerar Novo Relatório" para criar seu primeiro relatório utilizando nossa IA.</p>
+            <button class="generate-report-btn" onclick="modalGerarRelatorio()">
+                <span class="material-symbols-outlined">assignment_add</span>
+                <h3>Gerar Relatório</h3>
+            </button>
+        </div>
+        `;
+    }
+
+    function modalGerarRelatorio() {
+        document.getElementById("modalGerarRelatorio").style.display = "flex";
+        document.getElementById("data_inicio").value = "";
+
+        const hoje = new Date();
+        const yyyy = hoje.getFullYear();
+        const mm = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dd = String(hoje.getDate()).padStart(2, '0');
+        document.getElementById("data_fim").value = `${yyyy}-${mm}-${dd}`;
+
+        document.getElementById("data_inicio").max = `${yyyy}-${mm}-${dd}`;
+        document.getElementById("data_fim").max = `${yyyy}-${mm}-${dd}`;
+    }
+
+    function fecharModal() {
+        document.getElementById("modalGerarRelatorio").style.display = "none";
+        document.getElementById("data_inicio").value = "";
+        document.getElementById("data_fim").value = "";
+    }
+</script>
