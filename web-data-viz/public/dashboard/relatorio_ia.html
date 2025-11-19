@@ -20,6 +20,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://unpkg.com/lucide-static@latest/font/lucide.css" />
 </head>
 
 <body>
@@ -110,7 +112,7 @@
             <div class="metrics-container">
                 <!-- Cards de métricas principais -->
                 <div class="metric-card total-relatorios">
-                    <span class="material-symbols-outlined">assignment</span>
+                    <div class="icon-file-text icon"></div>
                     <div class="metric-info">
                         <h3>Relatórios Gerados IA</h3>
                         <p id="total_relatorios">0</p>
@@ -118,35 +120,40 @@
                 </div>
 
                 <div class="metric-card relatorios_bons">
-                    <span class="material-symbols-outlined icon">assignment_turned_in</span>
+                    <div class="icon-activity icon"></div>
                     <div class="metric-info">
-                        <h3>Média Nota</h3>
-                        <p id="relatorios_bons" class="material-symbols-outlined">
-                            <span class="material-symbols-outlined fill">
-                                star
-                            </span>
-                            <span class="material-symbols-outlined fill">
-                                star
-                            </span>
-                            <span class="material-symbols-outlined">
-                                star_half
-                            </span>
-                            <span class="material-symbols-outlined">
-                                star
-                            </span>
-                            <span class="material-symbols-outlined">
-                                star
-                            </span>
-                        </p>
+                        <h3>Score Médio de Relatórios</h3>
+                        <div class="score">
+                            <h1 id="numero_score">4.8</h1>
+                            <p class="relatorios_bons">
+                                
+                                <span class="material-symbols-outlined fill">
+                                    star
+                                </span>
+                                <span class="material-symbols-outlined fill">
+                                    star
+                                </span>
+                                <span class="material-symbols-outlined">
+                                    star_half
+                                </span>
+                                <span class="material-symbols-outlined">
+                                    star
+                                </span>
+                                <span class="material-symbols-outlined">
+                                    star
+                                </span>
+                            </p>
+                        </div>
                     </div>
                 </div>
 
                 <button class="metric-card" onclick="modalGerarRelatorio()">
-                    <span class="material-symbols-outlined">assignment_add</span>
+                    <div class="icon-plus icon"></div>
                     <div class="metric-info">
-                        <p>Gerar Novo Relatório</p>
-                        <h3>Clique para Gerar</h3>
+                        <p>Novo <br>Relatório IA</p>
+                        <h3>Gere Insights dos seus ATMs agora.</h3>
                     </div>
+                    <div class="icon-bot bg-icon"></div>
                 </button>
             </div>
             <div class="lista_relatorios">

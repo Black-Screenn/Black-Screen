@@ -10,7 +10,7 @@ const genAI = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY});
 const modelo = "gemini-2.5-flash";
 
 async function agenteAnalise(dadosJSON) {
-    console.log("[GERAR RELATORIO] Iniciando Agente de Análise");
+    console.log("[GERAR RELATORIO] [1/4] Iniciando Módulo de Análise");
 
     const instrucaoSistemaAnalise = `
         **AVISO: SUA ÚNICA TAREFA É REFORMATAR DADOS. VOCÊ É UM ESCRITURÁRIO DE DADOS.**
@@ -90,7 +90,7 @@ async function agenteAnalise(dadosJSON) {
 }
 
 async function agenteRecomendacoes(textoAnaliseFactual) {
-    console.log("[GERAR RELATORIO] Iniciando Agente de Recomendações");
+    console.log("[GERAR RELATORIO] [2/4] Iniciando Módulo de Insights");
 
     const instrucaoSistemaRecomendacoes = `
         Persona (Quem você é): Você é o 'BlackAnalyst', um especialista sênior em manutenção de hardware de ATMs.
@@ -135,7 +135,7 @@ async function agenteRecomendacoes(textoAnaliseFactual) {
 }
 
 async function agenteSumarizacao(relatorioCompleto) {
-    console.log("[GERAR RELATORIO] Iniciando Agente de Sumarização (Final)...");
+    console.log("[GERAR RELATORIO] [3/4] Iniciando Módulo de Sumarização (Final)...");
 
     const instrucaoSistemaSumarizacao = `
         Persona (Quem você é): Você é o 'BlackAnalyst', o Analista Chefe (SME - Subject Matter Expert).
@@ -272,11 +272,78 @@ async function gerarRelatorio(req, res) {
             <head>
                 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&display=swap" rel="stylesheet">
                 <style>
-                    body { font-family: "Barlow", sans-serif; margin: 40px; }
-                    .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
-                    .header img { max-width: 200px; max-height: 80px; }
-                    h1, h2, h3 { color: #333; }
-                    pre { background-color: #f4f4f4; padding: 10px; border-radius: 5px; }
+                    body { 
+                        font-family: 'Barlow', sans-serif; 
+                        font-size: 14px;
+                        color: #333;
+                        line-height: 1.5;
+                        margin: 0;
+                    }
+
+                    .header { 
+                        text-align: center; 
+                        padding-bottom: 15px; 
+                        margin-bottom: 30px; 
+                    }
+                    .header img { 
+                        max-width: 200px; 
+                    }
+
+                    
+                    h1, h2, h3, h4 { 
+                        color: #000; 
+                        margin-top: 25px; 
+                        page-break-after: avoid;
+                        break-after: avoid;
+                    }
+
+                    li, pre, blockquote, .alert-box {
+                        page-break-inside: avoid;
+                        break-inside: avoid;
+                    }
+
+                    h2 { 
+                        border-bottom: 1px solid #ccc; 
+                        padding-bottom: 5px; 
+                        font-weight: 700;
+                        font-size: 18px;
+                    }
+                    
+                    h3 {
+                        font-size: 16px;
+                        margin-bottom: 5px;
+                    }
+
+                    ul { 
+                        margin-top: 5px;
+                        padding-left: 20px;
+                    }
+
+                    li { 
+                        margin-bottom: 4px; 
+                    }
+
+                    strong { 
+                        color: #000;
+                    }
+
+                    pre { 
+                        background-color: #f4f4f4; 
+                        border: 1px solid #ddd;
+                        font-family: monospace; 
+                        padding: 10px;
+                        border-radius: 4px;
+                        white-space: pre-wrap;
+                    }
+
+                    .footer {
+                        margin-top: 50px; 
+                        font-size: 10px; 
+                        text-align: center; 
+                        color: #888;
+                        border-top: 1px solid #eee;
+                        padding-top: 10px;
+                    }
                 </style>
             </head>
             <body>
@@ -303,20 +370,31 @@ async function gerarRelatorio(req, res) {
 
         const pdfBuffer = await page.pdf({
             format: 'A4',
-            printBackground: true
+            printBackground: true,
+            margin: { 
+                top: '20mm',
+                bottom: '20mm', 
+                left: '15mm', 
+                right: '15mm' 
+            },
+            footerTemplate: `
+                <div style="font-size: 10px; width: 100%; text-align: right; padding-right: 20px;">
+                    <span class="pageNumber"></span> / <span class="totalPages"></span>
+                </div>
+            `
         });
 
-        console.log("Tamanho do PDF Gerado:", pdfBuffer.length, "bytes"); 
+        console.log("[GERAR RELATÓRIO PDF] [4/4] Tamanho do PDF Gerado:", pdfBuffer.length, "bytes"); 
 
         await browser.close();
-        console.log("[GERAR RELATÓRIO] PDF gerado. Enviando para o cliente...");
+        console.log("[GERAR RELATÓRIO Sucesso] Enviando PDF");
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename=relatorio.pdf'); 
         res.end(pdfBuffer, 'binary');
     } catch (error) {
         console.error("Erro no fluxo 'gerarRelatorio':", error);
-        // res.status(500).json({ error: "Falha ao processar relatório." });
+        res.status(500).json({ error: "Falha ao processar relatório." });
     }
 }
 
