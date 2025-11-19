@@ -1,8 +1,13 @@
 const { GoogleGenAI } = require('@google/genai');
 
+const MarkdownIt = require('markdown-it');
+const md = new MarkdownIt();
+
+const puppeteer = require('puppeteer');
+
 const genAI = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY});
 
-const modelo = "gemini-2.5-pro";
+const modelo = "gemini-2.5-flash";
 
 async function agenteAnalise(dadosJSON) {
     console.log("[GERAR RELATORIO] Iniciando Agente de Análise");
@@ -129,10 +134,6 @@ async function agenteRecomendacoes(textoAnaliseFactual) {
     }
 }
 
-/**
- * Agente 3: Agente de Sumarização (Sumário Executivo)
- * Lê o relatório completo (fatos + recomendações) e escreve o Sumário Executivo.
- */
 async function agenteSumarizacao(relatorioCompleto) {
     console.log("[GERAR RELATORIO] Iniciando Agente de Sumarização (Final)...");
 
@@ -180,9 +181,13 @@ async function agenteSumarizacao(relatorioCompleto) {
     }
 }
 
-async function gerarRelatorio(req, res) { // Exemplo se estiver usando Express
+async function gerarRelatorio(req, res) {
     try {
-        const dadosDoRequest = {
+        if (req.url === '/favicon.ico') {
+            return res.status(204).end();
+        }
+
+        let dadosDoRequest = {
             "relatorio_id": "RPT-20251111-002",
             "periodo_analise": "2025-11-10 12:00:00 a 2025-11-11 12:00:00",
             "escopo": {
@@ -256,17 +261,59 @@ async function gerarRelatorio(req, res) { // Exemplo se estiver usando Express
 
         const textoSumarizado = await agenteSumarizacao(relatorioParcial);
 
-        const relatorioFinal = textoSumarizado + "\n\n" + relatorioParcial
+        const relatorioFinal = textoSumarizado + "\n\n" + relatorioParcial;
 
-        // const pdf = await transformarEmPDF(relatorioFinal);
+        const relatorioHTML = md.render(relatorioFinal);
 
-        console.log("\n--- SAÍDA FINAL (AGENTES 1+2+3) ---");
-        console.log(relatorioFinal);
-        console.log("-----------------------------------");
+        const logoUrl = "https://raw.githubusercontent.com/Black-Screenn/Black-Screen/refs/heads/main/web-data-viz/public/assets/imgs/blackscreenlogo.png";
 
-        // Envia o relatório final e completo
-        res.status(200).send(relatorioFinal);
+        const htmlCompleto = `
+            <html>
+            <head>
+                <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&display=swap" rel="stylesheet">
+                <style>
+                    body { font-family: "Barlow", sans-serif; margin: 40px; }
+                    .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
+                    .header img { max-width: 200px; max-height: 80px; }
+                    h1, h2, h3 { color: #333; }
+                    pre { background-color: #f4f4f4; padding: 10px; border-radius: 5px; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <img src="${logoUrl}" alt="Logo da Empresa">
+                </div>
+                
+                ${relatorioHTML}
 
+                <div style="margin-top: 50px; font-size: 12px; text-align: center; color: #888;">
+                    Relatório gerado automaticamente por BlackAnalyst AI em ${new Date().toLocaleString()}
+                </div>
+            </body>
+            </html>
+        `;
+
+        const browser = await puppeteer.launch({ 
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+
+        await page.setContent(htmlCompleto, { waitUntil: 'networkidle0' });
+
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true
+        });
+
+        console.log("Tamanho do PDF Gerado:", pdfBuffer.length, "bytes"); 
+
+        await browser.close();
+        console.log("[GERAR RELATÓRIO] PDF gerado. Enviando para o cliente...");
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline; filename=relatorio.pdf'); 
+        res.end(pdfBuffer, 'binary');
     } catch (error) {
         console.error("Erro no fluxo 'gerarRelatorio':", error);
         // res.status(500).json({ error: "Falha ao processar relatório." });

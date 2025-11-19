@@ -271,7 +271,7 @@
                     <textarea id="info_adicional" name="info_adicional" rows="4"
                         placeholder="Compare o uso de CPU dos ATMs em São Paulo com os do Rio de Janeiro no último mês."></textarea>
 
-                    <button type="submit" class="generate-report-btn">
+                    <button type="submit" class="generate-report-btn" onclick="gerarRelatorio()">
                         <span class="material-symbols-outlined">assignment_add</span>
                         <h3>Gerar Relatório</h3>
                     </button>
@@ -323,5 +323,41 @@
         document.getElementById("modalGerarRelatorio").style.display = "none";
         document.getElementById("data_inicio").value = "";
         document.getElementById("data_fim").value = "";
+    }
+
+    async function gerarRelatorio() {
+        const btn = document.querySelector('button');
+
+        try {
+            console.log("Solicitando Relatório...");
+            const response = await fetch('http://localhost:3333/relatorio/gerar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
+
+            const tipoConteudo = response.headers.get('content-type');
+            console.log("Tipo recebido:", tipoConteudo);
+
+            if (tipoConteudo && tipoConteudo.includes('application/json')) {
+                const erroJson = await response.json();
+                alert("ERRO DO SERVIDOR: " + JSON.stringify(erroJson));
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const arquivoPdf = new Blob([blob], { type: 'application/pdf' });
+
+            const fileURL = window.URL.createObjectURL(arquivoPdf);
+            window.open(fileURL, '_blank');
+
+        } catch (error) {
+            console.error("Erro:", error);
+            alert("Falha: " + error.message);
+        }
     }
 </script>
