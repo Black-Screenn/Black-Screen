@@ -299,12 +299,13 @@ h1 {
 }
 
 .modal-content {
-  background: white;
+  background:#004076;
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 20px;
     min-width: 340px;
     position: relative;
     font-size: 30px;
+    color: white;
 }
 
 .fechar {
@@ -315,16 +316,19 @@ h1 {
     font-weight: bold;
 }
 .divSvg{
+    background-color: white;
        display: flex;
     flex-direction: row;
-    gap: 10px;
-    font-size: 30px;
+    gap: 25px;
+    font-size: 20px;
     font-weight: 400;
     font-style: italic;
     color: #004076;
     align-items: center;
     justify-items: center;
     justify-content: center;
+    border-radius: 10px;
+    width: 330px;
 }
 .divSvg svg{
     width: 30px;
