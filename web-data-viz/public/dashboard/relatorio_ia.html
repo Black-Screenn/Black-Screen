@@ -287,6 +287,17 @@
         </div>
     </div>
 
+    <div id="loaderOverlay" class="loader-overlay" style="display:  none;">
+        <div class="loaderBody">
+            <div class="loading-bar"></div>
+            <div class="icon-bot robot">
+                <div class="icon-sparkles sparkles"></div>
+            </div>
+            <h2>Gerando Relatório</h2>
+            <p class="loader-text">A IA está processando os dados para otimizar seu tempo de análise.</p>
+        </div>
+    </div>
+
 </body>
 
 
@@ -297,11 +308,9 @@
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
     const fkEmpresa = sessionStorage.FK_EMPRESA;
 
-    // busca e renderiza relatórios ao carregar
     window._relatoriosRows = [];
     buscarRelatorios();
 
-    // função para renderizar um conjunto de rows (usada por busca e filtro)
     function renderRelatorios(rows) {
         const listaEl = document.querySelector('.lista');
 
@@ -437,6 +446,9 @@
         const btn = document.querySelector('button');
 
         try {
+            fecharModal();
+            showLoading();
+
             console.log("Solicitando Relatório...");
             const response = await fetch('http://localhost:3333/relatorio/gerar', {
                 method: 'POST',
@@ -466,6 +478,18 @@
         } catch (error) {
             console.error("Erro:", error);
             alert("Falha: " + error.message);
+        } finally{
+            hideLoading();
         }
+    }
+
+    function showLoading() {
+        const overlay = document.getElementById('loaderOverlay');
+        if (overlay) overlay.style.display = 'flex';
+    }
+
+    function hideLoading() {
+        const overlay = document.getElementById('loaderOverlay');
+        if (overlay) overlay.style.display = 'none';
     }
 </script>

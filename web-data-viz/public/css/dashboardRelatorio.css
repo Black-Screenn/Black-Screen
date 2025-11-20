@@ -24,6 +24,7 @@
     gap: 16px;
     transition: transform 0.2s, box-shadow 0.2s;
 }
+
 button.metric-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -52,14 +53,16 @@ button.metric-card:hover {
     margin: 0;
 }
 
-.metric-info .score{
+.metric-info .score {
     display: flex;
     align-items: flex-end;
 }
-.metric-info .score h1{
+
+.metric-info .score h1 {
     margin: 0;
     margin-right: 4px;
 }
+
 .metric-info p {
     height: fit-content;
     font-size: 1.8em;
@@ -67,17 +70,20 @@ button.metric-card:hover {
     color: #0a1128;
     margin: 4px 0;
 }
-.metric-card.relatorios_bons{
+
+.metric-card.relatorios_bons {
     min-width: fit-content;
 }
-.metric-card.relatorios_bons p{
+
+.metric-card.relatorios_bons p {
     display: flex;
     gap: -4px;
     font-size: 1em;
     padding: 0;
     margin: 0;
 }
-.metric-card.relatorios_bons p span{
+
+.metric-card.relatorios_bons p span {
     padding: 0;
     color: #72c950;
     font-variation-settings:
@@ -87,7 +93,8 @@ button.metric-card:hover {
         'opsz' 24;
     user-select: none;
 }
-.metric-card.relatorios_bons p span.fill{
+
+.metric-card.relatorios_bons p span.fill {
     font-variation-settings:
         'FILL' 1,
         'wght' 300,
@@ -109,14 +116,17 @@ button.metric-card {
     background: -webkit-linear-gradient(to right, #5B86E5, #36D1DC);
     background: linear-gradient(to right, #5B86E5, #36D1DC);
 }
-button.metric-card h3{
+
+button.metric-card h3 {
     color: #FFF;
     font-weight: normal;
 }
-button.metric-card p{
+
+button.metric-card p {
     color: #FFF;
 }
-button.metric-card .bg-icon{
+
+button.metric-card .bg-icon {
     position: absolute;
     top: 8px;
     right: 24px;
@@ -125,20 +135,23 @@ button.metric-card .bg-icon{
     opacity: 0.2;
     transition: .2s;
 }
-button.metric-card .icon{
+
+button.metric-card .icon {
     background-color: rgba(255, 255, 255, 0.1);
     color: #FFF;
 }
-button.metric-card:hover .bg-icon{
+
+button.metric-card:hover .bg-icon {
     opacity: 0.5;
 }
 
-.lista_relatorios{
+.lista_relatorios {
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
-.lista_relatorios .header{
+
+.lista_relatorios .header {
     display: flex;
     align-items: center;
     padding: 2px;
@@ -147,13 +160,15 @@ button.metric-card:hover .bg-icon{
     border-radius: 8px;
     margin-bottom: 12px;
 }
-.lista_relatorios .header .search_bar{
+
+.lista_relatorios .header .search_bar {
     display: flex;
     position: relative;
     min-width: 230px;
     width: 60%;
 }
-.lista_relatorios .header .search_bar span{
+
+.lista_relatorios .header .search_bar span {
     position: absolute;
     left: 8px;
     top: 50%;
@@ -161,7 +176,8 @@ button.metric-card:hover .bg-icon{
     color: #989e9e;
     transition: .2s;
 }
-.lista_relatorios .header .search_bar input{
+
+.lista_relatorios .header .search_bar input {
     padding: 8px;
     padding-left: 42px;
     font-size: 1em;
@@ -170,11 +186,13 @@ button.metric-card:hover .bg-icon{
     border-radius: 9px;
     border: 1px solid #989e9e;
 }
-.lista_relatorios .header .filtros{
+
+.lista_relatorios .header .filtros {
     display: flex;
     gap: 8px;
 }
-.lista_relatorios .header .filtros select{
+
+.lista_relatorios .header .filtros select {
     padding: 8px;
     font-size: 1em;
     border-radius: 9px;
@@ -182,39 +200,45 @@ button.metric-card:hover .bg-icon{
     background-color: #FFF;
     cursor: pointer;
 }
+
 .lista_relatorios .header .search_bar input:focus,
-.lista_relatorios .header .filtros select:focus{
+.lista_relatorios .header .filtros select:focus {
     border: 1px solid #3c87ce;
     box-shadow: 0 0 4px #034078;
     outline: none;
     transition: .3s;
 }
-.lista_relatorios .header .search_bar:has(input:focus) span{
+
+.lista_relatorios .header .search_bar:has(input:focus) span {
     color: #034078;
 }
 
-.lista_relatorios .lista{
+.lista_relatorios .lista {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    gap: 8px; 
+    gap: 8px;
     scrollbar-color: #4a4b4b transparent;
     scrollbar-width: thin;
     padding: 2px;
 }
-.lista_relatorios .header_lista p{
+
+.lista_relatorios .header_lista p {
     font-weight: bold;
     font-size: 1em;
     margin: 0;
 }
-.lista_relatorios .header_lista .visualizar{
+
+.lista_relatorios .header_lista .visualizar {
     width: 100px;
 }
-.lista_relatorios .header_lista{
+
+.lista_relatorios .header_lista {
     margin-bottom: 8px;
 }
+
 .lista_relatorios .header_lista,
-.lista_relatorios .lista .card{
+.lista_relatorios .lista .card {
     display: flex;
     width: 100%;
     align-items: center;
@@ -225,18 +249,21 @@ button.metric-card:hover .bg-icon{
     gap: 24px;
     border-left: 3px solid #FFF;
 }
-.lista_relatorios .lista .card:hover{
+
+.lista_relatorios .lista .card:hover {
     outline: 1px solid #034078;
     border-color: #034078;
     transition: .3s;
 }
+
 .lista_relatorios .header_lista .periodo,
-.lista_relatorios .lista .card .periodo{
+.lista_relatorios .lista .card .periodo {
     display: flex;
     flex-direction: column;
     width: 100px;
 }
-.lista_relatorios .lista .card .periodo p{
+
+.lista_relatorios .lista .card .periodo p {
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -246,29 +273,35 @@ button.metric-card:hover .bg-icon{
     box-sizing: border-box;
     border-radius: 8px;
 }
-.lista_relatorios .lista .card .periodo p span{
+
+.lista_relatorios .lista .card .periodo p span {
     text-align: center;
 }
+
 .lista_relatorios .header_lista .titulo,
-.lista_relatorios .lista .card .titulo{
+.lista_relatorios .lista .card .titulo {
     display: flex;
     flex-direction: column;
-    flex:1;
+    flex: 1;
 }
+
 .lista_relatorios .lista .card .titulo h3,
-.lista_relatorios .lista .card .titulo p{
+.lista_relatorios .lista .card .titulo p {
     margin: 0;
 }
+
 .lista_relatorios .header_lista .nota,
-.lista_relatorios .lista .card .nota{
+.lista_relatorios .lista .card .nota {
     display: flex;
     gap: 0;
     width: 193px;
 }
-.lista_relatorios .lista .card .nota .nota_star{
+
+.lista_relatorios .lista .card .nota .nota_star {
     display: flex;
 }
-.lista_relatorios .lista .card .nota .nota_star span{
+
+.lista_relatorios .lista .card .nota .nota_star span {
     margin: 0;
     padding: 0;
     font-size: 1.6em;
@@ -279,14 +312,16 @@ button.metric-card:hover .bg-icon{
         'GRAD' 0,
         'opsz' 24;
 }
-.lista_relatorios .lista .card .nota .nota_star .fill{
+
+.lista_relatorios .lista .card .nota .nota_star .fill {
     font-variation-settings:
         'FILL' 1,
         'wght' 300,
         'GRAD' 0,
         'opsz' 24;
 }
-.lista_relatorios .lista .card button{
+
+.lista_relatorios .lista .card button {
     display: flex;
     align-items: center;
     padding: 4px 8px;
@@ -300,40 +335,45 @@ button.metric-card:hover .bg-icon{
     outline: 1px solid #989e9e;
     transition: .3s;
 }
-.lista_relatorios .lista .card button:hover{
+
+.lista_relatorios .lista .card button:hover {
     font-weight: bold;
     background-color: #add8db;
 }
 
-.no-data{
+.no-data {
     align-self: center;
     margin: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
-.no-data .icon{
+
+.no-data .icon {
     font-size: 4em;
     color: #034078;
     background-color: rgba(3, 64, 120, 0.1);
     padding: 16px;
     border-radius: 12px;
 }
-.no-data h2{
+
+.no-data h2 {
     margin: 0;
     margin-top: 12px;
     font-size: 1.5em;
     color: #034078;
     text-align: center;
 }
-.no-data p{
+
+.no-data p {
     margin: 0;
     margin-top: 16px;
     font-size: 1.2em;
     color: #666;
     text-align: center;
 }
-.no-data button{
+
+.no-data button {
     display: flex;
     align-items: center;
     margin-top: 20px;
@@ -348,17 +388,20 @@ button.metric-card:hover .bg-icon{
     transition: 0.3s;
     position: relative;
 }
-.no-data button h3{
+
+.no-data button h3 {
     margin: 0;
     transition: .3s;
     color: #535455;
 }
-.no-data button span{
+
+.no-data button span {
     font-size: 1.5em;
     transition: .3s;
 }
-.no-data button:hover span, 
-.no-data button:hover h3{
+
+.no-data button:hover span,
+.no-data button:hover h3 {
     color: transparent;
     background: linear-gradient(270deg, #217dd3, #034078, #062644, #0a1128, #0a1128, #034078);
     background-size: 1400% 1400%;
@@ -366,7 +409,8 @@ button.metric-card:hover .bg-icon{
     background-clip: text;
     -webkit-background-clip: text;
 }
-.no-data button::before{
+
+.no-data button::before {
     content: "";
     display: block;
     width: 104%;
@@ -382,16 +426,18 @@ button.metric-card:hover .bg-icon{
     animation: gradientAnimacao 4s ease infinite;
     filter: blur(8px);
 }
+
 @keyframes gradientAnimacao {
     0% {
         background-position: 0% 50%;
     }
+
     100% {
         background-position: 100% 50%;
     }
 }
 
-.no-data button:hover{
+.no-data button:hover {
     background: #ffffff;
 }
 
@@ -420,6 +466,7 @@ button.metric-card:hover .bg-icon{
     max-height: 90dvh;
     overflow-y: auto;
 }
+
 .modal .modalContainer .modalHeader h2 {
     font-size: 1.5em;
     font-weight: 600;
@@ -427,9 +474,11 @@ button.metric-card:hover .bg-icon{
     margin-bottom: 16px;
     color: #034078;
 }
+
 .modal .modalContainer .modalHeader {
     padding-right: 72px;
 }
+
 .modal .modalContainer .closeModal {
     position: absolute;
     top: 28px;
@@ -438,46 +487,51 @@ button.metric-card:hover .bg-icon{
     cursor: pointer;
     color: #666;
 }
+
 .modal .modalContainer .closeModal:hover {
     color: #b80000;
 }
 
-.modal .modalContainer .modalBody{
+.modal .modalContainer .modalBody {
     display: flex;
     flex-direction: column;
 }
 
-.modal .modalContainer .modalBody #divGerarRelatorio{
+.modal .modalContainer .modalBody #divGerarRelatorio {
     margin-top: 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
-.modal .modalContainer .modalBody #divGerarRelatorio .periodo{
+
+.modal .modalContainer .modalBody #divGerarRelatorio .periodo {
     display: flex;
     align-items: center;
     gap: 8px;
     align-self: flex-end;
 }
-.modal .modalContainer .modalBody #divGerarRelatorio .periodo input[type="date"]{
+
+.modal .modalContainer .modalBody #divGerarRelatorio .periodo input[type="date"] {
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 1em;
     font-family: 'Barlow';
 }
-.modal .modalContainer .modalBody #divGerarRelatorio .periodo .material-symbols-outlined{
+
+.modal .modalContainer .modalBody #divGerarRelatorio .periodo .material-symbols-outlined {
     font-size: 1.5em;
     color: #6c6d6d;
 }
-.modal .modalContainer .modalBody #divGerarRelatorio label{
+
+.modal .modalContainer .modalBody #divGerarRelatorio label {
     font-size: 1em;
     font-weight: 500;
     color: #353535;
 }
 
 
-.modal .modalContainer .modalBody #divGerarRelatorio .componentes{
+.modal .modalContainer .modalBody #divGerarRelatorio .componentes {
     min-height: 120px;
     max-height: 300px;
     padding: 8px;
@@ -497,12 +551,14 @@ button.metric-card:hover .bg-icon{
     transition: .2s;
     border-radius: 4px;
 }
-.modal .modalContainer .modalBody #divGerarRelatorio .componentes .componente:hover{
+
+.modal .modalContainer .modalBody #divGerarRelatorio .componentes .componente:hover {
     background-color: #f0f0f0;
     padding-left: 12px;
     cursor: pointer;
 }
-.modal .modalContainer .modalBody #divGerarRelatorio .componentes .componente label{
+
+.modal .modalContainer .modalBody #divGerarRelatorio .componentes .componente label {
     margin: 0;
     font-size: 1em;
     color: #353535;
@@ -511,18 +567,20 @@ button.metric-card:hover .bg-icon{
     padding-left: 0;
     cursor: pointer;
 }
-.modal .modalContainer .modalBody #divGerarRelatorio .componentes .componente input[type="checkbox"]{
+
+.modal .modalContainer .modalBody #divGerarRelatorio .componentes .componente input[type="checkbox"] {
     width: 19px;
     height: 17px;
     cursor: pointer;
     display: grid;
     place-content: center;
-  appearance: none;
+    appearance: none;
     border: 2px solid #3c3e3f;
     border-radius: 4px;
     position: relative;
     box-sizing: border-box;
 }
+
 .modal .modalContainer .modalBody #divGerarRelatorio .componentes .componente input[type="checkbox"]::before {
     content: "";
     width: 12px;
@@ -532,17 +590,20 @@ button.metric-card:hover .bg-icon{
     box-shadow: inset 1em 1em #034078;
     border-radius: 2px;
 }
+
 .modal .modalContainer .modalBody #divGerarRelatorio .componentes .componente input[type="checkbox"]:checked::before {
     transform: scale(1);
 }
-.modal .modalContainer .modalBody #divGerarRelatorio .componentes .componente:has(input[type="checkbox"]:checked){
+
+.modal .modalContainer .modalBody #divGerarRelatorio .componentes .componente:has(input[type="checkbox"]:checked) {
     background-color: #d0e7ff;
 }
-.modal .modalContainer .modalBody #divGerarRelatorio .componentes .componente:has(input[type="checkbox"]:checked) label{
+
+.modal .modalContainer .modalBody #divGerarRelatorio .componentes .componente:has(input[type="checkbox"]:checked) label {
     font-weight: 600;
 }
 
-.modal .modalContainer .modalBody #divGerarRelatorio textarea#info_adicional{
+.modal .modalContainer .modalBody #divGerarRelatorio textarea#info_adicional {
     margin-top: 8px;
     padding: 8px;
     border: 1px solid #ccc;
@@ -557,7 +618,7 @@ button.metric-card:hover .bg-icon{
     font-family: 'Barlow';
 }
 
-.modal .modalContainer .modalBody #divGerarRelatorio button{
+.modal .modalContainer .modalBody #divGerarRelatorio button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -570,9 +631,93 @@ button.metric-card:hover .bg-icon{
     cursor: pointer;
     transition: .3s;
 }
-.modal .modalContainer .modalBody #divGerarRelatorio button h3{
+
+.modal .modalContainer .modalBody #divGerarRelatorio button h3 {
     margin: 0;
 }
-.modal .modalContainer .modalBody #divGerarRelatorio button:hover{
+
+.modal .modalContainer .modalBody #divGerarRelatorio button:hover {
     background-color: #9ef99e;
+}
+
+
+.loader-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    flex-direction: column;
+    color: #333;
+}
+.loaderBody{
+    background-color: #FFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 300px;
+    padding: 24px;
+    padding-inline: 0;
+    padding-top: 0;
+    text-align: center;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.loaderBody .loading-bar{
+    margin-bottom: 28px;
+    height: 8px;
+    width: 100%;
+    background: linear-gradient(90deg, rgba(0, 187, 255, 1) 0%, rgba(42, 98, 155, 1) 33%, rgba(224, 220, 220, 1) 33%, rgba(224, 220, 220, 1) 66%, rgba(0, 187, 255, 1) 66%, rgba(42, 98, 155, 1) 100%);
+    background-size: 300% 100%;
+    transition: width .3s ease;
+    animation: loadingBar 2s linear infinite;
+}
+
+@keyframes loadingBar {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 0%; }
+}
+
+.loaderBody .robot{
+    font-size: 3em;
+    position: relative;
+    border-radius: 50%;
+    width: 82px;
+    height: 82px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #E0EAFC;
+    background: -webkit-linear-gradient(to right, #CFDEF3, #E0EAFC);
+    background: linear-gradient(to right, #CFDEF3, #E0EAFC);
+}
+.loaderBody .robot .sparkles{
+    position: absolute;
+    font-size: 0.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FFF;
+    top: 0;
+    right: -8px;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+    width: 28px;
+    height: 28px;
+}
+.loaderBody h2{
+    margin: 0;
+}
+
+.loader-text {
+    font-size: 16px;
+    opacity: 0.95;
+    padding-inline: 24px;
+}
+
+.generate-report-btn[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
 }
