@@ -64,7 +64,7 @@ async function uploadRelatorioS3(pdfBuffer, nomeArquivo, fkEmpresa) {
     // Define o caminho dentro do bucket (ex: relatorios/2025/arquivo.pdf)
     const key = `relatorios/${fkEmpresa}/${nomeArquivo}`;
 
-    const command = PutObjectCommand({
+    const command = new s3.PutObjectCommand({
         Bucket: bucketName,
         Key: key,
         Body: pdfBuffer,
