@@ -410,4 +410,28 @@ async function gerarRelatorio(req, res) {
     }
 }
 
-module.exports = { gerarRelatorio }
+
+async function listarRelatorios(req, res) {
+    try {
+        const empresa = req.body.fkEmpresa || req.query.fkEmpresa;
+
+        if (!empresa) {
+            return res.status(400).json({ erro: 'Fk_Empresa é obrigatório.' });
+        }
+
+        const resultados = await listar(empresa);
+
+        const rows = Array.isArray(resultados) && resultados.length > 0 && Array.isArray(resultados[0]) ? resultados[0] : resultados;
+
+        if (!rows || rows.length === 0) {
+            return res.status(204).send();
+        }
+
+        return res.status(200).json(rows);
+    } catch (error) {
+        console.error('[RELATORIO] Erro ao listar relatórios:', error);
+        return res.status(500).json({ erro: error.message || error });
+    }
+}
+
+module.exports = { gerarRelatorio, listarRelatorios }

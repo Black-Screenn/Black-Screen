@@ -160,7 +160,7 @@
                 <div class="header">
                     <div class="search_bar">
                         <span class="material-symbols-outlined">search</span>
-                        <input type="text" placeholder="Pesquisar...">
+                        <input type="text" id="search_input" placeholder="Pesquisar...">
                     </div>
                     <div class="filtros">
                         <select name="slt_filtro_geral" id="slt_filtro_geral">
@@ -297,20 +297,120 @@
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
     const fkEmpresa = sessionStorage.FK_EMPRESA;
 
-    document.getElementById("total_relatorios").innerText = "1"
+    // busca e renderiza relatórios ao carregar
+    window._relatoriosRows = [];
+    buscarRelatorios();
 
-    if (document.getElementById("total_relatorios").innerText == 0) {
-        document.querySelector(".content").innerHTML = `
-        <div class="no-data">
-            <span class="material-symbols-outlined icon">assignment</span>
-            <h2>Nenhum relatório gerado ainda.</h2>
-            <p>Clique no botão "Gerar Novo Relatório" para criar seu primeiro relatório utilizando nossa IA.</p>
-            <button class="generate-report-btn" onclick="modalGerarRelatorio()">
-                <span class="material-symbols-outlined">assignment_add</span>
-                <h3>Gerar Relatório</h3>
-            </button>
-        </div>
-        `;
+    // função para renderizar um conjunto de rows (usada por busca e filtro)
+    function renderRelatorios(rows) {
+        const listaEl = document.querySelector('.lista');
+
+
+        if (!rows || rows.length === 0) {
+            listaEl.innerHTML = `
+                <div class="no-data">
+                    <span class="material-symbols-outlined icon">assignment</span>
+                    <h2>Nenhum relatório gerado ainda.</h2>
+                    <p>Clique no botão "Gerar Novo Relatório" para criar seu primeiro relatório utilizando nossa IA.</p>
+                    <button class="generate-report-btn" onclick="modalGerarRelatorio()">
+                        <span class="material-symbols-outlined">assignment_add</span>
+                        <h3>Gerar Relatório</h3>
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        listaEl.innerHTML = '';
+
+        rows.forEach(r => {
+            const periodoInicioText = r.Periodo_Inicio || r.Periodo || '';
+            const periodoFimText = r.Periodo_Fim || '';
+            const titulo = r.Titulo || r.Nome || (r.Link_Relatorio ? `Relatório ${r.Id_Relatorio || ''}` : 'Relatório IA');
+            const nota = r.Nota || r.Score || '';
+            const link = r.Link_Relatorio || r.link || r.Link || '';
+
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            card.innerHTML = `
+                <div class="periodo">
+                    <p>
+                        ${(periodoInicioText)}
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                        ${(periodoFimText)}
+                    </p>
+                </div>
+                <div class="titulo">
+                    <h3>${titulo}</h3>
+                    <p>${(r.Conteudo_Texto ? (r.Conteudo_Texto.substr(0, 80) + '...') : '')}</p>
+                </div>
+                <div class="nota">
+                    <p class="material-symbols-outlined nota_star">${(String(nota))}</p>
+                </div>
+                <button ${link ? `onclick="window.open('${link}','_blank')"` : ''}>
+                    Visualizar
+                </button>
+            `;
+
+            listaEl.appendChild(card);
+        });
+    }
+
+    async function buscarRelatorios() {
+        try {
+            const resp = await fetch('http://localhost:3333/relatorio/listar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fkEmpresa: fkEmpresa })
+            });
+
+            if (resp.status === 204) {
+                window._relatoriosRows = [];
+                renderRelatorios([]);
+                return;
+            }
+
+            if (!resp.ok) {
+                throw new Error('Erro ao obter relatórios: ' + resp.status);
+            }
+
+            const dados = await resp.json();
+            const rows = Array.isArray(dados) && dados.length > 0 && Array.isArray(dados[0]) ? dados[0] : dados;
+
+            window._relatoriosRows = rows;
+            renderRelatorios(rows);
+            
+            const totalEl = document.getElementById("total_relatorios");
+            totalEl.innerText = String(rows.length || 0);
+
+        } catch (error) {
+            console.error('Erro ao listar relatórios:', error);
+            document.querySelector('.lista').innerHTML = `<p class="error">Falha ao carregar relatórios.</p>`;
+            document.getElementById("total_relatorios").innerText = '0';
+        }
+    }
+
+    function filtrarRelatorios(query) {
+        const q = String(query || '').trim().toLowerCase();
+        if (!q) {
+            renderRelatorios(window._relatoriosRows || []);
+            return;
+        }
+
+        const filtrados = (window._relatoriosRows || []).filter(r => {
+            const titulo = (r.Titulo || r.Nome || '').toString().toLowerCase();
+            const texto = (r.Conteudo_Texto || '').toString().toLowerCase();
+            const periodo = (r.Periodo || r.Periodo_Inicio || r.Data_Criacao || '').toString().toLowerCase();
+            return titulo.includes(q) || texto.includes(q) || periodo.includes(q);
+        });
+
+        renderRelatorios(filtrados);
+    }
+
+    const searchInput = document.getElementById('search_input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => filtrarRelatorios(e.target.value), 250);
     }
 
     function modalGerarRelatorio() {
