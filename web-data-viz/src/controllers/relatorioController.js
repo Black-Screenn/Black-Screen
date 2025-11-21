@@ -398,7 +398,7 @@ async function gerarRelatorio(req, res) {
         const dadosUnicos = Date.now().toString() + Math.random().toString();
         const hash = crypto.createHash('md5').update(dadosUnicos).digest('hex');
 
-        link = uploadRelatorioS3(pdfBuffer, "relatorio_"+hash, fkEmpresa);
+        link = await uploadRelatorioS3(pdfBuffer, "relatorio_"+hash, fkEmpresa);
         cadastrar(link, fkEmpresa, relatorioFinal)
 
         res.setHeader('Content-Type', 'application/pdf');

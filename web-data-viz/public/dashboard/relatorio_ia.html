@@ -20,7 +20,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
-    
+
     <link rel="stylesheet" href="https://unpkg.com/lucide-static@latest/font/lucide.css" />
 </head>
 
@@ -126,7 +126,7 @@
                         <div class="score">
                             <h1 id="numero_score">4.8</h1>
                             <p class="relatorios_bons">
-                                
+
                                 <span class="material-symbols-outlined fill">
                                     star
                                 </span>
@@ -357,7 +357,7 @@
                 <div class="nota">
                     <p class="material-symbols-outlined nota_star">${(String(nota))}</p>
                 </div>
-                <button ${link ? `onclick="window.open('${link}','_blank')"` : ''}>
+                <button onclick="abrirRelatorio(${r.Id_Relatorio})">
                     Visualizar
                 </button>
             `;
@@ -366,9 +366,23 @@
         });
     }
 
+    async function abrirRelatorio(idRelatorio) {
+        try {
+            const response = await fetch(`/cloud/visualizarRelatorio/${idRelatorio}`);
+
+            if (!response.ok) throw new Error("Erro ao buscar link");
+
+            const data = await response.json();
+            window.open(data.url, '_blank');
+
+        } catch (error) {
+            alert("Não foi possível abrir o relatório.");
+        }
+    }
+
     async function buscarRelatorios() {
         try {
-            const resp = await fetch('http://localhost:3333/relatorio/listar', {
+            const resp = await fetch('/relatorio/listar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ fkEmpresa: fkEmpresa })
@@ -389,7 +403,7 @@
 
             window._relatoriosRows = rows;
             renderRelatorios(rows);
-            
+
             const totalEl = document.getElementById("total_relatorios");
             totalEl.innerText = String(rows.length || 0);
 
@@ -453,7 +467,7 @@
             const response = await fetch('http://localhost:3333/relatorio/gerar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({fkEmpresa: fkEmpresa})
+                body: JSON.stringify({ fkEmpresa: fkEmpresa })
             });
 
             const tipoConteudo = response.headers.get('content-type');
@@ -478,7 +492,7 @@
         } catch (error) {
             console.error("Erro:", error);
             alert("Falha: " + error.message);
-        } finally{
+        } finally {
             hideLoading();
         }
     }
