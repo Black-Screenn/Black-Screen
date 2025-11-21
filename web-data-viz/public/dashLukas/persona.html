@@ -271,7 +271,7 @@
     };
 
     function lerCsvBucket(csv) {
-        fetch("https://s3-trusted-blackscreen.s3.us-east-1.amazonaws.com/", {
+        fetch("/bucket/processos", {
             method: "GET"
         }).then(Response => {
             return Response.text();
@@ -729,28 +729,40 @@ window.onclick = function(event) {
             let componentes_nome = document.querySelector('.classCompontes');
             let ATM_Alerta = document.querySelector('.ATM_Alerta')
             chamados.forEach(chamado => {
-
+                
                 statusNome = chamado.fields.status.name;
                 nomeComponente = chamado.fields.summary;
                 chave = chamado.key;
                 idMaquina = chamado.fields.description.content[0].content[0].text;
-                if (idMaquina.includes("ID ATM:")) {
+                
+                idAnterio = "";
+                if (idMaquina.includes("ID ATM:") ) {
                     if (!atmId.includes(idMaquina)) {
-                        qtdAtm++;
                         atmId.push(idMaquina);
+                        console.log(statusNome)
+                        
+                        if(!idMaquina == idAnterio && statusNome.includes("Aberto")){
+                            qtdAtm++;
+                            idAnterio = idMaquina;
+                            console.log(idMaquina)
+                        console.log(idAnterio)
+                        }else if(!idMaquina == idAnterio && statusNome.includes("Reaberto")){
+                            qtdAtm++;
+                            idAnterio = idMaquina;
+                            console.log(idMaquina)
+                        console.log(idAnterio)
+                        }
                     }
-
                 }
 
-
                 if (statusNome == "Aberto" || statusNome == "Itens Pendentes") {
-                    if (nomeComponente == "CPU" || nomeComponente.includes("CPU")) {
+                    if (nomeComponente.includes("CPU")) {
                         cpu++
                     }
-                    else if (nomeComponente == "RAM" || nomeComponente.includes("RAM")) {
+                    else if (nomeComponente.includes("RAM")) {
                         ram++
                     }
-                    else if (nomeComponente == "DISCO" || nomeComponente.includes("DISCO")) {
+                    else if (nomeComponente.includes("DISCO")) {
                         disco++
                     }
 
@@ -789,8 +801,9 @@ window.onclick = function(event) {
                 }
 
             });
+           console.log(idMaquina)
             if (qtdAtm > 0) {
-
+                    console.log(qtdAtm)
                 ATM_Alerta.innerHTML += `
                 <h4 class="atms">ATM(S):  ${qtdAtm}</h4>
                 `

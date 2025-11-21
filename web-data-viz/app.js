@@ -23,6 +23,8 @@ var cloudRouter = require("./src/routes/cloud");
 var cargoRouter = require("./src/routes/cargos");
 var relatorioRouter = require("./src/routes/relatorio");
 
+
+var dadosBucketRouter = require("./src/routes/dadosBucket")
 var geminiRouter = require("./src/routes/gemini");
 
 app.use(express.json({ limit: '1gb' }));
@@ -46,8 +48,10 @@ app.use("/componentes", componentesRouter);
 app.use("/caixas", caixasRouter);
 app.use("/cloud", cloudRouter);
 app.use("/cargos", cargoRouter);
+app.use("/bucket",dadosBucketRouter);
 app.use("/gemini", geminiRouter)
 app.use("/relatorio",relatorioRouter);
+
 
 app.listen(PORTA_APP, function () {
     console.log(`
