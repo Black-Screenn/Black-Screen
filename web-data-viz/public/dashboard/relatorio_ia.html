@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <link rel="shortcut icon" href="../assets/imgs/blackscreenicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackScreen | Relatórios</title>
+
+    <link rel="stylesheet" href="./../css/dashboards.css">
+    <link rel="stylesheet" href="./../css/dashboardRelatorio.css" />
+    <script src="../js/sessao.js"></script>
+    <script src="./../js/alerta.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,arrow_forward,assignment,assignment_add,assignment_turned_in,close,health_and_safety,home,local_atm,notifications,search,search_insights,star,star_half,visibility" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://unpkg.com/lucide-static@latest/font/lucide.css" />
+</head>
+
+<body>
+
+    <div class="janela">
+        <div class="header-left">
+            <img src="../assets/imgs/blackscreenlogo.png" alt="BlackScreen">
+
+            <div class="hello">
+                <h3>Bem vindo, <br><span id="b_usuario">usuário</span>!</h3>
+            </div>
+
+            <div class="links">
+                <div class="btn-nav-white">
+                    <a href="dashboard.html">
+                        <span class="material-symbols-outlined">
+                            home
+                        </span>
+                        <h3>
+                            Ínicio
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav-white">
+                    <a href="./logAlertas.html">
+                        <span class="material-symbols-outlined">
+                            notifications
+                        </span>
+                        <h3>
+                            Alertas
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav-white">
+                    <a href="atm.html">
+                        <span class="material-symbols-outlined">
+                            local_atm
+                        </span>
+                        <h3>
+                            ATMs
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav-white">
+                    <a href="./cadastroComponentes.html">
+                        <span class="material-symbols-outlined">
+                            health_and_safety
+                        </span>
+                        <h3>
+                            Componentes
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav">
+                    <a href="./insight.html">
+                        <span class="material-symbols-outlined">
+                            search_insights
+                        </span>
+                        <h3>
+                            Relatórios
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav-white">
+                    <a href="./perfil.html">
+                        <span class="material-symbols-outlined">
+                            account_circle
+                        </span>
+                        <h3>
+                            Meu Perfil
+                        </h3>
+                    </a>
+                </div>
+            </div>
+
+            <div class="btn-logout" onclick="limparSessao()">
+                <h3>Sair</h3>
+            </div>
+
+        </div>
+
+        <div class="content">
+            <div class="metrics-container">
+                <!-- Cards de métricas principais -->
+                <div class="metric-card total-relatorios">
+                    <div class="icon-file-text icon"></div>
+                    <div class="metric-info">
+                        <h3>Relatórios Gerados IA</h3>
+                        <p id="total_relatorios">0</p>
+                    </div>
+                </div>
+
+                <div class="metric-card relatorios_bons">
+                    <div class="icon-activity icon"></div>
+                    <div class="metric-info">
+                        <h3>Score Médio de Relatórios</h3>
+                        <div class="score">
+                            <h1 id="numero_score">4.8</h1>
+                            <p class="relatorios_bons">
+
+                                <span class="material-symbols-outlined fill">
+                                    star
+                                </span>
+                                <span class="material-symbols-outlined fill">
+                                    star
+                                </span>
+                                <span class="material-symbols-outlined">
+                                    star_half
+                                </span>
+                                <span class="material-symbols-outlined">
+                                    star
+                                </span>
+                                <span class="material-symbols-outlined">
+                                    star
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="metric-card" onclick="modalGerarRelatorio()">
+                    <div class="icon-plus icon"></div>
+                    <div class="metric-info">
+                        <p>Novo <br>Relatório IA</p>
+                        <h3>Gere Insights dos seus ATMs agora.</h3>
+                    </div>
+                    <div class="icon-bot bg-icon"></div>
+                </button>
+            </div>
+            <div class="lista_relatorios">
+                <div class="header">
+                    <div class="search_bar">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" id="search_input" placeholder="Pesquisar...">
+                    </div>
+                    <div class="filtros">
+                        <select name="slt_filtro_geral" id="slt_filtro_geral">
+                            <option value="all" selected>Todos</option>
+                            <option value="maior_que">Acima de 3.5</option>
+                            <option value="menor_que">Abaixo de 3.5</option>
+                        </select>
+                        <select name="slt_filtro_periodo" id="slt_filtro_periodo">
+                            <option value="all" selected>Todo Periodo</option>
+                            <option value="semana">Última Semana</option>
+                            <option value="mes">Último Mês</option>
+                            <option value="ano">Último Ano</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="header_lista">
+                    <div class="periodo">
+                        <p>Periodo
+                        </p>
+                    </div>
+
+                    <div class="titulo">
+                        <p>Titulo</p>
+                    </div>
+
+                    <div class="nota">
+                        <p>Nota</p>
+                    </div>
+
+                    <p class="visualizar">
+                        Visualizar
+                    </p>
+                </div>
+
+                <div class="lista">
+                    <div class="card">
+                        <div class="periodo">
+                            <p>01/11/2025
+                                <span class="material-symbols-outlined">arrow_forward</span>
+                                03/11/2025
+                            </p>
+                        </div>
+
+                        <div class="titulo">
+                            <h3>Alto uso no ATM Paulista</h3>
+                            <p>Subtitle</p>
+                        </div>
+
+                        <div class="nota">
+                            <p class="material-symbols-outlined nota_star">
+                                <span class="material-symbols-outlined fill">
+                                    star
+                                </span>
+                                <span class="material-symbols-outlined fill">
+                                    star
+                                </span>
+                                <span class="material-symbols-outlined">
+                                    star_half
+                                </span>
+                                <span class="material-symbols-outlined">
+                                    star
+                                </span>
+                                <span class="material-symbols-outlined">
+                                    star
+                                </span>
+                            </p>
+                        </div>
+
+                        <button>
+                            Visualizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="modal" id="modalGerarRelatorio">
+        <div class="modalContainer">
+            <div class="modalHeader">
+                <h2>Gerar Novo Relatório</h2>
+                <span class="material-symbols-outlined closeModal" onclick="fecharModal()">close</span>
+            </div>
+            <div class="modalBody">
+                <div id="divGerarRelatorio">
+                    <div class="periodo">
+                        <input type="date" id="data_inicio" name="data_inicio" required>
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                        <input type="date" id="data_fim" name="data_fim" required>
+                    </div>
+
+                    <label for="componentes">Componentes a Incluir:</label>
+                    <div class="componentes">
+                        <div class="componente">
+                            <input type="checkbox" id="cpu" name="cpu">
+                            <label for="cpu">CPU</label>
+                        </div>
+                        <div class="componente">
+                            <input type="checkbox" id="ram" name="ram">
+                            <label for="ram">RAM</label>
+                        </div>
+                        <div class="componente">
+                            <input type="checkbox" id="disco" name="disco">
+                            <label for="disco">Disco</label>
+                        </div>
+                        <div class="componente">
+                            <input type="checkbox" id="rede" name="rede">
+                            <label for="rede">Rede</label>
+                        </div>
+                    </div>
+
+                    <label for="info_adicional">Informações Adicionais (Opcionais):</label>
+                    <textarea id="info_adicional" name="info_adicional" rows="4"
+                        placeholder="Compare o uso de CPU dos ATMs em São Paulo com os do Rio de Janeiro no último mês."></textarea>
+
+                    <button type="submit" class="generate-report-btn" onclick="gerarRelatorio()">
+                        <span class="material-symbols-outlined">assignment_add</span>
+                        <h3>Gerar Relatório</h3>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loaderOverlay" class="loader-overlay" style="display:  none;">
+        <div class="loaderBody">
+            <div class="loading-bar"></div>
+            <div class="icon-bot robot">
+                <div class="icon-sparkles sparkles"></div>
+            </div>
+            <h2>Gerando Relatório</h2>
+            <p class="loader-text">A IA está processando os dados para otimizar seu tempo de análise.</p>
+        </div>
+    </div>
+
+</body>
+
+
+</html>
+
+<script>
+
+    b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
+    const fkEmpresa = sessionStorage.FK_EMPRESA;
+
+    window._relatoriosRows = [];
+    buscarRelatorios();
+
+    function renderRelatorios(rows) {
+        const listaEl = document.querySelector('.lista');
+
+
+        if (!rows || rows.length === 0) {
+            listaEl.innerHTML = `
+                <div class="no-data">
+                    <span class="material-symbols-outlined icon">assignment</span>
+                    <h2>Nenhum relatório gerado ainda.</h2>
+                    <p>Clique no botão "Gerar Novo Relatório" para criar seu primeiro relatório utilizando nossa IA.</p>
+                    <button class="generate-report-btn" onclick="modalGerarRelatorio()">
+                        <span class="material-symbols-outlined">assignment_add</span>
+                        <h3>Gerar Relatório</h3>
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        listaEl.innerHTML = '';
+
+        rows.forEach(r => {
+            const periodoInicioText = r.Periodo_Inicio || r.Periodo || '';
+            const periodoFimText = r.Periodo_Fim || '';
+            const titulo = r.Titulo || r.Nome || (r.Link_Relatorio ? `Relatório ${r.Id_Relatorio || ''}` : 'Relatório IA');
+            const nota = r.Nota || r.Score || '';
+            const link = r.Link_Relatorio || r.link || r.Link || '';
+
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            card.innerHTML = `
+                <div class="periodo">
+                    <p>
+                        ${(periodoInicioText)}
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                        ${(periodoFimText)}
+                    </p>
+                </div>
+                <div class="titulo">
+                    <h3>${titulo}</h3>
+                    <p>${(r.Conteudo_Texto ? (r.Conteudo_Texto.substr(0, 80) + '...') : '')}</p>
+                </div>
+                <div class="nota">
+                    <p class="material-symbols-outlined nota_star">${(String(nota))}</p>
+                </div>
+                <button onclick="abrirRelatorio(${r.Id_Relatorio})">
+                    Visualizar
+                </button>
+            `;
+
+            listaEl.appendChild(card);
+        });
+    }
+
+    async function abrirRelatorio(idRelatorio) {
+        try {
+            const response = await fetch(`/cloud/visualizarRelatorio/${idRelatorio}`);
+
+            if (!response.ok) throw new Error("Erro ao buscar link");
+
+            const data = await response.json();
+            window.open(data.url, '_blank');
+
+        } catch (error) {
+            alert("Não foi possível abrir o relatório.");
+        }
+    }
+
+    async function buscarRelatorios() {
+        try {
+            const resp = await fetch('/relatorio/listar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fkEmpresa: fkEmpresa })
+            });
+
+            if (resp.status === 204) {
+                window._relatoriosRows = [];
+                renderRelatorios([]);
+                return;
+            }
+
+            if (!resp.ok) {
+                throw new Error('Erro ao obter relatórios: ' + resp.status);
+            }
+
+            const dados = await resp.json();
+            const rows = Array.isArray(dados) && dados.length > 0 && Array.isArray(dados[0]) ? dados[0] : dados;
+
+            window._relatoriosRows = rows;
+            renderRelatorios(rows);
+
+            const totalEl = document.getElementById("total_relatorios");
+            totalEl.innerText = String(rows.length || 0);
+
+        } catch (error) {
+            console.error('Erro ao listar relatórios:', error);
+            document.querySelector('.lista').innerHTML = `<p class="error">Falha ao carregar relatórios.</p>`;
+            document.getElementById("total_relatorios").innerText = '0';
+        }
+    }
+
+    function filtrarRelatorios(query) {
+        const q = String(query || '').trim().toLowerCase();
+        if (!q) {
+            renderRelatorios(window._relatoriosRows || []);
+            return;
+        }
+
+        const filtrados = (window._relatoriosRows || []).filter(r => {
+            const titulo = (r.Titulo || r.Nome || '').toString().toLowerCase();
+            const texto = (r.Conteudo_Texto || '').toString().toLowerCase();
+            const periodo = (r.Periodo || r.Periodo_Inicio || r.Data_Criacao || '').toString().toLowerCase();
+            return titulo.includes(q) || texto.includes(q) || periodo.includes(q);
+        });
+
+        renderRelatorios(filtrados);
+    }
+
+    const searchInput = document.getElementById('search_input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => filtrarRelatorios(e.target.value), 250);
+    }
+
+    function modalGerarRelatorio() {
+        document.getElementById("modalGerarRelatorio").style.display = "flex";
+        document.getElementById("data_inicio").value = "";
+
+        const hoje = new Date();
+        const yyyy = hoje.getFullYear();
+        const mm = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dd = String(hoje.getDate()).padStart(2, '0');
+        document.getElementById("data_fim").value = `${yyyy}-${mm}-${dd}`;
+
+        document.getElementById("data_inicio").max = `${yyyy}-${mm}-${dd}`;
+        document.getElementById("data_fim").max = `${yyyy}-${mm}-${dd}`;
+    }
+
+    function fecharModal() {
+        document.getElementById("modalGerarRelatorio").style.display = "none";
+        document.getElementById("data_inicio").value = "";
+        document.getElementById("data_fim").value = "";
+    }
+
+    async function gerarRelatorio() {
+        const btn = document.querySelector('button');
+
+        try {
+            fecharModal();
+            showLoading();
+
+            console.log("Solicitando Relatório...");
+            const response = await fetch('http://localhost:3333/relatorio/gerar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fkEmpresa: fkEmpresa })
+            });
+
+            const tipoConteudo = response.headers.get('content-type');
+            console.log("Tipo recebido:", tipoConteudo);
+
+            if (tipoConteudo && tipoConteudo.includes('application/json')) {
+                const erroJson = await response.json();
+                alert("ERRO DO SERVIDOR: " + JSON.stringify(erroJson));
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const arquivoPdf = new Blob([blob], { type: 'application/pdf' });
+
+            const fileURL = window.URL.createObjectURL(arquivoPdf);
+            window.open(fileURL, '_blank');
+
+        } catch (error) {
+            console.error("Erro:", error);
+            alert("Falha: " + error.message);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    function showLoading() {
+        const overlay = document.getElementById('loaderOverlay');
+        if (overlay) overlay.style.display = 'flex';
+    }
+
+    function hideLoading() {
+        const overlay = document.getElementById('loaderOverlay');
+        if (overlay) overlay.style.display = 'none';
+    }
+</script>

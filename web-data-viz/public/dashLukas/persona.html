@@ -30,7 +30,7 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="../js/leaflet-heat.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <style>
     </style>
@@ -188,11 +188,11 @@
                     </div>
                 </div>
 
-                <!-- Gráfico de Pizza Status -->
-                <div class="chart-card employees-status">
+
+                <div class="grafico chart-card employees-status">
                     <h3>Panorama Geral Tickets</h3>
                     <div class="chart-container">
-                        <canvas id="myChart"></canvas>
+                        <div id="myChart"></div>
                     </div>
                 </div>
             </div>
@@ -200,21 +200,22 @@
 
 
 
-            <div class="charts-grid">
+            <div class="graficBarra charts-grid">
 
-                <div class="container_jira container chart-card employees-by-role-bar full-width">
-                    <h3>Chamados em Aberto no jira</h3>
-                    <div class="chart-container">
-                        <div class="kpi_metrica">
+                <div class=" containerBarra container_jira container chart-card employees-by-role-bar full-width">
+                    <h3> Metricas Componentes </h3>
+                    <div>
+                        <div id="kpi_metrica">
+                            <div id="chart"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Gráfico de Pizza Status -->
+
                 <div class="chart-card employees-status">
-                    <h3>Panorama Geral Tickets</h3>
+                    <h3>Insights Gerado Por Inteligencia Artificial</h3>
                     <div class="chart-container">
-                        <canvas id="myChart"></canvas>
+                        <div class="insights-container"></div>
                     </div>
                 </div>
             </div>
@@ -242,48 +243,281 @@
         </div>
     </div>
 
+
+
+
+
+
+    <div id="meuModalJira" class="modal-container" style="display: none;">
+        <div class="modal-content">
+            <span class="fechar" onclick="fecharModal()">&times;</span>
+            <div id="conteudoModal"></div>
+        </div>
+    </div>
 </body>
 
 </html>
+
 <script>
+    b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
     graficoPizza = null;
 
+    let dataPadrao = {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    };
+
+    function lerCsvBucket(csv) {
+        fetch("/bucket/processos", {
+            method: "GET"
+        }).then(Response => {
+            return Response.text();
+        }).then(respostaBucket => {
+
+            var csv = respostaBucket.split("\n")
+            var resultado = []
+            var headers = csv[0].split(",")
+
+            for (i = 1; i < csv.length; i++) {
+                var obj = {};
+                var linhaAtual = csv[i].split(",")
+                for (j = 0; j < headers.length; j++) {
+
+                    obj[headers[j]] = linhaAtual[j]
+                }
+                resultado.push(obj)
+            }
+            var jsonFinal = JSON.stringify(resultado);
+        })
+
+
+    }
+
+    function buscarPorComponenteDash() {
+        fetch('http://98.83.124.125:8080/chamadosJira', {
+            method: "GET"
+        }).then(Response => {
+            return Response.json();
+        }).then(respostaJira => {
+
+            let ArrayChamados = [];
+            respostaDoJira = respostaJira.issues
+
+            const hoje = new Date();
+            const inicioSemanaAtual = new Date(hoje);
+            inicioSemanaAtual.setDate(hoje.getDate() - hoje.getDay());
+            inicioSemanaAtual.setHours(0, 0, 0, 0);
+
+            const inicioSemanaAnterior = new Date(inicioSemanaAtual);
+            inicioSemanaAnterior.setDate(inicioSemanaAtual.getDate() - 7);
+            const fimSemanaAnterior = new Date(inicioSemanaAtual);
+            fimSemanaAnterior.setMilliseconds(-1);
+
+            respostaDoJira.forEach(dadosJira => {
+
+                let dataDeCriacao = dadosJira.fields.created;
+                let nomeDoAtm = dadosJira.fields.description.content[0].content[0].text;
+                let nomeDoComponente = dadosJira.fields.summary
+                let todosChamados = dadosJira.fields.status.name
+
+                if (nomeDoComponente.includes("TESTANDO VIA JAVA")) {
+                    return;
+                }
+                else if(nomeDoComponente.includes("RAM")){
+                    nomeDoComponente = 'RAM';
+                }else if(nomeDoComponente.includes("CPU")){
+                    nomeDoComponente = "CPU";
+                }
+                else if(nomeDoComponente.includes("DISCO")){
+                    nomeDoComponente = 'DISCO';    
+                }
+                const objDataCriacao = new Date(dataDeCriacao);
+
+                let periodo = null;
+                if (objDataCriacao >= inicioSemanaAtual && objDataCriacao <= hoje) {
+                    periodo = 'atual';
+                } else if (objDataCriacao >= inicioSemanaAnterior && objDataCriacao <= fimSemanaAnterior) {
+                    periodo = 'anterior';
+                }
+
+
+                if (periodo) {
+                    let chamado = {
+                        componente: nomeDoComponente,
+                        periodo: periodo,
+                        status: todosChamados
+                    };
+                    ArrayChamados.push(chamado);
+                }
+            });
+
+
+
+            const contagemPorComponente = {};
+
+            ArrayChamados.forEach(chamado => {
+                if (!contagemPorComponente[chamado.componente]) {
+                    contagemPorComponente[chamado.componente] = {
+                        atual: 0,
+                        anterior: 0
+                    };
+                }
+
+                if (chamado.periodo === 'atual') {
+                    contagemPorComponente[chamado.componente].atual++;
+                } else if (chamado.periodo === 'anterior') {
+                    contagemPorComponente[chamado.componente].anterior++;
+                }
+            });
+
+            const componentes = Object.keys(contagemPorComponente);
+            
+            const dadosSemanaAtual = componentes.map(comp => contagemPorComponente[comp].atual);
+            const dadosSemanaAnterior = componentes.map(comp => contagemPorComponente[comp].anterior);
+
+
+            var BarraChamados = {
+                series: [{
+                    name: 'Semana Atual',
+                    data: dadosSemanaAtual
+                }, {
+                    name: 'Semana Anterior',
+                    data: dadosSemanaAnterior
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 430
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        dataLabels: {
+                            position: 'top',
+                        },
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    offsetX: -6,
+                    style: {
+                        fontSize: '12px',
+                        colors: ['#fff']
+                    }
+                },
+                stroke: {
+                    show: true,
+                    width: 1,
+                    colors: ['#fff']
+                },
+                tooltip: {
+                    shared: true,
+                    intersect: false
+                },
+                xaxis: {
+                    categories: componentes,
+                    title: {
+
+                    }
+                },
+                yaxis: {
+                    title: {
+
+                    }
+                },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'right'
+                },
+                colors: ['#5C9BD5', '#004076']
+            };
+
+
+
+
+            var chart = new ApexCharts(document.querySelector("#chart"), BarraChamados);
+            chart.render();
+
+            enviarDadosParaIA(ArrayChamados, componentes, dadosSemanaAtual, dadosSemanaAnterior);
+
+        })
+    }
+
+    /* function enviarDadosParaIA(dadosJira, componentes, dadosSemanaAtual, dadosSemanaAnterior) {
+          fetch("http://localhost:3333/gemini/prompt", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                  dadosJira: dadosJira,
+                  componentes: componentes,
+                  dadosSemanaAtual: dadosSemanaAtual,
+                  dadosSemanaAnterior: dadosSemanaAnterior
+              })
+          })
+              .then(response => response.json())
+              .then(resultado => {
+                  exibirInsights(resultado.insights);
+              })
+              .catch(error => {
+                  console.error("Erro ao buscar insights do gemini", error);
+              });
+      }
+      function exibirInsights(insights) {
+          const container = document.querySelector('.insights-container');
+          if (container) {
+              container.innerHTML = `
+              <div>
+                  <h1>
+                      Análise Técnica 
+                  </h1>
+                  <div class="insights_ia">
+                      ${insights}
+                  </div>
+                  </div>
+                  <h3>Todos os insights gerado por IA devem ser seguidos com responsábilidade e não dispensa a analise de um especialista. </h3>
+          `;
+          }
+      }
+     */
 
     function buscarDataEHoraChamados() {
-        fetch("http://localhost:8080/chamadosJira", {
+
+        fetch('http://98.83.124.125:8080/chamadosJira', {
             method: "GET"
         }).then(Response => {
             return Response.json();
         }).then(respostaData => {
 
-            let dataPadrao = {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
-            };
-
+            
             const dataEHoraFormatada = new Intl.DateTimeFormat('pt-BR', dataPadrao);
             const chamadoHora = respostaData.issues;
+            
+
+            const classCompontes_alertas = document.querySelector('.classCompontes_alertas');
+
 
             const kpi_metrica = document.querySelector('.kpi_metrica');
 
             kpi_metrica.innerHTML = '';
 
             let totalDeChamadosAbertos = 0;
-            let totalDeChamadosConcluidos=0;
+            let totalDeChamadosConcluidos = 0;
             let totalDeChamadosReabertos = 0;
-            const ctx = document.getElementById('myChart');
-            const classCompontes_alertas = document.querySelector('.classCompontes_alertas');
-        
+
+            const chartElement = document.querySelector('#myChart');
+
             let statusAtual;
             let cores;
             chamadoHora.forEach(chamadosHora => {
-                if(statusAtual === "Concluído"){
-                        totalDeChamadosConcluidos++
-                    }
-                    
+                if (statusAtual === "Concluído") {
+                    totalDeChamadosConcluidos++
+                   
+                }
+
                 const stringCriacao = chamadosHora.fields.created;
                 const stringAlteracao = chamadosHora.fields.updated;
                 statusAtual = chamadosHora.fields.status.name;
@@ -300,13 +534,13 @@
                 const tempo = 5 * 60 * 1000;
 
                 idMaquina = chamadosHora.fields.description.content[0].content[0].text;
-                 cores = [
-                     'rgb(255,0,0)',  
-                       
-                     'rgb(0, 64, 118)'   
-                        ];
+                cores = [
+                    'rgb(255,0,0)',
+
+                    'rgb(0, 64, 118)'
+                ];
                 
-                if (statusAtual == "Aberto"|| statusAtual == "Reaberto") {
+                if (statusAtual == "Aberto" || statusAtual == "Reaberto") {
                     if (compHora > tempo) {
 
                         const emDias = compHora / milissegundosPorDia;
@@ -315,39 +549,40 @@
                         const chamadoDiv = document.createElement('div');
                         chamadoDiv.className = 'chamado-item';
 
+                       
                         chamadoDiv.innerHTML = `
-                    <div class="info">
-                        <div class="chamado-titulo">${nomeComponenteAlerta}</div>
-                        <div class="chamado-detalhes">
+                          <div class="info">
+                            <div class="card-jira"role="button" onclick="abrirModal('${idMaquina}','${nomeComponenteAlerta}' , '${statusAtual}', '${diasInteiros}', '${dataCriacao}', '${dataUpdate}')">
+                                <div class="chamado-titulo">${nomeComponenteAlerta} <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="48px" fill="#EA3323"><path d="M210-160v-60h61l84-277q6-19 21.5-31t35.5-12h136q20 0 35.5 12t21.5 31l84 277h61v60H210Zm125-60h290l-78-260H413l-78 260Zm115-440v-180h60v180h-60Zm235 98-43-43 128-127 42 42-127 128Zm55 192v-60h180v60H740ZM275-562 148-690l42-42 128 127-43 43ZM40-370v-60h180v60H40Zm440 150Z"/></svg></div>
                             <p>${idMaquina}</p>
-                            <p>Status: ${statusAtual}</p>
-                            <p>Dias em aberto: ${diasInteiros} dia(s)</p>
-                            <p>Criado em: ${dataCriacao}</p>
-                            <p>Atualizado em: ${dataUpdate}</p>
-                        </div>
-                    </div>
-                `;
-                console.log(idMaquina)
-                
+                            </div>
+                          </div>
+                          `;
+
+
+
+
+
+
 
                         kpi_metrica.appendChild(chamadoDiv);
 
-                    if(statusAtual == "Aberto"){
-                        totalDeChamadosAbertos++
-                    }else if(statusAtual =="Reaberto"){
-                        totalDeChamadosReabertos++;
-                    }
-                    
-                        
+                        if (statusAtual == "Aberto") {
+                            totalDeChamadosAbertos++
+                        } else if (statusAtual == "Reaberto") {
+                            totalDeChamadosReabertos++;
+                        }
+
+
                     }
                 }
-                
+
             });
             if (statusAtual == "Concluído" || statusAtual == "Aberto" || statusAtual == "Reaberto") {
-                chamadosTotais=0;
-                chamadosTotais +=totalDeChamadosReabertos;
-                chamadosTotais+=totalDeChamadosAbertos;
-                
+                chamadosTotais = 0;
+                chamadosTotais += totalDeChamadosReabertos;
+                chamadosTotais += totalDeChamadosAbertos;
+
 
                 let chamadosGrafico =
                     [
@@ -357,54 +592,127 @@
                 if (graficoPizza) {
                     graficoPizza.destroy();
                 }
-                graficoPizza = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Abertos e Reabertos', 'Concluidos'],
-                        datasets: [{
-                            label: 'Chamados',
-                            data: [chamadosGrafico[0], chamadosGrafico[1]],
-                            backgroundColor: cores,
-                            borderColor: 'white',
-                            borderWidth: 2
-                        }]
+
+                var options = {
+                    series: [chamadosGrafico[0], chamadosGrafico[1]],
+
+                    chart: {
+                        type: 'donut',
+                        width: '380px'
                     },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            },
-                            title: {
-                                display: true,
-                                text: 'Status dos Chamados'
+
+                    labels: ['Abertos e Reabertos', 'Concluídos'],
+                    colors: cores,
+
+                    legend: {
+                        position: 'top'
+                    },
+
+                    title: {
+                        text: 'Status dos Chamados',
+                        align: 'center'
+                    },
+
+                    plotOptions: {
+                        pie: {
+                            donut: {
+                                size: '65%',
+                                labels: {
+                                    show: true,
+                                    total: {
+                                        show: true,
+                                        label: 'Total',
+                                        fontSize: '15   px',
+                                        color: '#000',
+                                        formatter: function (w) {
+                                            return w.globals.series.reduce((a, b) => a + b, 0);
+                                        }
+                                    }
+                                }
                             }
                         }
-                    }
-                });
-                
+                    },
 
+                    responsive: [{
+                        breakpoint: 480,
+                        options: {
+                            chart: {
+                                width: 200
+                            },
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }]
+                };
+
+
+                graficoPizza = new ApexCharts(chartElement, options);
+                graficoPizza.render();
             }
-            
-            
+
+
 
             if (totalDeChamadosAbertos === 0 && totalDeChamadosReabertos === 0) {
-                
+
                 innerHTML = '<p class="sem-alertas">Nenhum chamado em alerta no momento.</p>';
             }
-            else{
-                totalDeChamadosAbertos+=totalDeChamadosReabertos;
+            else {
+                totalDeChamadosAbertos += totalDeChamadosReabertos;
 
-                classCompontes_alertas.innerHTML+=`
+                classCompontes_alertas.innerHTML += `
                     <div class="tituloAlerta">chamado(s) sem solução</div>
                     <div class="infoAlerta">${totalDeChamadosAbertos}</div>
                 `
             }
 
         })
+
     };
+   
+    function abrirModal(nomeComponenteAlerta,nome, status, dias, criacao, update, idMaquina) {
+    const modal = document.getElementById('meuModalJira');
+    const conteudo = document.getElementById('conteudoModal');
+    const divSvg = document.querySelector('.divSvg')
+
+    let valorSvg="";
+    if(nome.includes("CPU")){
+        valorSvg = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M13.9802 7.75H10.0102C8.76023 7.75 7.74023 8.76 7.74023 10.02V13.99C7.74023 15.24 8.75023 16.26 10.0102 16.26H13.9802C15.2302 16.26 16.2502 15.25 16.2502 13.99V10.02C16.2502 8.76 15.2402 7.75 13.9802 7.75ZM13.5002 12.98L12.6102 14.53C12.4802 14.76 12.2402 14.88 12.0002 14.88C11.8802 14.88 11.7502 14.85 11.6502 14.79C11.3102 14.6 11.1902 14.17 11.3902 13.83L12.0302 12.72H11.4702C11.0202 12.72 10.6502 12.52 10.4502 12.18C10.2502 11.84 10.2702 11.42 10.5002 11.03L11.3902 9.48C11.5902 9.14 12.0202 9.03 12.3502 9.22C12.6902 9.41 12.8102 9.84 12.6102 10.18L11.9702 11.29H12.5302C12.9802 11.29 13.3502 11.49 13.5502 11.83C13.7502 12.17 13.7302 12.59 13.5002 12.98Z" fill="#292D32"></path> <path d="M21.25 12.75C21.67 12.75 22 12.41 22 12C22 11.58 21.67 11.25 21.25 11.25H20V9.05H21.25C21.67 9.05 22 8.72 22 8.3C22 7.89 21.67 7.55 21.25 7.55H19.77C19.29 5.96 18.04 4.71 16.45 4.23V2.75C16.45 2.34 16.11 2 15.7 2C15.29 2 14.95 2.34 14.95 2.75V4H12.75V2.75C12.75 2.34 12.41 2 12 2C11.59 2 11.25 2.34 11.25 2.75V4H9.06V2.75C9.06 2.34 8.72 2 8.31 2C7.89 2 7.56 2.34 7.56 2.75V4.23C5.96 4.71 4.71 5.96 4.23 7.55H2.75C2.34 7.55 2 7.89 2 8.3C2 8.72 2.34 9.05 2.75 9.05H4V11.25H2.75C2.34 11.25 2 11.58 2 12C2 12.41 2.34 12.75 2.75 12.75H4V14.95H2.75C2.34 14.95 2 15.28 2 15.7C2 16.11 2.34 16.45 2.75 16.45H4.23C4.7 18.04 5.96 19.29 7.56 19.77V21.25C7.56 21.66 7.89 22 8.31 22C8.72 22 9.06 21.66 9.06 21.25V20H11.26V21.25C11.26 21.66 11.59 22 12.01 22C12.42 22 12.76 21.66 12.76 21.25V20H14.95V21.25C14.95 21.66 15.29 22 15.7 22C16.11 22 16.45 21.66 16.45 21.25V19.77C18.04 19.29 19.29 18.04 19.77 16.45H21.25C21.67 16.45 22 16.11 22 15.7C22 15.28 21.67 14.95 21.25 14.95H20V12.75H21.25ZM17.26 14.26C17.26 15.91 15.91 17.26 14.26 17.26H9.74C8.09 17.26 6.74 15.91 6.74 14.26V9.74C6.74 8.09 8.09 6.74 9.74 6.74H14.26C15.91 6.74 17.26 8.09 17.26 9.74V14.26Z" fill="#292D32"></path> </g></svg>`
+    }
+    else if(nome.includes("RAM")){
+        valorSvg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="ram"> <g> <path fill="#A0D468" d="M278.625,361.594L256,338.969l0,0c-4.172-4.156-4.172-10.922,0-15.094c4.156-4.156,10.922-4.156,15.078,0 l0,0l22.625,22.641L512,128.227L459.203,75.43c-4.172,4.164-10.922,4.164-15.094,0c-4.156-4.164-4.156-10.922,0-15.086 l-7.531-7.539c-4.172,4.164-10.922,4.164-15.094-0.008c-4.156-4.164-4.156-10.914,0-15.078L383.781,0L0,383.781L37.703,421.5 c4.172-4.172,10.922-4.172,15.094,0c4.156,4.156,4.156,10.906,0,15.078l7.531,7.547c4.172-4.172,10.922-4.172,15.094,0 c4.156,4.156,4.172,10.906,0,15.078L128.219,512L278.625,361.594z"></path> </g> <g> <polygon fill="#8CC153" points="256,338.969 105.594,489.375 128.219,512 278.625,361.594 256,338.969 "></polygon> <polygon fill="#8CC153" points="271.078,323.875 271.078,323.875 271.078,323.875 293.703,346.516 512,128.227 489.375,105.602 "></polygon> </g> <g> <path fill="#FFCE54" d="M482.266,142.867c-4.156,4.164-4.156,10.922,0,15.086l15.094-15.086 C493.188,138.703,486.438,138.703,482.266,142.867z"></path> <path fill="#FFCE54" d="M459.641,165.492c-4.156,4.164-4.156,10.922,0,15.086l15.094-15.086 C470.562,161.328,463.812,161.328,459.641,165.492z"></path> <path fill="#FFCE54" d="M437.016,188.117c-4.172,4.172-4.172,10.922,0,15.086l15.078-15.086 C447.938,183.953,441.188,183.953,437.016,188.117z"></path> <path fill="#FFCE54" d="M414.391,210.75c-4.172,4.164-4.172,10.922,0,15.086l15.078-15.086 C425.312,206.586,418.547,206.586,414.391,210.75z"></path> <path fill="#FFCE54" d="M391.766,233.375c-4.172,4.164-4.172,10.922,0,15.086l15.078-15.086 C402.688,229.211,395.922,229.211,391.766,233.375z"></path> <path fill="#FFCE54" d="M369.125,256c-4.156,4.172-4.156,10.922,0,15.086L384.219,256 C380.047,251.836,373.297,251.836,369.125,256z"></path> <path fill="#FFCE54" d="M346.5,278.625c-4.156,4.172-4.156,10.938,0,15.094l15.094-15.094 C357.422,274.469,350.672,274.469,346.5,278.625z"></path> <path fill="#FFCE54" d="M323.875,301.25c-4.156,4.172-4.156,10.938,0,15.094l15.094-15.094 C334.797,297.094,328.047,297.094,323.875,301.25z"></path> <path fill="#FFCE54" d="M301.25,323.875c-4.156,4.188-4.172,10.938,0,15.094l15.094-15.094 C312.172,319.719,305.422,319.719,301.25,323.875z"></path> <path fill="#FFCE54" d="M256,369.141c-4.172,4.172-4.172,10.922,0,15.078l15.078-15.078 C266.922,364.969,260.156,364.969,256,369.141z"></path> <path fill="#FFCE54" d="M233.375,391.766c-4.172,4.172-4.172,10.922,0,15.078l15.078-15.078 C244.281,387.594,237.531,387.594,233.375,391.766z"></path> <path fill="#FFCE54" d="M210.734,414.406c-4.156,4.156-4.156,10.906,0,15.078l15.094-15.078 C221.656,410.219,214.906,410.219,210.734,414.406z"></path> <path fill="#FFCE54" d="M188.109,437.031c-4.156,4.156-4.156,10.906,0,15.078l15.094-15.078 C199.031,432.859,192.281,432.859,188.109,437.031z"></path> <path fill="#FFCE54" d="M165.484,459.656c-4.156,4.156-4.156,10.906,0,15.078l15.094-15.078 C176.406,455.484,169.656,455.484,165.484,459.656z"></path> <path fill="#FFCE54" d="M142.859,482.281c-4.172,4.156-4.172,10.906,0,15.078l15.078-15.078 C153.781,478.109,147.031,478.109,142.859,482.281z"></path> </g> <rect x="84.259" y="362.447" transform="matrix(0.7071 0.7071 -0.7071 0.7071 302.302 37.7409)" fill="#656D78" width="42.669" height="42.669"></rect> <polygon fill="#656D78" points="165.938,353.609 135.766,323.438 165.938,293.281 196.094,323.438 "></polygon> <polygon fill="#656D78" points="256.438,263.102 226.266,232.93 256.438,202.766 286.609,232.93 "></polygon> <rect x="295.447" y="151.259" transform="matrix(0.7071 0.7071 -0.7071 0.7071 214.8253 -173.4466)" fill="#656D78" width="42.669" height="42.669"></rect> <g> <path fill="#434A54" d="M60.328,383.781l45.266,45.25l45.25-45.25l-45.25-45.25L60.328,383.781z M105.594,398.875L90.5,383.781 l15.094-15.094l15.078,15.094L105.594,398.875z"></path> <path fill="#434A54" d="M120.672,323.438l45.266,45.25l45.25-45.25l-45.25-45.25L120.672,323.438z M165.938,338.531 l-15.094-15.094l15.094-15.078l15.078,15.078L165.938,338.531z"></path> <path fill="#434A54" d="M211.188,232.93l45.25,45.258l45.25-45.258l-45.25-45.25L211.188,232.93z M256.438,248.016l-15.078-15.086 l15.078-15.086l15.094,15.086L256.438,248.016z"></path> <path fill="#434A54" d="M316.781,127.336l-45.25,45.258l45.25,45.25l45.25-45.25L316.781,127.336z M301.688,172.594l15.094-15.086 l15.078,15.086l-15.078,15.086L301.688,172.594z"></path> </g> <polygon fill="#656D78" points="377.125,142.422 346.953,112.25 377.125,82.086 407.281,112.25 "></polygon> <path fill="#434A54" d="M377.125,67l-45.266,45.25l45.266,45.258l45.25-45.258L377.125,67z M377.125,127.336l-15.094-15.086 l15.094-15.078l15.078,15.078L377.125,127.336z"></path> </g> </g></svg> `
+    }
+    else if(nome.includes("DISCO")){
+        valorSvg= `<svg viewBox="0 0 32 32" enable-background="new 0 0 32 32" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Home"></g> <g id="Print"></g> <g id="Mail"></g> <g id="Camera"></g> <g id="Video"></g> <g id="Film"></g> <g id="Message"></g> <g id="Telephone"></g> <g id="User"></g> <g id="File"></g> <g id="Folder"></g> <g id="Map"></g> <g id="Download"></g> <g id="Upload"></g> <g id="Video_Recorder"></g> <g id="Schedule"></g> <g id="Cart"></g> <g id="Setting"></g> <g id="Search"></g> <g id="Pencils"></g> <g id="Group"></g> <g id="Record"></g> <g id="Headphone"></g> <g id="Music_Player"></g> <g id="Sound_On"></g> <g id="Sound_Off"></g> <g id="Lock"></g> <g id="Lock_open"></g> <g id="Love"></g> <g id="Favorite"></g> <g id="Film_1_"></g> <g id="Music"></g> <g id="Puzzle"></g> <g id="Turn_Off"></g> <g id="Book"></g> <g id="Save"> <path d="M30.7,9.3l-8-8C22.5,1.1,22.3,1,22,1h-4h-2H8H2C1.5,1,1,1.5,1,2v28c0,0.5,0.5,1,1,1h6h8h8h6 c0.5,0,1-0.5,1-1V10C31,9.7,30.9,9.5,30.7,9.3z" fill="#000000"></path> <g> <path d="M8,9h8h2c0.5,0,1-0.5,1-1V2c0-0.5-0.5-1-1-1h-2H8C7.5,1,7,1.5,7,2v6C7,8.5,7.5,9,8,9z" fill="#ffffff"></path> <path d="M24,17h-8H8c-0.5,0-1,0.5-1,1v12c0,0.5,0.5,1,1,1h8h8c0.5,0,1-0.5,1-1V18C25,17.5,24.5,17,24,17z" fill="#ffffff"></path> </g> </g> <g id="Reload"></g> <g id="Trash"></g> <g id="Tag"></g> <g id="Link"></g> <g id="Like"></g> <g id="Bad"></g> <g id="Gallery"></g> <g id="Add"></g> <g id="Close"></g> <g id="Forward"></g> <g id="Back"></g> <g id="Buy"></g> <g id="Mac"></g> <g id="Laptop"></g> </g></svg>`
+    }
+    
+    conteudo.innerHTML = `
+        <div class="divSvg">${nome} ${valorSvg}</div>
+        <p>${nomeComponenteAlerta}</p>
+        <div class="chamado-detalhes">
+            <p><strong>Status:</strong> ${status}</p>
+            <p><strong>Dias em aberto:</strong> ${dias} dia(s)</p>
+            <p><strong>Criado em:</strong> ${criacao}</p>
+            <p><strong>Atualizado em:</strong> ${update}</p>
+        </div>
+    `;
+
+    modal.style.display = 'flex';
+}
+
+function fecharModal() {
+    document.getElementById('meuModalJira').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('meuModalJira');
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
     function buscandoComponenteJiraKpi() {
-        fetch("http://localhost:8080/chamadosJira", {
+        fetch('http://98.83.124.125:8080/chamadosJira', {
             method: "GET"
 
         }).then(Response => {
@@ -417,46 +725,57 @@
             let ram = 0;
             let disco = 0;
             let qtdAtm = 0;
-            let atmId=[]
+            let atmId = []
             let componentes_nome = document.querySelector('.classCompontes');
             let ATM_Alerta = document.querySelector('.ATM_Alerta')
-            console.log(chamados)
             chamados.forEach(chamado => {
                 
                 statusNome = chamado.fields.status.name;
                 nomeComponente = chamado.fields.summary;
                 chave = chamado.key;
                 idMaquina = chamado.fields.description.content[0].content[0].text;
-                 if (idMaquina.includes("ID ATM:")){
-                    if(!atmId.includes(idMaquina)){
-                        qtdAtm++; 
+                
+                idAnterio = "";
+                if (idMaquina.includes("ID ATM:") ) {
+                    if (!atmId.includes(idMaquina)) {
                         atmId.push(idMaquina);
+                        console.log(statusNome)
+                        
+                        if(!idMaquina == idAnterio && statusNome.includes("Aberto")){
+                            qtdAtm++;
+                            idAnterio = idMaquina;
+                            console.log(idMaquina)
+                        console.log(idAnterio)
+                        }else if(!idMaquina == idAnterio && statusNome.includes("Reaberto")){
+                            qtdAtm++;
+                            idAnterio = idMaquina;
+                            console.log(idMaquina)
+                        console.log(idAnterio)
+                        }
                     }
-
                 }
-                    
 
                 if (statusNome == "Aberto" || statusNome == "Itens Pendentes") {
-                     if (nomeComponente == "CPU") {
+                    if (nomeComponente.includes("CPU")) {
                         cpu++
                     }
-                    else if (nomeComponente == "RAM") {
+                    else if (nomeComponente.includes("RAM")) {
                         ram++
                     }
-                    else if (nomeComponente == "DISCO") {
+                    else if (nomeComponente.includes("DISCO")) {
                         disco++
                     }
 
 
                 }
-                
+
                 let ranking = [
                     { nome: 'CPU', valor: cpu, classe: 'componente1' },
                     { nome: 'RAM', valor: ram, classe: 'componente2' },
                     { nome: 'DISCO', valor: disco, classe: 'componente3' }
                 ];
 
-                
+
                 ranking.sort((a, b) => {
                     return b.valor - a.valor;
                 });
@@ -465,33 +784,41 @@
 
                 container.innerHTML = '';
 
-               
+
                 for (const item of ranking) {
-                    if (item.valor <7) {
+                   if(item.valor === 0 ){
+                        container.innerHTML+=`
+                        <h4 class="componente ${item.classe}">${item.nome}: ${item.valor}<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#75FB4C"><path d="M378-246 154-470l43-43 181 181 384-384 43 43-427 427Z"/></svg> </h4> `
+                    } else if (item.valor < 10) {
                         container.innerHTML += `
                     <h4 class="componente ${item.classe}">${item.nome}: ${item.valor}  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFF55"><path d="M400-240q-33 0-56.5-23.5T320-320v-50q-57-39-88.5-100T200-600q0-117 81.5-198.5T480-880q117 0 198.5 81.5T760-600q0 69-31.5 129.5T640-370v50q0 33-23.5 56.5T560-240H400Zm0-80h160v-92l34-24q41-28 63.5-71.5T680-600q0-83-58.5-141.5T480-800q-83 0-141.5 58.5T280-600q0 49 22.5 92.5T366-436l34 24v92Zm0 240q-17 0-28.5-11.5T360-120v-40h240v40q0 17-11.5 28.5T560-80H400Zm80-520Z"/></svg></h4>
                 `;
-                    } else if (item.valor >= 7) {
+                    } else if (item.valor >= 11) {
                         container.innerHTML += `
                     <h4 class="componente ${item.classe}">${item.nome}: ${item.valor}<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#EA3323"><path d="M200-160v-80h64l79-263q8-26 29.5-41.5T420-560h120q26 0 47.5 15.5T617-503l79 263h64v80H200Zm148-80h264l-72-240H420l-72 240Zm92-400v-200h80v200h-80Zm238 99-57-57 142-141 56 56-141 142Zm42 181v-80h200v80H720ZM282-541 141-683l56-56 142 141-57 57ZM40-360v-80h200v80H40Zm440 120Z"/></svg> </h4>
                 `;
                     }
                 }
-                
-            });
-            if( qtdAtm > 0){
 
-                ATM_Alerta.innerHTML+=`
+            });
+           console.log(idMaquina)
+            if (qtdAtm > 0) {
+                    console.log(qtdAtm)
+                ATM_Alerta.innerHTML += `
                 <h4 class="atms">ATM(S):  ${qtdAtm}</h4>
                 `
-                }else{
-                    ATM_Alerta.innerHTML+=`
+            } else {
+                ATM_Alerta.innerHTML += `
                 <h4 class="atms"><strong>Nenhum ATM com alerta</strong></h4>
                 `
-                }
-                              
+            }
+
         })
     };
+
+
+    setTimeout(lerCsvBucket, 2000)
     setTimeout(buscarDataEHoraChamados, 2000);
     setTimeout(buscandoComponenteJiraKpi, 2000);
+    setTimeout(buscarPorComponenteDash, 2000);
 </script>

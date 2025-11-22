@@ -3,6 +3,7 @@ const db = require("../database/config");
 const SQL_BASE = `
   select
     c.Id_Caixa       as id,
+    c.Macaddress,
     c.codigoCaixa,
     c.Fk_Empresa,
     e.Logradouro, e.Bairro, e.Cidade, e.UF,
@@ -64,8 +65,8 @@ async function cadastrar(caixa){
     const idCaixa = result[0].idCaixa;
     console.log(result)
     sql = `
-      INSERT INTO Caixa(codigoCaixa, Fk_Empresa, Fk_Endereco_Maquina)
-        VALUES("CX-${idCaixa+1}_${caixa.idEmpresa}", ${caixa.idEmpresa}, ${idEndereco});
+      INSERT INTO Caixa(codigoCaixa, Macaddress, Fk_Empresa, Fk_Endereco_Maquina)
+        VALUES("CX-${idCaixa+1}_${caixa.idEmpresa}", "${caixa.macaddress}", ${caixa.idEmpresa}, ${idEndereco});
     `
     return db.executar(sql).then(() => idCaixa);
   });
