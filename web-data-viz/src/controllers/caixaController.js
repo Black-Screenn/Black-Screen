@@ -47,4 +47,30 @@ async function cadastrar(req, res) {
   }
 }
 
-module.exports = { listar, cadastrar };
+async function buscarPorMac(req, res) {
+  try {
+    const mac = req.params.mac;
+    if (!mac) {
+      return res.status(400).json({ erro: "MAC não fornecido" });
+    }
+
+    const fk = req.headers["fk_empresa"];
+    // opcional: validar fk se desejar restringir a consulta por empresa
+
+    const dados = await caixaModel.buscarPorMac(mac);
+
+    if (!dados || dados.length === 0) {
+      return res.status(404).json({ erro: "Máquina não encontrada para esse MAC" });
+    }
+
+    // retornar latitude e longitude (único registro esperado)
+    const registro = dados[0];
+    return res.status(200).json({ latitude: registro.Latitude, longitude: registro.Longitude, caixa: registro });
+
+  } catch (e) {
+    console.error("X [CAIXAS] buscarPorMac erro:", e.code, e.sqlMessage || e.message);
+    return res.status(500).json({ erro: "Falha ao consultar caixa por MAC" });
+  }
+}
+
+module.exports = { listar, cadastrar, buscarPorMac };

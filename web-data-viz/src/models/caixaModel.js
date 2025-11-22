@@ -29,6 +29,14 @@ function listarPorEmpresa(fkEmpresa) {
   return db.executar(sql);
 }
 
+function buscarPorMac(mac) {
+  if (!mac || mac == "") {
+    return Promise.reject(new Error("mac inválido"));
+  }
+  const sql = SQL_BASE + ` and (c.MacAddress = "${mac}" or c.mac = "${mac}" or c.MAC = "${mac}") limit 1`;
+  return db.executar(sql);
+}
+
 async function cadastrar(caixa){
   let sql = `
     SELECT COUNT(Id_Caixa) AS Id_Caixa FROM Caixa WHERE Fk_Empresa = ${caixa.idEmpresa};
@@ -63,4 +71,4 @@ async function cadastrar(caixa){
   });
 }
 
-module.exports = { listarTodos, listarPorEmpresa, cadastrar };
+module.exports = { listarTodos, listarPorEmpresa, cadastrar, buscarPorMac };
