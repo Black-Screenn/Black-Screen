@@ -270,27 +270,20 @@
         minute: "2-digit"
     };
 
+
+
+   
     function lerCsvBucket(csv) {
         fetch("/bucket/processos", {
             method: "GET"
         }).then(Response => {
+            console.log(Response)
             return Response.text();
+
         }).then(respostaBucket => {
-
-            var csv = respostaBucket.split("\n")
-            var resultado = []
-            var headers = csv[0].split(",")
-
-            for (i = 1; i < csv.length; i++) {
-                var obj = {};
-                var linhaAtual = csv[i].split(",")
-                for (j = 0; j < headers.length; j++) {
-
-                    obj[headers[j]] = linhaAtual[j]
-                }
-                resultado.push(obj)
-            }
-            var jsonFinal = JSON.stringify(resultado);
+            console.log(respostaBucket)
+            
+            
         })
 
 
@@ -333,6 +326,11 @@
                 }
                 else if(nomeDoComponente.includes("DISCO")){
                     nomeDoComponente = 'DISCO';    
+                }else if(nomeDoComponente.includes("REDE")){
+                    nomeDoComponente = 'REDE';
+                }else{
+                   
+                    return;
                 }
                 const objDataCriacao = new Date(dataDeCriacao);
 
@@ -354,7 +352,7 @@
                 }
             });
 
-
+           
 
             const contagemPorComponente = {};
 
@@ -443,6 +441,7 @@
             enviarDadosParaIA(ArrayChamados, componentes, dadosSemanaAtual, dadosSemanaAnterior);
 
         })
+       
     }
 
     /* function enviarDadosParaIA(dadosJira, componentes, dadosSemanaAtual, dadosSemanaAnterior) {
@@ -492,21 +491,24 @@
             return Response.json();
         }).then(respostaData => {
 
+                localStorage.setItem('JIRA_DADOS', JSON.stringify(respostaData));
+                const sessionchamadoHora = JSON.parse(localStorage.getItem('JIRA_DADOS') || '{}');
+                const chamadoHora = sessionchamadoHora.issues;
             
             const dataEHoraFormatada = new Intl.DateTimeFormat('pt-BR', dataPadrao);
-            const chamadoHora = respostaData.issues;
-            
+        
 
             const classCompontes_alertas = document.querySelector('.classCompontes_alertas');
-
-
+            
+            
             const kpi_metrica = document.querySelector('.kpi_metrica');
 
             kpi_metrica.innerHTML = '';
-
+            classCompontes_alertas.innerHTML =""
             let totalDeChamadosAbertos = 0;
             let totalDeChamadosConcluidos = 0;
             let totalDeChamadosReabertos = 0;
+            
 
             const chartElement = document.querySelector('#myChart');
 
@@ -539,10 +541,10 @@
 
                     'rgb(0, 64, 118)'
                 ];
-                
+               
                 if (statusAtual == "Aberto" || statusAtual == "Reaberto") {
+                                    
                     if (compHora > tempo) {
-
                         const emDias = compHora / milissegundosPorDia;
                         const diasInteiros = Math.floor(emDias);
 
@@ -558,13 +560,6 @@
                             </div>
                           </div>
                           `;
-
-
-
-
-
-
-
                         kpi_metrica.appendChild(chamadoDiv);
 
                         if (statusAtual == "Aberto") {
@@ -652,6 +647,7 @@
             }
 
 
+            
 
             if (totalDeChamadosAbertos === 0 && totalDeChamadosReabertos === 0) {
 
@@ -659,14 +655,15 @@
             }
             else {
                 totalDeChamadosAbertos += totalDeChamadosReabertos;
-
                 classCompontes_alertas.innerHTML += `
-                    <div class="tituloAlerta">chamado(s) sem solução</div>
-                    <div class="infoAlerta">${totalDeChamadosAbertos}</div>
+                <div class="tituloAlerta">chamado(s) sem solução</div>
+                <div class="infoAlerta">${totalDeChamadosAbertos}</div>
                 `
             }
-
+            
         })
+        
+       
 
     };
    
@@ -698,10 +695,12 @@
     `;
 
     modal.style.display = 'flex';
+    
 }
 
 function fecharModal() {
     document.getElementById('meuModalJira').style.display = 'none';
+    window.location.reload()
 }
 
 window.onclick = function(event) {
@@ -724,6 +723,7 @@ window.onclick = function(event) {
             let cpu = 0;
             let ram = 0;
             let disco = 0;
+            let rede =0;
             let qtdAtm = 0;
             let atmId = []
             let componentes_nome = document.querySelector('.classCompontes');
@@ -739,18 +739,18 @@ window.onclick = function(event) {
                 if (idMaquina.includes("ID ATM:") ) {
                     if (!atmId.includes(idMaquina)) {
                         atmId.push(idMaquina);
-                        console.log(statusNome)
+                       
                         
                         if(!idMaquina == idAnterio && statusNome.includes("Aberto")){
                             qtdAtm++;
                             idAnterio = idMaquina;
-                            console.log(idMaquina)
-                        console.log(idAnterio)
+                            
+                        
                         }else if(!idMaquina == idAnterio && statusNome.includes("Reaberto")){
                             qtdAtm++;
                             idAnterio = idMaquina;
-                            console.log(idMaquina)
-                        console.log(idAnterio)
+                           
+                        
                         }
                     }
                 }
@@ -764,6 +764,8 @@ window.onclick = function(event) {
                     }
                     else if (nomeComponente.includes("DISCO")) {
                         disco++
+                    }else if(nomeComponente.includes("REDE")){
+                        rede++
                     }
 
 
@@ -772,7 +774,8 @@ window.onclick = function(event) {
                 let ranking = [
                     { nome: 'CPU', valor: cpu, classe: 'componente1' },
                     { nome: 'RAM', valor: ram, classe: 'componente2' },
-                    { nome: 'DISCO', valor: disco, classe: 'componente3' }
+                    { nome: 'DISCO', valor: disco, classe: 'componente3'},
+                    { nome: 'REDE', valor:rede, classe:'componente4'}
                 ];
 
 
@@ -801,9 +804,9 @@ window.onclick = function(event) {
                 }
 
             });
-           console.log(idMaquina)
+         
             if (qtdAtm > 0) {
-                    console.log(qtdAtm)
+                    
                 ATM_Alerta.innerHTML += `
                 <h4 class="atms">ATM(S):  ${qtdAtm}</h4>
                 `
@@ -815,10 +818,12 @@ window.onclick = function(event) {
 
         })
     };
-
-
+    
+    
+    
     setTimeout(lerCsvBucket, 2000)
     setTimeout(buscarDataEHoraChamados, 2000);
     setTimeout(buscandoComponenteJiraKpi, 2000);
     setTimeout(buscarPorComponenteDash, 2000);
+    setTimeout(lerCsvBucket,2000)   
 </script>
