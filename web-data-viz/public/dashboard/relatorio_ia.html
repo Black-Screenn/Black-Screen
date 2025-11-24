@@ -464,7 +464,7 @@
             showLoading();
 
             console.log("Solicitando Relatório...");
-            const response = await fetch('http://localhost:3333/relatorio/gerar', {
+            const response = await fetch('/relatorio/gerar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ fkEmpresa: fkEmpresa })
