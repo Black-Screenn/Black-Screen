@@ -111,7 +111,7 @@ CREATE TABLE Relatorio (
     Id_Relatorio INT PRIMARY KEY AUTO_INCREMENT,
     Fk_Empresa INT,
     Link_Relatorio VARCHAR(2048),
-    Conteudo_Texto TEXT, 
+    Conteudo_Texto TEXT,
     Avaliacao FLOAT DEFAULT 0.0,
     Periodo_Inicio DATE,
     Periodo_Fim DATE,
@@ -121,46 +121,46 @@ CREATE TABLE Relatorio (
 
 USE BlackScreen;
 
-INSERT INTO Enderecos (Cep, Pais, Cidade, UF, Logradouro, Numero, Latitude, Longitude, Bairro, Complemento) VALUES 
+INSERT INTO Enderecos (Cep, Pais, Cidade, UF, Logradouro, Numero, Latitude, Longitude, Bairro, Complemento) VALUES
 ('01310-100', 'Brasil', 'São Paulo', 'SP', 'Av. Paulista', 1000, -23.56168, -46.65598, 'Bela Vista', 'Andar 10'),
 ('04543-907', 'Brasil', 'São Paulo', 'SP', 'Av. Pres. Juscelino Kubitschek', 2041, -23.58998, -46.68987, 'Vila Olímpia', 'Shopping JK'),
 ('01001-000', 'Brasil', 'São Paulo', 'SP', 'Praça da Sé', 1, -23.55052, -46.63331, 'Sé', 'Ao lado do metrô');
 
-INSERT INTO Empresa (Nome_Empresa, Cnpj, Fk_Endereco) VALUES 
+INSERT INTO Empresa (Nome_Empresa, Cnpj, Fk_Endereco) VALUES
 ('BlackScreen Solutions', '12.345.678/0001-99', 1);
 
-INSERT INTO Cargo (Nome_Cargo, Fk_Empresa) VALUES 
+INSERT INTO Cargo (Nome_Cargo, Fk_Empresa) VALUES
 ('Admin', 1),              -- ID 1: Vai para dashboardAdm
 ('Analista', 1),           -- ID 2: Vai para dashboard comum, IS_ADMIN false
 ('Tecnico de Suporte', 1); -- ID 3: Vai para dashboard comum, IS_ADMIN false
 
-INSERT INTO Usuario (Nome, Email, Senha, Fk_Empresa, Fk_Cargo) VALUES 
+INSERT INTO Usuario (Nome, Email, Senha, Fk_Empresa, Fk_Cargo) VALUES
 ('Carlos Admin', 'admin@blackscreen.com', '12345', 1, 1),   -- Teste Admin
 ('Ana Analista', 'ana@blackscreen.com', '12345', 1, 2),     -- Teste Analista
 ('Pedro Suporte', 'pedro@blackscreen.com', '12345', 1, 3);  -- Teste Técnico
 
-INSERT INTO Caixa (Macaddress, codigoCaixa, Fk_Endereco_Maquina, Fk_Empresa) VALUES 
-('00:1B:44:11:3A:B7', 'TOTEM-JK-01', 2, 1),
-('00:1B:44:11:3A:B8', 'TOTEM-SE-02', 3, 1);
+INSERT INTO Caixa (Macaddress, codigoCaixa, Fk_Endereco_Maquina, Fk_Empresa) VALUES
+('764275743843724', 'TOTEM-JK-01', 2, 1),
+('038473474382445', 'TOTEM-SE-02', 3, 1);
 
-INSERT INTO Componentes (Nome_Componente, Unidade, Fk_Empresa) VALUES 
+INSERT INTO Componentes (Nome_Componente, Unidade, Fk_Empresa) VALUES
 ('CPU', '%', 1),       -- ID 1
 ('Memória RAM', 'GB', 1), -- ID 2
 ('Disco Rígido', 'GB', 1); -- ID 3
 
-INSERT INTO Caixa_Componente (Fk_Caixa, Fk_Componente) VALUES 
+INSERT INTO Caixa_Componente (Fk_Caixa, Fk_Componente) VALUES
 (1, 1), (1, 2), (1, 3),
 (2, 1), (2, 2), (2, 3);
 
-INSERT INTO Parametros (Valor_Parametrizado, Fk_Componente) VALUES 
+INSERT INTO Parametros (Valor_Parametrizado, Fk_Componente) VALUES
 (90, 1), -- Alerta se CPU passar de 90%
 (80, 2); -- Alerta se RAM passar de 80% (Considerando uso percentual ou valor fixo dependendo da sua lógica)
 
-INSERT INTO Permissao (Nome_Permissao, Descricao_Permissao) VALUES 
+INSERT INTO Permissao (Nome_Permissao, Descricao_Permissao) VALUES
 ('DASHBOARD_FULL', 'Acesso completo aos gráficos'),
 ('DASHBOARD_VIEW', 'Apenas visualização');
 
-INSERT INTO CargoPermissao (Fk_Cargo, Fk_Permissao) VALUES 
+INSERT INTO CargoPermissao (Fk_Cargo, Fk_Permissao) VALUES
 (1, 1), -- Admin tem acesso full
 (2, 1), -- Analista tem acesso full
 (3, 2); -- Tecnico apenas visualiza
