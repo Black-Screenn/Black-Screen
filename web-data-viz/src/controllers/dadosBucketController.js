@@ -1,4 +1,4 @@
-const { S3Client, ListObjectsV2Command, GetObjectCommand } = require("@aws-sdk/client-s3");
+/*const { S3Client, ListObjectsV2Command, GetObjectCommand } = require("@aws-sdk/client-s3");
 
 let resultadoFinal = [];
 const s3Client = new S3Client({
@@ -84,4 +84,4 @@ async function buscarProcessos(req, res) {
 
 module.exports = {
     buscarProcessos
-};
+};*/

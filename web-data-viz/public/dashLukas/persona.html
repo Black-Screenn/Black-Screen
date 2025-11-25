@@ -281,12 +281,24 @@
             return Response.text();
 
         }).then(respostaBucket => {
-            console.log(respostaBucket)
-            
-            
+          var csv = respostaBucket.split("\n")
+            var resultado = []
+            var headers = csv[0].split(",")
+
+            for(i=1; i < csv.length; i++){
+                var obj = {};
+                var linhaAtual=csv[i].split(",")
+                for(j=0; j <headers.length; j++){
+
+                    obj[headers[j]] = linhaAtual[j]
+                }
+                resultado.push(obj)
+            }
+            var jsonFinal = JSON.stringify(resultado);
+            console.log(resultado)
         })
-
-
+        
+     
     }
 
     function buscarPorComponenteDash() {

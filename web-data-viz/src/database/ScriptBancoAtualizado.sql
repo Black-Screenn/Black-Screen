@@ -140,8 +140,8 @@ INSERT INTO Usuario (Nome, Email, Senha, Fk_Empresa, Fk_Cargo) VALUES
 ('Pedro Suporte', 'pedro@blackscreen.com', '12345', 1, 3);  -- Teste Técnico
 
 INSERT INTO Caixa (Macaddress, codigoCaixa, Fk_Endereco_Maquina, Fk_Empresa) VALUES 
-('00:1B:44:11:3A:B7', 'TOTEM-JK-01', 2, 1),
-('00:1B:44:11:3A:B8', 'TOTEM-SE-02', 3, 1);
+('80160640191877', 'TOTEM-JK-01', 2, 1),
+('185691056330935', 'TOTEM-SE-02', 3, 1);
 
 INSERT INTO Componentes (Nome_Componente, Unidade, Fk_Empresa) VALUES 
 ('CPU', '%', 1),       -- ID 1
