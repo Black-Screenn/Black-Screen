@@ -117,7 +117,7 @@
             </div>
 
             <div class="help-desk content">
-                <h1>Caixa XXX</h1>
+                <h1 id="maquinaid">Caixa XXX</h1>
 
                 <div class="charts-grid">
                     <div
@@ -165,6 +165,8 @@
 
         <script>
             b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
+            const urlparam = new URLSearchParams(window.location.search);
+            maquinaid.innerHTML = "Caixa #" + urlparam.get("id");
         </script>
     </body>
 </html>
