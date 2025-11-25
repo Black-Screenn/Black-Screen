@@ -5,9 +5,9 @@
     <link rel="shortcut icon" href="../assets/imgs/blackscreenicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlackScreen | Ranking</title>
-    
-     <link rel="stylesheet" href="./../css/dashboards.css">
+    <title>BlackScreen | Lista Alertas</title>
+
+    <link rel="stylesheet" href="./../css/dashboards.css">
     <link rel="stylesheet" href="./../css/dashboardRanking.css">
     <link rel="stylesheet" href="./../css/dashboardFunc.css">
     <link rel="stylesheet" href="./../css/estilo.css" />
@@ -15,18 +15,20 @@
     <script src="./../js/alerta.js"></script>
 
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    
+
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-    
+
     <link
         href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
 
     <style>
-        
+
     </style>
 </head>
-<body>    <div class="janela">
+
+<body>
+    <div class="janela">
         <div class="header-left">
             <img src="../assets/imgs/blackscreenlogo.png" alt="BlackScreen">
 
@@ -34,7 +36,7 @@
                 <h3>Bem vindo, <br><span id="b_usuario">usuário</span>!</h3>
             </div>
 
-           <div class="links">
+            <div class="links">
                 <div class="btn-nav">
                     <a href="../dashboard/dashboard.html">
                         <span class="material-symbols-outlined">
@@ -45,7 +47,7 @@
                         </h3>
                     </a>
                 </div>
-    
+
                 <div class="btn-nav-white">
                     <a href="../dashboard/logAlertas.html">
                         <span class="material-symbols-outlined">
@@ -94,8 +96,8 @@
                 </div>
 
 
-                
-    
+
+
                 <div class="btn-nav-white">
                     <a href="./insight.html">
                         <span class="material-symbols-outlined">
@@ -106,7 +108,7 @@
                         </h3>
                     </a>
                 </div>
-    
+
                 <div class="btn-nav-white">
                     <a href="./perfil.html">
                         <span class="material-symbols-outlined">
@@ -128,11 +130,11 @@
         <div class="content">
             <div class="listaAtm">
                 <div class="header">
-                    Ranking de ATMs com mais alertas
+                    Lista de ATMs com alertas
                 </div>
                 <div class="lista">
                     <div class="lista-header">
-                        <p class="id">ID</p>
+                        
                         <p class="atm">Código ATM</p>
                         <p class="address">Endereço</p>
                         <p class="country">Cidade/UF</p>
@@ -145,71 +147,57 @@
             </div>
         </div>
     </div>
-    </body>
+</body>
 
-    <script>
-        var qtdAlertas = 0
+<script>
+    let qtdAlertas = 0
 
-        window.onload = () => {
-            carregarATMs();
-        };
+    window.onload = async () => {
+        await buscandoAlertasJiraKpi();
+        await carregarATMs();
+    };
 
-        function buscandoAlertasJiraKpi() {
-            fetch('http://98.83.124.125:8080/chamadosJira', {
+    async function buscandoAlertasJiraKpi() {
+        await fetch('http://98.83.124.125:8080/chamadosJira', {
             method: "GET"
 
-            }).then(Response => {
+        }).then(Response => {
 
             return Response.json();
 
-            }).then(resposta => {
-                const chamados = resposta.issues;
-                let atmId = []
-                let ATM_Alerta = document.querySelector('.ATM_Alerta')
-                chamados.forEach(chamado => {
-                
-                    statusNome = chamado.fields.status.name;
-                    chave = chamado.key;
-                    idMaquina = chamado.fields.description.content[0].content[0].text;
-                
-                    idAnterio = "";
-                    if (idMaquina.includes("ID ATM:") ) {
-                        if (!atmId.includes(idMaquina)) {
-                            atmId.push(idMaquina);
-                            console.log(statusNome)
+        }).then(resposta => {
+            const chamados = resposta.issues;
+            let atmId = []
+            let ATM_Alerta = document.querySelector('.ATM_Alerta')
+            chamados.forEach(chamado => {
 
-                            if(!idMaquina == idAnterio ){
-                                idAnterio = idMaquina;
-                                console.log(idMaquina)
-                                console.log(idAnterio)
-                            }
-                        }
+                let statusNome = chamado.fields.status.name;
+                let chave = chamado.key;
+                let idMaquina = chamado.fields.description.content[0].content[0].text;
+
+                let idAnterio = idMaquina;
+                if (idMaquina.includes("ID ATM:")) {
+                    if (!atmId.includes(idMaquina)) {
+                        atmId.push(idMaquina);
+                        console.log(statusNome)
+                        console.log(idMaquina)
                     }
+                }
 
+                
 
-
-                    for(i = 0; i<=atmId.length; i++){
-                        chaveAnterior= "";
-                        chaveAtual= chamado.key;
-                        idAnterior == "";
-                        idATMAtual= atmId[i].idMaquina;
-                        if(!chaveAnterior == chaveAtual && !idAnterior == idATMAtual){
-                            qtdAlertas++
-                            chaveAnterior= chaveAtual;
-                            idAnterior= idATMAtual;
-                        }
-                    }
-
-                    const container = document.querySelector('.classCompontes');
-
-                    container.innerHTML = '';
-
-                console.log(idMaquina)
-                })
+                if (idMaquina == idAnterio) {
+                    qtdAlertas++;
+                }else if (!idMaquina == idAnterio) {
+                    idAnterio = idMaquina;
+                    qtdAlertas = 0;
+                }
             })
-        }
+            console.log(qtdAlertas)
+        })
+    }
 
-        function carregarATMs() {
+    function carregarATMs() {
         fetch("/caixas/listar", {
             method: "GET",
             headers: {
@@ -222,7 +210,7 @@
                 atmsData = data;
                 const listaContent = document.querySelector(".lista-content");
                 listaContent.innerHTML = "";
-                
+
                 if (data.length === 0) {
                     listaContent.innerHTML = "<p style='padding: 20px; text-align: center;'>Nenhum ATM cadastrado.</p>";
                     return;
@@ -231,26 +219,26 @@
                 data.forEach(atm => {
                     const item = document.createElement("div");
                     item.classList.add("lista-item");
-                    
+
                     const endereco = `${atm.Logradouro}, ${atm.Bairro}`;
                     const cidadeUF = `${atm.Cidade}/${atm.UF}`;
-                    
+
                     item.innerHTML = `
-                        <p class="id">${atm.id}</p>
+                        
                         <p class="atm">${atm.codigoCaixa}</p>
                         <p class="address">${endereco}</p>
                         <p class="country">${cidadeUF}</p>
-                        <p class="alertas" id="comp_count_${atm.id}">-</p>
+                        <p class="alertas" id="comp_count_${atm.id}">${qtdAlertas}</p>
                         <p class="acao">
                             <a class="link" href="./visao_detalhada.html"> Visão Detalhada </a> 
                         </p>
                     `;
                     listaContent.appendChild(item);
-                    
+
                 });
             })
             .catch(error => {
                 console.error("Erro ao carregar ATMs:", error);
             });
-        }
-    </script>
+    }
+</script>
