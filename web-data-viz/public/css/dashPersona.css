@@ -44,7 +44,11 @@
 .perosna-kpi:hover .metric-info h4 {
     color: rgb(0, 0, 0) !important;
 }
-
+.perosna-kpi .metric-info p {
+        font-size: 20px;
+    font-weight: 700;
+    font-style: italic;
+}
 .perosna-kpi .metric-info p {
     color: white !important;
 }

@@ -2,6 +2,10 @@ DROP DATABASE IF EXISTS BlackScreen;
 CREATE DATABASE BlackScreen;
 USE BlackScreen;
 
+-- ==========================================================
+-- 1. CRIAÇÃO DAS TABELAS
+-- ==========================================================
+
 CREATE TABLE Enderecos (
     Id_Endereco INT AUTO_INCREMENT PRIMARY KEY,
     Cep VARCHAR(9),
@@ -84,7 +88,7 @@ CREATE TABLE Caixa_Componente (
 
 CREATE TABLE Parametros (
     Id_Parametro INT AUTO_INCREMENT PRIMARY KEY,
-    Valor_Parametrizado INT NOT NULL,
+    Valor_Parametrizado DECIMAL(10,2) NOT NULL, -- Mudei para Decimal para aceitar pontos se precisar
     Fk_Componente INT,
     CONSTRAINT FK_Parametros_Componentes
         FOREIGN KEY (Fk_Componente) REFERENCES Componentes(Id_Componente)
@@ -119,7 +123,9 @@ CREATE TABLE Relatorio (
     FOREIGN KEY (Fk_Empresa) REFERENCES Empresa(Id_Empresa)
 );
 
-USE BlackScreen;
+-- ==========================================================
+-- 2. INSERÇÃO DE DADOS (POPULAÇÃO)
+-- ==========================================================
 
 INSERT INTO Enderecos (Cep, Pais, Cidade, UF, Logradouro, Numero, Latitude, Longitude, Bairro, Complemento) VALUES
 ('01310-100', 'Brasil', 'São Paulo', 'SP', 'Av. Paulista', 1000, -23.56168, -46.65598, 'Bela Vista', 'Andar 10'),
@@ -130,40 +136,53 @@ INSERT INTO Empresa (Nome_Empresa, Cnpj, Fk_Endereco) VALUES
 ('BlackScreen Solutions', '12.345.678/0001-99', 1);
 
 INSERT INTO Cargo (Nome_Cargo, Fk_Empresa) VALUES
-('Admin', 1),              -- ID 1: Vai para dashboardAdm
-('Analista', 1),           -- ID 2: Vai para dashboard comum, IS_ADMIN false
-('Tecnico de Suporte', 1); -- ID 3: Vai para dashboard comum, IS_ADMIN false
+('Admin', 1),
+('Analista', 1),
+('Tecnico de Suporte', 1);
 
 INSERT INTO Usuario (Nome, Email, Senha, Fk_Empresa, Fk_Cargo) VALUES
-('Carlos Admin', 'admin@blackscreen.com', '12345', 1, 1),   -- Teste Admin
-('Ana Analista', 'ana@blackscreen.com', '12345', 1, 2),     -- Teste Analista
-('Pedro Suporte', 'pedro@blackscreen.com', '12345', 1, 3);  -- Teste Técnico
+('Carlos Admin', 'admin@blackscreen.com', '12345', 1, 1),
+('Ana Analista', 'ana@blackscreen.com', '12345', 1, 2),
+('Pedro Suporte', 'pedro@blackscreen.com', '12345', 1, 3);
 
+-- AQUI ESTÃO AS CAIXAS (Seu MAC 8016... é a caixa ID 3)
 INSERT INTO Caixa (Macaddress, codigoCaixa, Fk_Endereco_Maquina, Fk_Empresa) VALUES
-('764275743843724', 'TOTEM-JK-01', 2, 1),
-('038473474382445', 'TOTEM-SE-02', 3, 1),
-('80160640191877', 'TOTEM-JK-01', 2, 1),
-('185691056330935', 'TOTEM-SE-02', 3, 1);
-=======
+('764275743843724', 'TOTEM-JK-01', 2, 1), -- ID 1
+('038473474382445', 'TOTEM-SE-02', 3, 1), -- ID 2
+('80160640191877', 'TOTEM-JK-02', 2, 1),  -- ID 3 (SUA MÁQUINA DO CSV)
+('185691056330935', 'TOTEM-SE-03', 3, 1); -- ID 4
 
+-- AQUI ADICIONEI OS COMPONENTES DO SEU CSV
 INSERT INTO Componentes (Nome_Componente, Unidade, Fk_Empresa) VALUES
-('CPU', '%', 1),       -- ID 1
-('Memória RAM', 'GB', 1), -- ID 2
-('Disco Rígido', 'GB', 1); -- ID 3
+('CPU', '%', 1),                    -- ID 1
+('RAM', '%', 1),                    -- ID 2 (Mudei pra % pois no CSV parece percentual)
+('Disco', 'GB', 1),                 -- ID 3
+('Rede - Bytes Enviados', 'Bytes', 1),   -- ID 4
+('Rede - Bytes Recebidos', 'Bytes', 1),  -- ID 5
+('Rede - Pacotes Perdidos', 'Qtd', 1);   -- ID 6
 
+-- AQUI LIGAMOS OS COMPONENTES ÀS CAIXAS
+-- Ligando tudo na sua máquina (ID 3 - 80160640191877) para testar
 INSERT INTO Caixa_Componente (Fk_Caixa, Fk_Componente) VALUES
-(1, 1), (1, 2), (1, 3),
-(2, 1), (2, 2), (2, 3);
+(1, 1), (1, 2), (1, 3), -- Caixa 1 tem CPU, RAM, Disco
+(2, 1), (2, 2), (2, 3), -- Caixa 2 tem CPU, RAM, Disco
+(3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6); -- Caixa 3 (SUA) tem TUDO!
 
+-- AQUI ESTÃO OS PARÂMETROS PARA GERAR ALERTAS (Trigger Points)
+-- Baseado no seu CSV:
+-- CPU chega a 97.8 -> Limite 90 (VAI ALERTA)
+-- RAM chega a 88.8 -> Limite 80 (VAI ALERTA)
+-- Pacotes Perdidos chega a 5491 -> Limite 5000 (VAI ALERTA)
 INSERT INTO Parametros (Valor_Parametrizado, Fk_Componente) VALUES
-(90, 1), -- Alerta se CPU passar de 90%
-(80, 2); -- Alerta se RAM passar de 80% (Considerando uso percentual ou valor fixo dependendo da sua lógica)
+(90.00, 1),  -- Alerta CPU > 90%
+(80.00, 2),  -- Alerta RAM > 80%
+(5000.00, 6); -- Alerta Pacotes Perdidos > 5000
 
 INSERT INTO Permissao (Nome_Permissao, Descricao_Permissao) VALUES
 ('DASHBOARD_FULL', 'Acesso completo aos gráficos'),
 ('DASHBOARD_VIEW', 'Apenas visualização');
 
 INSERT INTO CargoPermissao (Fk_Cargo, Fk_Permissao) VALUES
-(1, 1), -- Admin tem acesso full
-(2, 1), -- Analista tem acesso full
-(3, 2); -- Tecnico apenas visualiza
+(1, 1),
+(2, 1),
+(3, 2);
