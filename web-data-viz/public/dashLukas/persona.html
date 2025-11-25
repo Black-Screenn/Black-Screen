@@ -273,33 +273,78 @@
 
 
    
-    function lerCsvBucket(csv) {
-        fetch("/bucket/processos", {
-            method: "GET"
-        }).then(Response => {
-            console.log(Response)
-            return Response.text();
+    async function lerCsvBucket() {
+    const bucketUrl = "https://client-blackscreen.s3.us-east-1.amazonaws.com";
+    const pasta = "Maquina/";
+    
+     const STORAGE_KEY_DADOS = "csv_dados_cache";
+    const STORAGE_KEY_VERSAO = "csv_versao_hash";
 
-        }).then(respostaBucket => {
-          var csv = respostaBucket.split("\n")
-            var resultado = []
-            var headers = csv[0].split(",")
-
-            for(i=1; i < csv.length; i++){
-                var obj = {};
-                var linhaAtual=csv[i].split(",")
-                for(j=0; j <headers.length; j++){
-
-                    obj[headers[j]] = linhaAtual[j]
-                }
-                resultado.push(obj)
-            }
-            var jsonFinal = JSON.stringify(resultado);
-            console.log(resultado)
-        })
+    try {
+        const responseList = await fetch(`${bucketUrl}?list-type=2&prefix=${pasta}`);
+        if (!responseList.ok) throw new Error("Erro ao listar bucket");
         
-     
+        const xmlText = await responseList.text();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+        
+        const conteudos = xmlDoc.getElementsByTagName("Contents");
+        const urlsParaBaixar = [];
+        let assinaturaAtual = ""; 
+        for (let i = 0; i < conteudos.length; i++) {
+            const key = conteudos[i].getElementsByTagName("Key")[0].textContent;
+            const etag = conteudos[i].getElementsByTagName("ETag")[0].textContent;
+
+            if (key.endsWith(".csv")) {
+                urlsParaBaixar.push(`${bucketUrl}/${key}`);
+                assinaturaAtual += key + etag; 
+            }
+        }
+
+        const assinaturaSalva = sessionStorage.getItem(STORAGE_KEY_VERSAO);
+        const dadosSalvos = sessionStorage.getItem(STORAGE_KEY_DADOS);
+
+        if (assinaturaAtual === assinaturaSalva && dadosSalvos) {
+            
+            return JSON.parse(dadosSalvos);
+        }
+
+       
+
+        const requests = urlsParaBaixar.map(url => fetch(url).then(res => res.text()));
+        const conteudosClient = await Promise.all(requests);
+        let resultadoFinal = [];
+
+        conteudosClient.forEach(respostaBucket => {
+            var csv = respostaBucket.trim().split("\n"); 
+            var headers = csv[0].split(",");            
+            for(var i = 1; i < csv.length; i++){
+                var obj = {};
+                var linhaAtual = csv[i].replace('\r', '').split(",");
+
+                if (linhaAtual.length === headers.length) {
+                    for(var j = 0; j < headers.length; j++){
+                        var chave = headers[j].trim();
+                        var valor = linhaAtual[j];
+                        obj[chave] = valor;
+                    }
+                    resultadoFinal.push(obj);
+                }
+            }
+        });
+
+        sessionStorage.setItem(STORAGE_KEY_VERSAO, assinaturaAtual);
+        sessionStorage.setItem(STORAGE_KEY_DADOS, JSON.stringify(resultadoFinal));
+        
+       
+        return resultadoFinal;
+
+    } catch (erro) {
+        console.error("Erro ao processar CSVs:", erro);
+        return []; // Retorna array vazio em caso de erro para não quebrar o front
     }
+}
+
 
     function buscarPorComponenteDash() {
         fetch('http://98.83.124.125:8080/chamadosJira', {
@@ -663,7 +708,7 @@
 
             if (totalDeChamadosAbertos === 0 && totalDeChamadosReabertos === 0) {
 
-                innerHTML = '<p class="sem-alertas">Nenhum chamado em alerta no momento.</p>';
+                classCompontes_alertas.innerHTML = '<p class="sem-alertas">Nenhum chamado em alerta no momento.</p>';
             }
             else {
                 totalDeChamadosAbertos += totalDeChamadosReabertos;
