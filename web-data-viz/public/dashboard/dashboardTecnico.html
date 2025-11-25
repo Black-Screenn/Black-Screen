@@ -128,7 +128,7 @@
             <div class="top">
 
                 <!-- se tirar isso quebra o mapa inteiro kkkkk -->
-                <button class="btn-expand-kpi material-symbols-outlined">keyboard_arrow_up</button>
+
 
                 <div class="pesquisa-filtros">
                     <div class="pesquisa-div">
@@ -252,15 +252,6 @@
 
 
     <script>
-        document.querySelector('.btn-expand-kpi').addEventListener('click', function(){
-            const kpis = document.querySelector('.content .kpis');
-            kpis.classList.toggle('expanded');
-            if (kpis.classList.contains('expanded')) {
-                this.style.rotate = '0deg';
-            } else {
-                this.style.rotate = '180deg';
-            }
-        });
 
         function closeModal(){
             document.getElementById('modal').style.display = "none";
