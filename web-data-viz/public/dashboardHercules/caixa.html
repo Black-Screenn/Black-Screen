@@ -56,8 +56,8 @@
                     </h3>
                 </div>
                 <div class="links">
-                    <div class="btn-nav-white">
-                        <a href="dashboard.html"
+                    <div class="btn-nav">
+                        <a href="../dashboard/dashboardTecnico.html"
                             ><span class="material-symbols-outlined">home</span>
                             <h3>Ínicio</h3></a
                         >
@@ -71,7 +71,7 @@
                         >
                     </div>
                     <div class="btn-nav-white">
-                        <a href="../dashboard/atm.html"
+                        <a href="./../dashboard/atm.htm"
                             ><span class="material-symbols-outlined"
                                 >local_atm</span
                             >
@@ -86,8 +86,8 @@
                             <h3>Componentes</h3></a
                         >
                     </div>
-                    <div class="btn-nav">
-                        <a href="../dashLukas/persona.html"
+                    <div class="btn-nav-white">
+                        <a href="./../dashLukas/persona.html"
                             ><span class="material-symbols-outlined"
                                 >signal_cellular_alt</span
                             >
@@ -95,7 +95,7 @@
                         >
                     </div>
                     <div class="btn-nav-white">
-                        <a href="../dashboard/insight.html"
+                        <a href="./../dashboard/insight.html"
                             ><span class="material-symbols-outlined"
                                 >search_insights</span
                             >
@@ -103,7 +103,7 @@
                         >
                     </div>
                     <div class="btn-nav-white">
-                        <a href="../dashboard/perfil.html"
+                        <a href="./../dashboard/perfil.html"
                             ><span class="material-symbols-outlined"
                                 >account_circle</span
                             >
@@ -147,24 +147,31 @@
                 <div class="charts-grid-single">
                     <div
                         class="containerBarra container_jira container chart-card full-width"
-                        style="
-                            display: flex;
-                            gap: 10px;
-                            justify-content: space-between;
-                        "
                     >
-                        <div
-                            id="lineChart1"
-                            style="flex: 1; height: 300px; min-width: 0"
-                        ></div>
-                        <div
-                            id="barChart"
-                            style="flex: 1; height: 300px; min-width: 0"
-                        ></div>
-                        <div
-                            id="lineChart2"
-                            style="flex: 1; height: 300px; min-width: 0"
-                        ></div>
+                        <div class="period-selector">
+                            <label for="periodSelect"
+                                ><strong>Selecionar período:</strong></label
+                            >
+                            <select id="periodSelect">
+                                <option value="7">Últimos 7 dias</option>
+                                <option value="30">Últimos 30 dias</option>
+                                <option value="90">Últimos 3 meses</option>
+                            </select>
+                        </div>
+                        <div class="graficos-row">
+                            <div style="flex: 1; min-width: 0; height: 100%">
+                                <h3>Gráfico 1: Crescimento Mensal</h3>
+                                <div id="lineChart1"></div>
+                            </div>
+                            <div style="flex: 1; min-width: 0; height: 100%">
+                                <h3>Gráfico 2: Volume por Mês</h3>
+                                <div id="barChart"></div>
+                            </div>
+                            <div style="flex: 1; min-width: 0; height: 100%">
+                                <h3>Gráfico 3: Tendência</h3>
+                                <div id="lineChart2"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -180,7 +187,23 @@
         <script>
             b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
             const urlparam = new URLSearchParams(window.location.search);
+            const mac = urlparam.get("id");
             maquinaid.innerHTML = "Caixa #" + urlparam.get("id");
+
+            fetch("/caixas/listarinfo", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    mac: mac,
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
 
             const optionsLine1 = {
                 chart: { type: "line", height: 300 },
@@ -197,6 +220,10 @@
                         "Jun",
                         "Jul",
                     ],
+                    title: { text: "Meses" },
+                },
+                yaxis: {
+                    title: { text: "Quantidade" },
                 },
             };
 
@@ -215,6 +242,10 @@
                         "Jun",
                         "Jul",
                     ],
+                    title: { text: "Meses" },
+                },
+                yaxis: {
+                    title: { text: "Volume" },
                 },
             };
 
@@ -233,6 +264,10 @@
                         "Jun",
                         "Jul",
                     ],
+                    title: { text: "Meses" },
+                },
+                yaxis: {
+                    title: { text: "Tendência" },
                 },
             };
 
@@ -252,6 +287,49 @@
             lineChart1.render();
             barChart.render();
             lineChart2.render();
+
+            fetch("/caixas/listar", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    mac: maquinaid,
+                },
+            })
+                .then((r) => r.json())
+                .then((lista) => {
+                    const group = L.featureGroup();
+                    lista.forEach((c) => {
+                        if (c.Latitude == null || c.Longitude == null) return;
+
+                        marker = L.marker([c.Latitude, c.Longitude], {
+                            icon: icon,
+                        })
+                            .bindPopup(
+                                `<b>${c.codigoCaixa}</b><br>${c.Logradouro}<br>${c.Bairro} - ${c.Cidade}/${c.UF}<br> <i>Empresa dona: </i>${c.eNome}<br> <i>Código da empresa: </i> ${c.Id_Empresa}`,
+                            )
+                            .addTo(group);
+                        marker.on("mouseover", function (ev) {
+                            ev.target.openPopup();
+                        });
+                        marker.on("mouseout", function (ev) {
+                            ev.target.closePopup();
+                        });
+
+                        marker.on("click", function (e) {
+                            window.location.href = `../dashboardHercules/caixa.html?id=${c.Macaddress}`;
+                        });
+                    });
+
+                    if (group.getLayers().length) {
+                        group.addTo(map);
+                        try {
+                            map.fitBounds(group.getBounds().pad(0.2));
+                        } catch (_) {}
+                    }
+                })
+                .catch((err) =>
+                    console.error("Falha ao carregar /caixas:", err),
+                );
         </script>
     </body>
 </html>

@@ -30,18 +30,29 @@ function listarPorEmpresa(fkEmpresa) {
   return db.executar(sql);
 }
 
+function listarInfo(dado) {
+  const mac = Number(dado);
+  if (!Number.isInteger(mac)) {
+    return Promise.reject(new Error("mac inválido"));
+  }
+  const sql = SQL_BASE + ` and c.Macaddress = ${mac}`;
+  return db.executar(sql);
+}
+
 function buscarPorMac(mac) {
   if (!mac || mac == "") {
     return Promise.reject(new Error("mac inválido"));
   }
-  const sql = SQL_BASE + ` and (c.MacAddress = "${mac}" or c.mac = "${mac}" or c.MAC = "${mac}") limit 1`;
+  const sql =
+    SQL_BASE +
+    ` and (c.MacAddress = "${mac}" or c.mac = "${mac}" or c.MAC = "${mac}") limit 1`;
   return db.executar(sql);
 }
 
-async function cadastrar(caixa){
+async function cadastrar(caixa) {
   let sql = `
     SELECT COUNT(Id_Caixa) AS Id_Caixa FROM Caixa WHERE Fk_Empresa = ${caixa.idEmpresa};
-  `
+  `;
 
   res = await db.executar(sql);
 
@@ -49,27 +60,33 @@ async function cadastrar(caixa){
     INSERT INTO Enderecos(Cep, Logradouro, Bairro, Cidade, UF, Pais, Latitude, Longitude )
       VALUES("${caixa.cep}", "${caixa.logradouro}", "${caixa.bairro}", "${caixa.cidade}", "${caixa.uf}", "${caixa.pais}", ${caixa.latitude}, ${caixa.longitude})
   `;
-  
+
   await db.executar(sql);
 
   sql = `
     SELECT MAX(Id_Endereco) AS idEndereco FROM Enderecos;
-  `
+  `;
   const enderecoResult = await db.executar(sql);
   const idEndereco = enderecoResult[0].idEndereco;
 
   sql = `
     SELECT MAX(Id_Caixa) AS idCaixa FROM Caixa WHERE Fk_Empresa = ${caixa.idEmpresa};
-  `
-  return db.executar(sql).then(result => {
+  `;
+  return db.executar(sql).then((result) => {
     const idCaixa = result[0].idCaixa;
-    console.log(result)
+    console.log(result);
     sql = `
       INSERT INTO Caixa(codigoCaixa, Macaddress, Fk_Empresa, Fk_Endereco_Maquina)
-        VALUES("CX-${idCaixa+1}_${caixa.idEmpresa}", "${caixa.macaddress}", ${caixa.idEmpresa}, ${idEndereco});
-    `
+        VALUES("CX-${idCaixa + 1}_${caixa.idEmpresa}", "${caixa.macaddress}", ${caixa.idEmpresa}, ${idEndereco});
+    `;
     return db.executar(sql).then(() => idCaixa);
   });
 }
 
-module.exports = { listarTodos, listarPorEmpresa, cadastrar, buscarPorMac };
+module.exports = {
+  listarTodos,
+  listarPorEmpresa,
+  cadastrar,
+  buscarPorMac,
+  listarInfo,
+};
