@@ -117,7 +117,7 @@
             </div>
 
             <div class="help-desk content">
-                <h1 id="maquinaid">Caixa XXX</h1>
+                <h1 id="maquinaid">Caixa valor</h1>
 
                 <div class="charts-grid">
                     <div
@@ -127,12 +127,39 @@
                         <div class="info-columns">
                             <div class="coluna1">
                                 <div class="infosdentro">
-                                    <p>Código máquina</p>
-                                    <span>oi</span>
+                                    <p>Logradouro:</p>
+                                    <span id="rua">valor</span>
+                                </div>
+                                <div class="infosdentro">
+                                    <p>Bairro:</p>
+                                    <span id="bairro">valor</span>
+                                </div>
+                                <div class="infosdentro">
+                                    <p>Cidade:</p>
+                                    <span id="cidade">valor</span>
+                                </div>
+                                <div class="infosdentro">
+                                    <p>Estado:</p>
+                                    <span id="estado">valor</span>
                                 </div>
                             </div>
                             <div class="coluna2">
-                                <p>oi</p>
+                                <div class="infosdentro">
+                                    <p>Disponibilidade:</p>
+                                    <span id="disponibilidade">valor</span>
+                                </div>
+                                <div class="infosdentro">
+                                    <p>Latência:</p>
+                                    <span id="estado">valor</span>
+                                </div>
+                                <div class="infosdentro">
+                                    <p>Perda de pacotes:</p>
+                                    <span id="estado">valor</span>
+                                </div>
+                                <div class="infosdentro">
+                                    <p>Status:</p>
+                                    <span id="estado">valor</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -211,6 +238,11 @@
                 .then((response) => response.json())
                 .then((data) => {
                     console.log(data);
+                    maquinaid.innerHTML = "Caixa " + data[0].codigoCaixa;
+                    rua.innerHTML = data[0].Logradouro;
+                    estado.innerHTML = data[0].UF;
+                    cidade.innerHTML = data[0].Cidade;
+                    bairro.innerHTML = data[0].Bairro;
                 })
                 .catch((error) => {
                     console.error(error);
@@ -298,49 +330,6 @@
             lineChart1.render();
             barChart.render();
             lineChart2.render();
-
-            fetch("/caixas/listar", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    mac: maquinaid,
-                },
-            })
-                .then((r) => r.json())
-                .then((lista) => {
-                    const group = L.featureGroup();
-                    lista.forEach((c) => {
-                        if (c.Latitude == null || c.Longitude == null) return;
-
-                        marker = L.marker([c.Latitude, c.Longitude], {
-                            icon: icon,
-                        })
-                            .bindPopup(
-                                `<b>${c.codigoCaixa}</b><br>${c.Logradouro}<br>${c.Bairro} - ${c.Cidade}/${c.UF}<br> <i>Empresa dona: </i>${c.eNome}<br> <i>Código da empresa: </i> ${c.Id_Empresa}`,
-                            )
-                            .addTo(group);
-                        marker.on("mouseover", function (ev) {
-                            ev.target.openPopup();
-                        });
-                        marker.on("mouseout", function (ev) {
-                            ev.target.closePopup();
-                        });
-
-                        marker.on("click", function (e) {
-                            window.location.href = `../dashboardHercules/caixa.html?id=${c.Macaddress}`;
-                        });
-                    });
-
-                    if (group.getLayers().length) {
-                        group.addTo(map);
-                        try {
-                            map.fitBounds(group.getBounds().pad(0.2));
-                        } catch (_) {}
-                    }
-                })
-                .catch((err) =>
-                    console.error("Falha ao carregar /caixas:", err),
-                );
         </script>
     </body>
 </html>
