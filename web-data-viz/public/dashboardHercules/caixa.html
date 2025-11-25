@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-br">
+    <head>
+        <link
+            rel="shortcut icon"
+            href="../assets/imgs/blackscreenicon.ico"
+            type="image/x-icon"
+        />
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale-1.0" />
+        <title>BlackScreen | Dashboards</title>
+
+        <link rel="stylesheet" href="../css/cssTecnico.css" />
+        <link rel="stylesheet" href="./../css/dashboards.css" />
+        <link rel="stylesheet" href="./../css/style.css" />
+
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        />
+        <script src="../js/sessao.js"></script>
+        <script src="./../js/alerta.js"></script>
+
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+            rel="stylesheet"
+        />
+
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""
+        />
+        <script
+            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""
+        ></script>
+        <script src="../js/leaflet-heat.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    </head>
+
+    <body>
+        <div class="janela">
+            <div class="header-left">
+                <img
+                    src="../assets/imgs/blackscreenlogo.png"
+                    alt="BlackScreen"
+                />
+                <div class="hello">
+                    <h3>
+                        Bem vindo, <br /><span id="b_usuario">usuário</span>!
+                    </h3>
+                </div>
+                <div class="links">
+                    <div class="btn-nav-white">
+                        <a href="dashboard.html"
+                            ><span class="material-symbols-outlined">home</span>
+                            <h3>Ínicio</h3></a
+                        >
+                    </div>
+                    <div class="btn-nav-white">
+                        <a href="../dashboard/logAlertas.html"
+                            ><span class="material-symbols-outlined"
+                                >notifications</span
+                            >
+                            <h3>Alertas</h3></a
+                        >
+                    </div>
+                    <div class="btn-nav-white">
+                        <a href="../dashboard/atm.html"
+                            ><span class="material-symbols-outlined"
+                                >local_atm</span
+                            >
+                            <h3>ATMs</h3></a
+                        >
+                    </div>
+                    <div class="btn-nav-white">
+                        <a href="../dashboard/cadastroComponentes.html"
+                            ><span class="material-symbols-outlined"
+                                >health_and_safety</span
+                            >
+                            <h3>Componentes</h3></a
+                        >
+                    </div>
+                    <div class="btn-nav">
+                        <a href="../dashLukas/persona.html"
+                            ><span class="material-symbols-outlined"
+                                >signal_cellular_alt</span
+                            >
+                            <h3>Persona</h3></a
+                        >
+                    </div>
+                    <div class="btn-nav-white">
+                        <a href="../dashboard/insight.html"
+                            ><span class="material-symbols-outlined"
+                                >search_insights</span
+                            >
+                            <h3>Insights</h3></a
+                        >
+                    </div>
+                    <div class="btn-nav-white">
+                        <a href="../dashboard/perfil.html"
+                            ><span class="material-symbols-outlined"
+                                >account_circle</span
+                            >
+                            <h3>Meu Perfil</h3></a
+                        >
+                    </div>
+                </div>
+                <div class="btn-logout" onclick="limparSessao()">
+                    <h3>Sair</h3>
+                </div>
+            </div>
+
+            <div class="help-desk content">
+                <h1>Caixa XXX</h1>
+
+                <div class="charts-grid">
+                    <div
+                        class="container_jira chart-card employees-by-role-bar full-width double-height"
+                    >
+                        <h3>Informações da máquina</h3>
+                    </div>
+
+                    <div class="right-cards">
+                        <div
+                            class="grafico chart-card container employees-status half-height"
+                        >
+                            <h3>Data de manutenção recomendada</h3>
+                            <div class="chart-container">
+                                <div id="myChart"></div>
+                            </div>
+                        </div>
+                        <div
+                            class="grafico chart-card container employees-status half-height"
+                        >
+                            <h3>Último chamado</h3>
+                            <div class="chart-container"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h1>Componentes</h1>
+
+                <div class="charts-grid-single">
+                    <div
+                        class="containerBarra container_jira container chart-card full-width"
+                    >
+                        <h3>Gráficos</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="meuModalJira" class="modal-container" style="display: none">
+            <div class="modal-content">
+                <span class="fechar" onclick="fecharModal()">&times;</span>
+                <div id="conteudoModal"></div>
+            </div>
+        </div>
+
+        <script>
+            b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
+        </script>
+    </body>
+</html>

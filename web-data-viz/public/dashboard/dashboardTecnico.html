@@ -244,60 +244,6 @@
             </div>
         </div>
 
-        <div id="modal-ia">
-            <div class="modal-ia-content">
-                <div class="modal-ia-header">
-                    <div>
-                        <h2 id="modal-ia-title">Estado Detalhes</h2>
-                        <p>Análise Preditiva e Monitoramento de Hardware</p>
-                    </div>
-                    <button class="btn-close-ia material-symbols-outlined" onclick="closeIaModal()">close</button>
-                </div>
-                <div class="modal-ia-body">
-                    <div class="kpi-grid">
-                        <div class="kpi-card blue">
-                            <div class="kpi-label">Mediana CPU</div>
-                            <div class="kpi-value" id="ia-cpu">45%</div>
-                        </div>
-                        <div class="kpi-card purple">
-                            <div class="kpi-label">Mediana RAM</div>
-                            <div class="kpi-value" id="ia-ram">8.2 GB</div>
-                        </div>
-                        <div class="kpi-card orange">
-                            <div class="kpi-label">Mediana Disco</div>
-                            <div class="kpi-value" id="ia-disk">72%</div>
-                        </div>
-                        <div class="kpi-card green">
-                            <div class="kpi-label">Rede (I/O)</div>
-                            <div class="kpi-value" id="ia-net">450 MB/s</div>
-                        </div>
-                    </div>
-
-                    <div class="chart-container">
-                        <h3 style="margin-bottom: 10px; color: #333;">Previsão de Consumo (Próximas 24h)</h3>
-                        <div id="chart-regression" style="width: 100%; height: 300px;"></div>
-                    </div>
-
-                    <div>
-                        <h3 style="margin-bottom: 10px; color: #333;">Processos Críticos da Região</h3>
-                        <div class="table-container">
-                            <table class="table-ia">
-                                <thead>
-                                    <tr>
-                                        <th>Nome do Processo</th>
-                                        <th>PID</th>
-                                        <th>Uso CPU</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="process-table-body">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="">
@@ -366,25 +312,7 @@
                     });
 
                     marker.on('click', function (e){
-                        document.getElementById('modal').style.display = "flex";
-                        document.getElementById('caixa-name').textContent = c.codigoCaixa;
-                        document.getElementById('caixa-endereco').textContent = `${c.Logradouro} - ${c.Bairro}, ${c.Cidade}/${c.UF}`;
-                        statusCaixa = 1;
-                        if(statusCaixa === 1){
-                            document.getElementById('caixa-status').classList.remove('inativo');
-                            document.getElementById('caixa-status').classList.add('ativo');
-                            document.getElementById('caixa-status').innerHTML = `
-                                <span class="material-symbols-outlined">check_circle</span>
-                                Ativo
-                            `;
-                        } else {
-                            document.getElementById('caixa-status').classList.remove('ativo');
-                            document.getElementById('caixa-status').classList.add('inativo');
-                            document.getElementById('caixa-status').innerHTML = `
-                                <span class="material-symbols-outlined">cancel</span>
-                                Inativo
-                            `;
-                        }
+                        window.location.href = `../dashboardHercules/caixa.html?id=${c.Macaddress}`;
                     });
                 });
 
