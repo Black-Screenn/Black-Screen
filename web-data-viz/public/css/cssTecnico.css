@@ -138,6 +138,63 @@ body {
     gap: 10px;
     align-items: center;
 }
+
+#ultimoChamado {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1em;
+}
+
+.keyChamada {
+    font-weight: 700;
+    color: #444;
+    background: #eee;
+    border-radius: 6px;
+    padding: 2px 8px;
+    user-select: none;
+    font-family: monospace;
+}
+
+#ultimoChamado .nome {
+    font-weight: 700;
+    flex: 2;
+}
+
+#ultimoChamado .horario {
+    color: #666;
+    flex: 1.2;
+    text-align: center;
+}
+
+#ultimoChamado .status {
+    font-weight: 700;
+    flex: 1;
+    padding: 4px 10px;
+    border-radius: 12px;
+    text-align: center;
+    user-select: none;
+}
+
+#ultimoChamado .status.concluido {
+    background-color: #39ff14;
+    color: #000;
+}
+
+#ultimoChamado .status.outro {
+    background-color: #ccc;
+    color: #333;
+}
+
 #maquinaid {
     margin-top: 5px;
 }

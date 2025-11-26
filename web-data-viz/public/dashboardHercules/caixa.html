@@ -177,7 +177,12 @@
                             class="grafico chart-card container employees-status half-height"
                         >
                             <h3>Último chamado</h3>
-                            <div class="chart-container"></div>
+                            <div id="ultimoChamado">
+                                <div class="keyChamada">CHAMADO-123</div>
+                                <div class="nome">COMPONENTE</div>
+                                <div class="horario">00:00 01/01/1970</div>
+                                <div class="status concluido">${Concluído}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -250,11 +255,61 @@
                     console.error(error);
                 });
 
+            var chamado = {
+                key: "CHAMADO-89",
+                nome: "Chamado Exemplo",
+                horario: "10:30 - 25/11/2025",
+                status: "Concluído",
+            };
+
+            fetch("/caixas/buscarchamado", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: {
+                    jql: 'project = CHAMADO AND text ~ "%s" ORDER BY created DESC',
+                    maxResults: 1,
+                    fields: ["description"],
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+                    const container = document.getElementById("ultimoChamado");
+                    const statusClasse =
+                        data[0].status.toLowerCase() === "concluído"
+                            ? "concluido"
+                            : "outro";
+
+                    container.innerHTML = `
+                      <div class="keyChamada">${data[0]}</div>
+                      <div class="nome">${data[0]}</div>
+                      <div class="horario">${data[0]}</div>
+                      <div class="status ${statusClasse}">${data[0].status}</div>
+                    `;
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+
             const optionsLine1 = {
-                chart: { type: "line", height: 300 },
+                chart: {
+                    type: "line",
+                    height: 300,
+                    toolbar: { show: false },
+                },
                 series: [
-                    { name: "Série 1", data: [10, 41, 35, 51, 49, 62, 69] },
+                    {
+                        name: "Série 1",
+                        data: [10, 41, 35, 51, 49, 62, 69],
+                        color: "#004076",
+                    },
                 ],
+                stroke: {
+                    curve: "smooth",
+                    width: 3,
+                },
                 xaxis: {
                     categories: [
                         "Jan",
@@ -273,9 +328,17 @@
             };
 
             const optionsBar = {
-                chart: { type: "bar", height: 300 },
+                chart: {
+                    type: "bar",
+                    height: 300,
+                    toolbar: { show: false },
+                },
                 series: [
-                    { name: "Série 2", data: [23, 12, 54, 61, 32, 56, 81] },
+                    {
+                        name: "Série 2",
+                        data: [23, 12, 54, 61, 32, 56, 81],
+                        color: "#004076",
+                    },
                 ],
                 xaxis: {
                     categories: [
@@ -295,10 +358,22 @@
             };
 
             const optionsLine2 = {
-                chart: { type: "line", height: 300 },
+                chart: {
+                    type: "line",
+                    height: 300,
+                    toolbar: { show: false },
+                },
                 series: [
-                    { name: "Série 3", data: [30, 20, 60, 40, 70, 50, 90] },
+                    {
+                        name: "Série 3",
+                        data: [30, 20, 60, 40, 70, 50, 90],
+                        color: "#004076",
+                    },
                 ],
+                stroke: {
+                    curve: "smooth",
+                    width: 3,
+                },
                 xaxis: {
                     categories: [
                         "Jan",

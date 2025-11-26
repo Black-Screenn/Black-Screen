@@ -22,6 +22,16 @@ async function listar(req, res) {
   }
 }
 
+async function buscarChamado(req, res) {
+  try {
+    const dados = await caixaModel.listarPorEmpresa(fkNum);
+    return res.status(200).json(dados);
+  } catch (e) {
+    console.error("erro:", e.code, e.sqlMessage || e.message);
+    return res.status(500).json({ erro: "Falha ao consultar chamados" });
+  }
+}
+
 async function listarInfo(req, res) {
   try {
     const fk = req.headers["mac"];
@@ -101,4 +111,4 @@ async function buscarPorMac(req, res) {
   }
 }
 
-module.exports = { listar, cadastrar, buscarPorMac, listarInfo };
+module.exports = { listar, cadastrar, buscarPorMac, listarInfo, buscarChamado };
