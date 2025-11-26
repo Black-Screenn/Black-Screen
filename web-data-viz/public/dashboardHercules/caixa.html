@@ -175,13 +175,14 @@
                         </div>
                         <div
                             class="grafico chart-card container employees-status half-height"
+                            id="caixa-jira"
                         >
                             <h3>Último chamado</h3>
                             <div id="ultimoChamado">
                                 <div class="keyChamada">CHAMADO-123</div>
                                 <div class="nome">COMPONENTE</div>
                                 <div class="horario">00:00 01/01/1970</div>
-                                <div class="status concluido">${Concluído}</div>
+                                <div class="status concluido">Concluído</div>
                             </div>
                         </div>
                     </div>
@@ -255,39 +256,49 @@
                     console.error(error);
                 });
 
-            var chamado = {
-                key: "CHAMADO-89",
-                nome: "Chamado Exemplo",
-                horario: "10:30 - 25/11/2025",
-                status: "Concluído",
-            };
-
             fetch("/caixas/buscarchamado", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                },
-                body: {
-                    jql: 'project = CHAMADO AND text ~ "%s" ORDER BY created DESC',
-                    maxResults: 1,
-                    fields: ["description"],
+                    mac: mac,
                 },
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    console.log(data);
-                    const container = document.getElementById("ultimoChamado");
+                    const issue = data[0];
+
+                    const key = issue.key;
+                    const status = issue.fields.status.name;
+                    const summary = issue.fields.summary;
+
+                    const descriptionContent = issue.fields.description.content;
+                    let descriptionText = descriptionContent
+                        .map((paragraph) =>
+                            paragraph.content.map((node) => node.text).join(""),
+                        )
+                        .join("\n");
+
                     const statusClasse =
-                        data[0].status.toLowerCase() === "concluído"
+                        status.toLowerCase() === "concluído"
                             ? "concluido"
                             : "outro";
 
-                    container.innerHTML = `
-                      <div class="keyChamada">${data[0]}</div>
-                      <div class="nome">${data[0]}</div>
-                      <div class="horario">${data[0]}</div>
-                      <div class="status ${statusClasse}">${data[0].status}</div>
-                    `;
+                    const createdDate = new Date(
+                        issue.fields.created,
+                    ).toLocaleString("pt-BR");
+
+                    document.getElementById("caixa-jira").innerHTML = `
+                      <h3>Último chamado</h3>
+                      <a href="https://chamadosblackscreen.atlassian.net/browse/${key}">
+                      <div id="ultimoChamado">
+                        <div class="keyChamada">${key}</div>
+                        <div class="nome">${summary}</div>
+                        <div class="horario">${createdDate}</div>
+                        <div class="status ${statusClasse}">${status}</div>
+                      </div> </a>
+
+
+                      `;
                 })
                 .catch((error) => {
                     console.error(error);

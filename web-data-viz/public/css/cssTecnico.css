@@ -165,6 +165,12 @@ body {
     font-family: monospace;
 }
 
+a {
+    all: unset;
+    display: inline;
+    cursor: pointer;
+}
+
 #ultimoChamado .nome {
     font-weight: 700;
     flex: 2;
