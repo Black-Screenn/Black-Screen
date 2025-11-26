@@ -341,167 +341,131 @@
 
     } catch (erro) {
         console.error("Erro ao processar CSVs:", erro);
-        return []; // Retorna array vazio em caso de erro para não quebrar o front
+        return []; 
     }
+    console.log(resultadoFinal)
 }
 
 
-    function buscarPorComponenteDash() {
-        fetch('http://98.83.124.125:8080/chamadosJira', {
-            method: "GET"
-        }).then(Response => {
-            return Response.json();
-        }).then(respostaJira => {
+ function buscarPorComponenteDash() {
+    fetch('http://98.83.124.125:8080/chamadosJira', {
+        method: "GET"
+    }).then(Response => {
+        return Response.json();
+    }).then(respostaJira => {
 
-            let ArrayChamados = [];
-            respostaDoJira = respostaJira.issues
-
-            const hoje = new Date();
-            const inicioSemanaAtual = new Date(hoje);
-            inicioSemanaAtual.setDate(hoje.getDate() - hoje.getDay());
-            inicioSemanaAtual.setHours(0, 0, 0, 0);
-
-            const inicioSemanaAnterior = new Date(inicioSemanaAtual);
-            inicioSemanaAnterior.setDate(inicioSemanaAtual.getDate() - 7);
-            const fimSemanaAnterior = new Date(inicioSemanaAtual);
-            fimSemanaAnterior.setMilliseconds(-1);
-
-            respostaDoJira.forEach(dadosJira => {
-
-                let dataDeCriacao = dadosJira.fields.created;
-                let nomeDoAtm = dadosJira.fields.description.content[0].content[0].text;
-                let nomeDoComponente = dadosJira.fields.summary
-                let todosChamados = dadosJira.fields.status.name
-
-                if (nomeDoComponente.includes("TESTANDO VIA JAVA")) {
-                    return;
-                }
-                else if(nomeDoComponente.includes("RAM")){
-                    nomeDoComponente = 'RAM';
-                }else if(nomeDoComponente.includes("CPU")){
-                    nomeDoComponente = "CPU";
-                }
-                else if(nomeDoComponente.includes("DISCO")){
-                    nomeDoComponente = 'DISCO';    
-                }else if(nomeDoComponente.includes("REDE")){
-                    nomeDoComponente = 'REDE';
-                }else{
-                   
-                    return;
-                }
-                const objDataCriacao = new Date(dataDeCriacao);
-
-                let periodo = null;
-                if (objDataCriacao >= inicioSemanaAtual && objDataCriacao <= hoje) {
-                    periodo = 'atual';
-                } else if (objDataCriacao >= inicioSemanaAnterior && objDataCriacao <= fimSemanaAnterior) {
-                    periodo = 'anterior';
-                }
-
-
-                if (periodo) {
-                    let chamado = {
-                        componente: nomeDoComponente,
-                        periodo: periodo,
-                        status: todosChamados
-                    };
-                    ArrayChamados.push(chamado);
-                }
-            });
-
-           
-
-            const contagemPorComponente = {};
-
-            ArrayChamados.forEach(chamado => {
-                if (!contagemPorComponente[chamado.componente]) {
-                    contagemPorComponente[chamado.componente] = {
-                        atual: 0,
-                        anterior: 0
-                    };
-                }
-
-                if (chamado.periodo === 'atual') {
-                    contagemPorComponente[chamado.componente].atual++;
-                } else if (chamado.periodo === 'anterior') {
-                    contagemPorComponente[chamado.componente].anterior++;
-                }
-            });
-
-            const componentes = Object.keys(contagemPorComponente);
-            
-            const dadosSemanaAtual = componentes.map(comp => contagemPorComponente[comp].atual);
-            const dadosSemanaAnterior = componentes.map(comp => contagemPorComponente[comp].anterior);
-
-
-            var BarraChamados = {
-                series: [{
-                    name: 'Semana Atual',
-                    data: dadosSemanaAtual
-                }, {
-                    name: 'Semana Anterior',
-                    data: dadosSemanaAnterior
-                }],
-                chart: {
-                    type: 'bar',
-                    height: 430
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        dataLabels: {
-                            position: 'top',
-                        },
-                    }
-                },
-                dataLabels: {
-                    enabled: true,
-                    offsetX: -6,
-                    style: {
-                        fontSize: '12px',
-                        colors: ['#fff']
-                    }
-                },
-                stroke: {
-                    show: true,
-                    width: 1,
-                    colors: ['#fff']
-                },
-                tooltip: {
-                    shared: true,
-                    intersect: false
-                },
-                xaxis: {
-                    categories: componentes,
-                    title: {
-
-                    }
-                },
-                yaxis: {
-                    title: {
-
-                    }
-                },
-                legend: {
-                    position: 'top',
-                    horizontalAlign: 'right'
-                },
-                colors: ['#5C9BD5', '#004076']
-            };
-
-
-
-
-            var chart = new ApexCharts(document.querySelector("#chart"), BarraChamados);
-            chart.render();
-
-            enviarDadosParaIA(ArrayChamados, componentes, dadosSemanaAtual, dadosSemanaAnterior);
-
-        })
+        let ArrayChamados = [];
+        const respostaDoJira = respostaJira.issues; 
        
-    }
+        const hoje = new Date();
+        
+        const inicioSemanaAtual = new Date(hoje);
+        inicioSemanaAtual.setDate(hoje.getDate() - hoje.getDay());
+        inicioSemanaAtual.setHours(0, 0, 0, 0);
 
-    /* function enviarDadosParaIA(dadosJira, componentes, dadosSemanaAtual, dadosSemanaAnterior) {
+        const inicioSemanaAnterior = new Date(inicioSemanaAtual);
+        inicioSemanaAnterior.setDate(inicioSemanaAtual.getDate() - 7);
+        
+        const fimSemanaAnterior = new Date(inicioSemanaAtual);
+        fimSemanaAnterior.setMilliseconds(-1);
+
+        respostaDoJira.forEach(dadosJira => {
+            let nomeDoAtm = dadosJira.fields.description?.content?.[0]?.content?.[0]?.text || "Indefinido";
+            
+            let dataDeCriacao = new Date(dadosJira.fields.created);
+            let nomeDoComponente = dadosJira.fields.summary;
+            let status = dadosJira.fields.status.name;
+
+          
+            if (nomeDoComponente.toLowerCase().includes("testando via java")) return;
+
+            if (nomeDoComponente.toLowerCase().includes("ram")) nomeDoComponente = 'RAM';
+            else if (nomeDoComponente.toLowerCase().includes("cpu")) nomeDoComponente = 'CPU';
+            else if (nomeDoComponente.toLowerCase().includes("disco")) nomeDoComponente = 'DISCO';
+            else if (nomeDoComponente.toLowerCase().includes("rede")) nomeDoComponente = 'REDE';
+            else return;             
+            let periodo = null;
+            if (dataDeCriacao >= inicioSemanaAtual && dataDeCriacao <= hoje) {
+                periodo = 'atual';
+            } else if (dataDeCriacao >= inicioSemanaAnterior && dataDeCriacao <= fimSemanaAnterior) {
+                periodo = 'anterior';
+            }
+
+            if (periodo) {
+                ArrayChamados.push({
+                    componente: nomeDoComponente,
+                    periodo: periodo,
+                    status: status
+                });
+            }
+        });
+
+        const contagemPorComponente = {};
+
+        ArrayChamados.forEach(chamado => {
+            
+            if (!contagemPorComponente[chamado.componente]) {
+                contagemPorComponente[chamado.componente] = { atual: 0, anterior: 0 };
+            }
+
+            if (chamado.periodo === 'atual') {
+                contagemPorComponente[chamado.componente].atual++;
+            } else if (chamado.periodo === 'anterior') {
+                contagemPorComponente[chamado.componente].anterior++;
+            }
+        });
+
+        const componentes = Object.keys(contagemPorComponente);
+        const dadosSemanaAtual = componentes.map(comp => contagemPorComponente[comp].atual);
+        const dadosSemanaAnterior = componentes.map(comp => contagemPorComponente[comp].anterior);
+
+        var options = {
+            series: [{
+                name: 'Semana Atual',
+                data: dadosSemanaAtual
+            }, {
+                name: 'Semana Anterior',
+                data: dadosSemanaAnterior
+            }],
+            chart: {
+                type: 'bar',
+                height: 430
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    dataLabels: { position: 'top' },
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                offsetX: -6,
+                style: { fontSize: '12px', colors: ['#fff'] }
+            },
+            stroke: { show: true, width: 1, colors: ['#fff'] },
+            tooltip: { shared: true, intersect: false },
+            xaxis: { categories: componentes },
+            legend: { position: 'top', horizontalAlign: 'right' },
+            colors: ['#5C9BD5', '#004076']
+        };
+
+        const chartElement = document.querySelector("#chart");
+        if(chartElement) {
+            chartElement.innerHTML = ""; 
+            var chart = new ApexCharts(chartElement, options);
+            chart.render();
+        }
+
+        if (typeof enviarDadosParaIA === 'function') {
+            enviarDadosParaIA(ArrayChamados, componentes, dadosSemanaAtual, dadosSemanaAnterior);
+        }
+
+    }).catch(error => {
+        console.error("Erro na requisição ou processamento:", error);
+    });
+
+
+}   /* function enviarDadosParaIA(dadosJira, componentes, dadosSemanaAtual, dadosSemanaAnterior) {
           fetch("http://localhost:3333/gemini/prompt", {
               method: "POST",
               headers: {
@@ -540,76 +504,78 @@
       }
      */
 
-    function buscarDataEHoraChamados() {
+function buscarDataEHoraChamados() {
 
-        fetch('http://98.83.124.125:8080/chamadosJira', {
-            method: "GET"
-        }).then(Response => {
-            return Response.json();
-        }).then(respostaData => {
+    fetch('http://98.83.124.125:8080/chamadosJira', {
+        method: "GET"
+    }).then(Response => {
+        return Response.json();
+    }).then(respostaData => {
 
-                localStorage.setItem('JIRA_DADOS', JSON.stringify(respostaData));
-                const sessionchamadoHora = JSON.parse(localStorage.getItem('JIRA_DADOS') || '{}');
-                const chamadoHora = sessionchamadoHora.issues;
-            
-            const dataEHoraFormatada = new Intl.DateTimeFormat('pt-BR', dataPadrao);
+        const chamadoHora = respostaData.issues;
+
+    
+        const dataEHoraFormatada = new Intl.DateTimeFormat('pt-BR', dataPadrao);
+
+
+        const classCompontes_alertas = document.querySelector('.classCompontes_alertas');
+
+
+        const kpi_metrica = document.querySelector('.kpi_metrica');
+
+        kpi_metrica.innerHTML = '';
+        classCompontes_alertas.innerHTML = ""
+        let totalDeChamadosAbertos = 0;
+        let totalDeChamadosConcluidos = 0;
+        let totalDeChamadosReabertos = 0;
+
+
+        const chartElement = document.querySelector('#myChart');
+
+        let statusAtual;
+        let cores;
         
+        chamadoHora.forEach(chamadosHora => {
+        
+            statusAtual = chamadosHora.fields.status.name;
+            const nomeComponenteAlerta = chamadosHora.fields.summary;
 
-            const classCompontes_alertas = document.querySelector('.classCompontes_alertas');
+            if (statusAtual === "Concluído") {
+                totalDeChamadosConcluidos++
+            }
+
+            const stringCriacao = chamadosHora.fields.created;
+            const stringAlteracao = chamadosHora.fields.updated;
             
-            
-            const kpi_metrica = document.querySelector('.kpi_metrica');
 
-            kpi_metrica.innerHTML = '';
-            classCompontes_alertas.innerHTML =""
-            let totalDeChamadosAbertos = 0;
-            let totalDeChamadosConcluidos = 0;
-            let totalDeChamadosReabertos = 0;
-            
+            const dataAtual = new Date();
+            const objDataCriacao = new Date(stringCriacao);
+            const objDataAtualizacao = new Date(stringAlteracao);
+            const dataCriacao = dataEHoraFormatada.format(objDataCriacao);
+            const dataUpdate = dataEHoraFormatada.format(objDataAtualizacao);
 
-            const chartElement = document.querySelector('#myChart');
+            const compHora = dataAtual - objDataCriacao;
+            const milissegundosPorDia = 1000 * 60 * 60 * 24;
+            const tempo = 5 * 60 * 1000;
 
-            let statusAtual;
-            let cores;
-            chamadoHora.forEach(chamadosHora => {
-                if (statusAtual === "Concluído") {
-                    totalDeChamadosConcluidos++
-                   
-                }
+            idMaquina = chamadosHora.fields.description.content[0].content[0].text;
+            cores = [
+                'rgb(255,0,0)',
 
-                const stringCriacao = chamadosHora.fields.created;
-                const stringAlteracao = chamadosHora.fields.updated;
-                statusAtual = chamadosHora.fields.status.name;
-                const nomeComponenteAlerta = chamadosHora.fields.summary;
+                'rgb(0, 64, 118)'
+            ];
 
-                const dataAtual = new Date();
-                const objDataCriacao = new Date(stringCriacao);
-                const objDataAtualizacao = new Date(stringAlteracao);
-                const dataCriacao = dataEHoraFormatada.format(objDataCriacao);
-                const dataUpdate = dataEHoraFormatada.format(objDataAtualizacao);
+            if (statusAtual == "Aberto" || statusAtual == "Reaberto") {
 
-                const compHora = dataAtual - objDataCriacao;
-                const milissegundosPorDia = 1000 * 60 * 60 * 24;
-                const tempo = 5 * 60 * 1000;
+                if (compHora > tempo) {
+                    const emDias = compHora / milissegundosPorDia;
+                    const diasInteiros = Math.floor(emDias);
 
-                idMaquina = chamadosHora.fields.description.content[0].content[0].text;
-                cores = [
-                    'rgb(255,0,0)',
+                    const chamadoDiv = document.createElement('div');
+                    chamadoDiv.className = 'chamado-item';
 
-                    'rgb(0, 64, 118)'
-                ];
-               
-                if (statusAtual == "Aberto" || statusAtual == "Reaberto") {
-                                    
-                    if (compHora > tempo) {
-                        const emDias = compHora / milissegundosPorDia;
-                        const diasInteiros = Math.floor(emDias);
 
-                        const chamadoDiv = document.createElement('div');
-                        chamadoDiv.className = 'chamado-item';
-
-                       
-                        chamadoDiv.innerHTML = `
+                    chamadoDiv.innerHTML = `
                           <div class="info">
                             <div class="card-jira"role="button" onclick="abrirModal('${idMaquina}','${nomeComponenteAlerta}' , '${statusAtual}', '${diasInteiros}', '${dataCriacao}', '${dataUpdate}')">
                                 <div class="chamado-titulo">${nomeComponenteAlerta} <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="48px" fill="#EA3323"><path d="M210-160v-60h61l84-277q6-19 21.5-31t35.5-12h136q20 0 35.5 12t21.5 31l84 277h61v60H210Zm125-60h290l-78-260H413l-78 260Zm115-440v-180h60v180h-60Zm235 98-43-43 128-127 42 42-127 128Zm55 192v-60h180v60H740ZM275-562 148-690l42-42 128 127-43 43ZM40-370v-60h180v60H40Zm440 150Z"/></svg></div>
@@ -617,114 +583,111 @@
                             </div>
                           </div>
                           `;
-                        kpi_metrica.appendChild(chamadoDiv);
+                    kpi_metrica.appendChild(chamadoDiv);
 
-                        if (statusAtual == "Aberto") {
-                            totalDeChamadosAbertos++
-                        } else if (statusAtual == "Reaberto") {
-                            totalDeChamadosReabertos++;
-                        }
-
-
+                    if (statusAtual == "Aberto") {
+                        totalDeChamadosAbertos++
+                    } else if (statusAtual == "Reaberto") {
+                        totalDeChamadosReabertos++;
                     }
+
+
                 }
+            }
 
-            });
-            if (statusAtual == "Concluído" || statusAtual == "Aberto" || statusAtual == "Reaberto") {
-                chamadosTotais = 0;
-                chamadosTotais += totalDeChamadosReabertos;
-                chamadosTotais += totalDeChamadosAbertos;
+        });
+        if (statusAtual == "Concluído" || statusAtual == "Aberto" || statusAtual == "Reaberto") {
+            chamadosTotais = 0;
+            chamadosTotais += totalDeChamadosReabertos;
+            chamadosTotais += totalDeChamadosAbertos;
 
 
-                let chamadosGrafico =
-                    [
-                        chamadosTotais,
-                        totalDeChamadosConcluidos
-                    ]
-                if (graficoPizza) {
-                    graficoPizza.destroy();
-                }
+            let chamadosGrafico =
+                [
+                    chamadosTotais,
+                    totalDeChamadosConcluidos
+                ]
+            if (graficoPizza) {
+                graficoPizza.destroy();
+            }
 
-                var options = {
-                    series: [chamadosGrafico[0], chamadosGrafico[1]],
+            var options = {
+                series: [chamadosGrafico[0], chamadosGrafico[1]],
 
-                    chart: {
-                        type: 'donut',
-                        width: '380px'
-                    },
+                chart: {
+                    type: 'donut',
+                    width: '380px'
+                },
 
-                    labels: ['Abertos e Reabertos', 'Concluídos'],
-                    colors: cores,
+                labels: ['Abertos e Reabertos', 'Concluídos'],
+                colors: cores,
 
-                    legend: {
-                        position: 'top'
-                    },
+                legend: {
+                    position: 'top'
+                },
 
-                    title: {
-                        text: 'Status dos Chamados',
-                        align: 'center'
-                    },
+                title: {
+                    text: 'Status dos Chamados',
+                    align: 'center'
+                },
 
-                    plotOptions: {
-                        pie: {
-                            donut: {
-                                size: '65%',
-                                labels: {
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '65%',
+                            labels: {
+                                show: true,
+                                total: {
                                     show: true,
-                                    total: {
-                                        show: true,
-                                        label: 'Total',
-                                        fontSize: '15   px',
-                                        color: '#000',
-                                        formatter: function (w) {
-                                            return w.globals.series.reduce((a, b) => a + b, 0);
-                                        }
+                                    label: 'Total',
+                                    fontSize: '15   px',
+                                    color: '#000',
+                                    formatter: function (w) {
+                                        return w.globals.series.reduce((a, b) => a + b, 0);
                                     }
                                 }
                             }
                         }
-                    },
+                    }
+                },
 
-                    responsive: [{
-                        breakpoint: 480,
-                        options: {
-                            chart: {
-                                width: 200
-                            },
-                            legend: {
-                                position: 'bottom'
-                            }
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200
+                        },
+                        legend: {
+                            position: 'bottom'
                         }
-                    }]
-                };
+                    }
+                }]
+            };
 
 
-                graficoPizza = new ApexCharts(chartElement, options);
-                graficoPizza.render();
-            }
+            graficoPizza = new ApexCharts(chartElement, options);
+            graficoPizza.render();
+        }
 
 
-            
 
-            if (totalDeChamadosAbertos === 0 && totalDeChamadosReabertos === 0) {
 
-                classCompontes_alertas.innerHTML = '<p class="sem-alertas">Nenhum chamado em alerta no momento.</p>';
-            }
-            else {
-                totalDeChamadosAbertos += totalDeChamadosReabertos;
-                classCompontes_alertas.innerHTML += `
-                <div class="tituloAlerta">chamado(s) sem solução</div>
-                <div class="infoAlerta">${totalDeChamadosAbertos}</div>
-                `
-            }
-            
-        })
-        
-       
+        if (totalDeChamadosAbertos === 0 && totalDeChamadosReabertos === 0) {
 
-    };
-   
-    function abrirModal(nomeComponenteAlerta,nome, status, dias, criacao, update, idMaquina) {
+            classCompontes_alertas.innerHTML = '<p class="sem-alertas">Nenhum chamado em alerta no momento.</p>';
+        }
+        else {
+            totalDeChamadosAbertos += totalDeChamadosReabertos;
+            classCompontes_alertas.innerHTML += `
+            <div class="tituloAlerta">chamado(s) sem solução</div>
+            <div class="infoAlerta">${totalDeChamadosAbertos}</div>
+            `
+        }
+
+    })
+
+};
+function abrirModal(nomeComponenteAlerta,nome, status, dias, criacao, update, idMaquina) {
     const modal = document.getElementById('meuModalJira');
     const conteudo = document.getElementById('conteudoModal');
     const divSvg = document.querySelector('.divSvg')
@@ -754,7 +717,6 @@
     modal.style.display = 'flex';
     
 }
-
 function fecharModal() {
     document.getElementById('meuModalJira').style.display = 'none';
     window.location.reload()
@@ -767,7 +729,7 @@ window.onclick = function(event) {
     }
 }
 
-    function buscandoComponenteJiraKpi() {
+function buscandoComponenteJiraKpi() {
         fetch('http://98.83.124.125:8080/chamadosJira', {
             method: "GET"
 
@@ -821,7 +783,7 @@ window.onclick = function(event) {
                     }
                     else if (nomeComponente.includes("DISCO")) {
                         disco++
-                    }else if(nomeComponente.includes("REDE")){
+                    }else if(nomeComponente.includes("Rede")){
                         rede++
                     }
 

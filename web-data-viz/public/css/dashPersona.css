@@ -93,21 +93,23 @@ h1 {
 }
 
 .chamado-titulo {
+    font-size: 17px;
     height: auto;
-    font-size: 10px;
     display: flex;
     flex-direction: row;
     justify-items: center;
     align-items: center;
     justify-content: space-around;
     gap: 10px;
+    width: 100%;
+    flex-wrap: wrap;
 }
 .chamado-titulo svg{
     width: 23px;
 }
 
 .chamado-item{
-    width: auto;
+    width: 250px;
     height: auto;
     font-size: 15px;
 }
@@ -126,13 +128,17 @@ h1 {
 
 
 
-.info{
-    width: 100%;
+.info {
+    width: 215px;
     margin: 0px;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
 }
 
 .chamado-titulo{
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 600;
     font-style: italic;
     color: #004076;
@@ -281,8 +287,14 @@ h1 {
     padding: 15px;
     border-radius: 8px;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s, background-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 150px;
 }
 
 .card-jira:hover {
@@ -304,10 +316,10 @@ h1 {
 }
 
 .modal-content {
-  background:#004076;
+    background: #004076;
     padding: 20px;
     border-radius: 20px;
-    min-width: 340px;
+    min-width: 430px;
     position: relative;
     font-size: 30px;
     color: white;
@@ -322,7 +334,7 @@ h1 {
 }
 .divSvg{
     background-color: white;
-       display: flex;
+    display: flex;
     flex-direction: row;
     gap: 25px;
     font-size: 20px;
@@ -333,7 +345,9 @@ h1 {
     justify-items: center;
     justify-content: center;
     border-radius: 10px;
-    width: 330px;
+    width: 430px;
+    margin-top: 13px;
+    height: 50px;
 }
 .divSvg svg{
     width: 30px;
