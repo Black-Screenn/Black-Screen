@@ -8,7 +8,7 @@
     <title>BlackScreen | Visão Detalhada</title>
     
      <link rel="stylesheet" href="./../css/dashboards.css">
-    <link rel="stylesheet" href="./../css/dashboardRanking.css">
+    <link rel="stylesheet" href="./../css/dashboardLista.css">
     <link rel="stylesheet" href="./../css/dashboardFunc.css">
     <link rel="stylesheet" href="./../css/estilo.css" />
     <script src="../js/sessao.js"></script>
@@ -26,7 +26,8 @@
  
     </style>
 </head>
-<body>    <div class="janela">
+<body>   
+     <div class="janela">
         <div class="header-left">
             <img src="../assets/imgs/blackscreenlogo.png" alt="BlackScreen">
 
@@ -122,7 +123,29 @@
             <div class="btn-logout" onclick="limparSessao()">
                 <h3>Sair</h3>
             </div>
-
         </div>
+
+        <div class="js">
+                <canvas id="grafico"></canvas>
+        </div>
+
+        <div class="content">
+            <div class="listaAtm">
+                <div class="header">
+                    Lista de ATMs com alertas
+                </div>
+                <div class="lista">
+                    <div class="lista-header">
+                        <p class="atm">Código Chamado</p>
+                        <p class="address">Componente</p>
+                        <p class="country">Horario</p>
+                        <p class="alertas">Link do Chamado</p>
+                    </div>
+                    <div class="lista-content">
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </body>

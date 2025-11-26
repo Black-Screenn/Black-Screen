@@ -8,7 +8,7 @@
     <title>BlackScreen | Lista Alertas</title>
 
     <link rel="stylesheet" href="./../css/dashboards.css">
-    <link rel="stylesheet" href="./../css/dashboardRanking.css">
+    <link rel="stylesheet" href="./../css/dashboardLista.css">
     <link rel="stylesheet" href="./../css/dashboardFunc.css">
     <link rel="stylesheet" href="./../css/estilo.css" />
     <script src="../js/sessao.js"></script>
@@ -188,8 +188,9 @@
 
                 if (idMaquina == idAnterio) {
                     qtdAlertas++;
-                }else if (!idMaquina == idAnterio) {
+                }else if (idMaquina != idAnterio) {
                     idAnterio = idMaquina;
+                    console.log("Oi")
                     qtdAlertas = 0;
                 }
             })

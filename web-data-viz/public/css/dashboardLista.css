@@ -1,3 +1,12 @@
+.js{
+    margin-left: 100px;
+    margin-top: 20px;
+    display: flex;
+    height: 500px;
+    width: 1000px;
+    background: linear-gradient(0deg, #b8b8b8, #ffffff);
+}
+
 .content{
     flex-direction: column;
     padding: 24px;
