@@ -150,15 +150,15 @@
                                 </div>
                                 <div class="infosdentro">
                                     <p>Latência:</p>
-                                    <span id="estado">valor</span>
+                                    <span id="latencia">valor</span>
                                 </div>
                                 <div class="infosdentro">
                                     <p>Perda de pacotes:</p>
-                                    <span id="estado">valor</span>
+                                    <span id="pacotes">valor</span>
                                 </div>
                                 <div class="infosdentro">
                                     <p>Status:</p>
-                                    <span id="estado">valor</span>
+                                    <span id="status">valor</span>
                                 </div>
                             </div>
                         </div>
@@ -190,7 +190,7 @@
                             <label for="periodSelect"
                                 ><strong>Selecionar período:</strong></label
                             >
-                            <select id="periodSelect">
+                            <select id="periodSelect" class="dropdown">
                                 <option value="7">Últimos 7 dias</option>
                                 <option value="30">Últimos 30 dias</option>
                                 <option value="90">Últimos 3 meses</option>
@@ -198,15 +198,17 @@
                         </div>
                         <div class="graficos-row">
                             <div style="flex: 1; min-width: 0; height: 100%">
-                                <h3>Gráfico 1: Crescimento Mensal</h3>
+                                <center><h3>Disponibilidade</h3></center>
                                 <div id="lineChart1"></div>
                             </div>
                             <div style="flex: 1; min-width: 0; height: 100%">
-                                <h3>Gráfico 2: Volume por Mês</h3>
+                                <center><h3>Quantidade de chamados</h3></center>
                                 <div id="barChart"></div>
                             </div>
                             <div style="flex: 1; min-width: 0; height: 100%">
-                                <h3>Gráfico 3: Tendência</h3>
+                                <center>
+                                    <h3>Probabilidade de falha no envio</h3>
+                                </center>
                                 <div id="lineChart2"></div>
                             </div>
                         </div>
