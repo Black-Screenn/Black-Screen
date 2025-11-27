@@ -134,6 +134,13 @@
             <div class="listaAtm">
                 <div class="header">
                     Lista de Chamados do Jira
+                    <select name="Componente" id="filtro_componente">
+                        <option value="sem_filtro">Filtrar por Componente</option>
+                        <option value="filtro_cpu">CPU</option>
+                        <option value="filtro_ram">RAM</option>
+                        <option value="filtro_disco">Disco</option>
+                        <option value="filtro_rede">Rede</option>
+                    </select>
                 </div>
                 <div class="lista">
                     <div class="lista-header">
@@ -158,8 +165,11 @@
     let rede = 0;
 
     window.onload = () => {
+        somandoComponenteAlertaJiraKpi();
         plotarGrafico();
     };
+
+    //console.log(sessionStorage.getItem(IDMAQUINAESCOLHIDA))
 
     function somandoComponenteAlertaJiraKpi() {
         fetch('http://98.83.124.125:8080/chamadosJira', {
@@ -180,6 +190,7 @@
                 chave = chamado.key;
                 idMaquina = chamado.fields.description.content[0].content[0].text;
             
+                if(IDMAQUINAESCOLHIDA == idMaquina){
                     if (nomeComponente.includes("CPU")) {
                         cpu++
                     }
@@ -191,7 +202,10 @@
                     }else if(nomeComponente.includes("Rede")){
                         rede++
                     }
+                }
+                console.log("RAM:"+ram)
             })
+             console.log("RAM:"+ram)
         })
     }
 
