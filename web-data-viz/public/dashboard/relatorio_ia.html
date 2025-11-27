@@ -355,7 +355,7 @@
                     <p>${(r.Conteudo_Texto ? (r.Conteudo_Texto.substr(0, 80) + '...') : '')}</p>
                 </div>
                 <div class="nota">
-                    <p class="material-symbols-outlined nota_star">${(String(nota))}</p>
+                    <p class="material-symbols-outlined nota_star">${nota}</p>
                 </div>
                 <button onclick="abrirRelatorio(${r.Id_Relatorio})">
                     Visualizar
@@ -439,6 +439,7 @@
     function modalGerarRelatorio() {
         document.getElementById("modalGerarRelatorio").style.display = "flex";
         document.getElementById("data_inicio").value = "";
+        document.getElementById("data_fim").value = "";
 
         const hoje = new Date();
         const yyyy = hoje.getFullYear();
@@ -452,8 +453,6 @@
 
     function fecharModal() {
         document.getElementById("modalGerarRelatorio").style.display = "none";
-        document.getElementById("data_inicio").value = "";
-        document.getElementById("data_fim").value = "";
     }
 
     async function gerarRelatorio() {
@@ -462,12 +461,18 @@
         try {
             fecharModal();
             showLoading();
+            const periodoInicio = document.getElementById("data_inicio").value
+            const periodoFim = document.getElementById("data_fim").value
 
             console.log("Solicitando Relatório...");
             const response = await fetch('/relatorio/gerar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fkEmpresa: fkEmpresa })
+                body: JSON.stringify({ 
+                    fkEmpresa: fkEmpresa,
+                    periodoInicio: periodoInicio,
+                    periodoFim: periodoFim
+                })
             });
 
             const tipoConteudo = response.headers.get('content-type');

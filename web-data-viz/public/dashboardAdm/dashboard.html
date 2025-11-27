@@ -211,7 +211,7 @@ href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wg
             .then(([usuarios, cargos]) => {
                 const totalFuncionarios = usuarios.length;
                 // const funcionariosAtivos = usuarios.filter(f => f.Status === 'Ativo').length;
-                const funcionariosAtivos = Math.round(totalFuncionarios / 3 * 2);
+                const funcionariosAtivos = Math.round(totalFuncionarios);
 
                 document.getElementById('total_funcionarios').textContent = totalFuncionarios;
                 document.getElementById('funcionarios_ativos').textContent = funcionariosAtivos;

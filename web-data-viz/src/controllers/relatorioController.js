@@ -4,6 +4,7 @@ const puppeteer = require('puppeteer');
 const crypto = require('crypto');
 
 const { uploadRelatorioS3 } = require('./cloudController.js');
+const { buscarParametroPorComponente } = require('../models/componenteModel.js')
 const { cadastrar, listar } = require('../models/relatorioModel.js');
 
 const genAI = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY});
@@ -187,24 +188,19 @@ async function agenteSumarizacao(relatorioCompleto) {
 
 async function gerarRelatorio(req, res) {
     try {
-        fkEmpresa = req.body.fkEmpresa;
+        const fkEmpresa = req.body.fkEmpresa;
+        const periodoInicio = req.body.periodoInicio || '';
+        const periodoFim = req.body.periodoFim || '';
+
+        const componentesParametro = await buscarParametroPorComponente();
 
         if (req.url === '/favicon.ico') {
             return res.status(204).end();
         }
 
         let dadosDoRequest = {
-            "relatorio_id": "RPT-20251111-002",
-            "periodo_analise": "2025-11-10 12:00:00 a 2025-11-11 12:00:00",
-            "escopo": {
-                "total_atms_monitorados": 1024
-            },
-            "limites_saudaveis": {
-                "cpu_max_percent": 80.0,
-                "ram_max_percent": 85.0,
-                "disco_max_percent": 90.0,
-                "pacotes_perdidos_max_periodo": 500
-            },
+            "periodo_analise": `${periodoInicio} a ${periodoFim}`,
+            "limites_saudaveis": componentesParametro,
             "todos_atms_monitorados": [
                 {
                 "id_atm": "00:00:00:00:00:00",
