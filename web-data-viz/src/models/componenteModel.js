@@ -1,4 +1,4 @@
-    var database = require("../database/config")
+var database = require("../database/config")
 
     function cadastrar(nome, fkEmpresa, unidade, parametro) {
         console.log("ACESSEI O COMPONENTE MODEL \n \n\t\t >> Se aqui der erro de 'Error: connect ECONNREFUSED',\n \t\t >> verifique suas credenciais de acesso ao banco\n \t\t >> e se o servidor de seu BD está rodando corretamente. \n\n function cadastrar():", nome, fkEmpresa, unidade, parametro);
@@ -36,7 +36,8 @@
         GROUP_CONCAT(DISTINCT cx.codigoCaixa) AS Caixas_Codigos
         FROM Componentes c
         LEFT JOIN Parametros p ON c.Id_Componente = p.Fk_Componente
-        LEFT JOIN Caixa cx ON c.Fk_Caixa = cx.Id_Caixa
+        LEFT JOIN Caixa_Componente cc ON c.Id_Componente = cc.Fk_Componente
+        LEFT JOIN Caixa cx ON cc.Fk_Caixa = cx.Id_Caixa
         WHERE cx.Fk_Empresa = ${fkEmpresa}
         GROUP BY 
             c.Id_Componente, 
