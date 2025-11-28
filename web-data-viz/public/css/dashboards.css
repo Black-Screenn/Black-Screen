@@ -466,6 +466,8 @@ canvas {
 }
 
 #modal #modalContainer {
+  width: 100%;
+  min-width: 240px;
   background-color: #FFF;
   padding: 12px;
 }

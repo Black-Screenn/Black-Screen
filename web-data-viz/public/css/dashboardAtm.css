@@ -102,3 +102,91 @@
     border-radius: 0px;
     background-color: #ebecec;
 }
+
+.modal {
+    z-index: 10000;
+    position: absolute;
+    top: 0;
+    width: 100dvw;
+    height: 100dvh;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal .modalContainer {
+    background-color: #FFF;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    position: relative;
+    min-width: 400px;
+    width: 100%;
+}
+.modal .modalContainer .closeModal {
+    cursor: pointer;
+    position: absolute;
+    top: 26px;
+    right: 16px;
+}
+.modal .modalContainer .form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.modal .modalContainer h2 {
+    margin: 0;
+    margin-bottom: 12px;
+}
+.modal .modalContainer .form .inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.modal .modalContainer .form .inputGroup label {
+    font-weight: 600;
+}
+.modal .modalContainer .form .inputGroup input,
+.modal .modalContainer .form .inputGroup select {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+}
+.modal .modalContainer .form .inputGroup input:focus,
+.modal .modalContainer .form .inputGroup select:focus {
+    outline: none;
+    border-color: #034078;
+    box-shadow: 0 0 5px rgba(3, 64, 120, 0.5);
+}
+.modal .modalContainer .form .btnGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+}
+.modal .modalContainer .form .btnGroup button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 32px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+.modal .modalContainer .form .btnGroup button.cancel {
+    background-color: #f44336;
+    color: #ffffff;
+}
+.modal .modalContainer .form .btnGroup button.cancel:hover {
+    background-color: #e57373;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.modal .modalContainer .form .btnGroup button.save {
+    background-color: #4caf50;
+    color: #ffffff;
+}
+.modal .modalContainer .form .btnGroup button.save:hover {
+    background-color: #66bb6a;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
