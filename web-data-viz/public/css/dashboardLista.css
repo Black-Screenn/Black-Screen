@@ -1,6 +1,16 @@
+
 .content{
     flex-direction: column;
     padding: 24px;
+}
+
+.content.js{
+    margin-left: 100px;
+    margin-top: 20px;
+    display: flex;
+    height: 500px;
+    width: 1000px;
+    background: linear-gradient(0deg, #b8b8b8);
 }
 
 .content .listaAtm{
@@ -31,7 +41,7 @@
 .content .listaAtm .header{
     display: flex;
     width: 100%;
-    justify-content:flex-start;
+    justify-content:space-between;
     align-items: center;
     margin-bottom: 20px;
     font-weight: bold;

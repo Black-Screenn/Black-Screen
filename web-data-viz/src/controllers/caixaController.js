@@ -24,8 +24,54 @@ async function listar(req, res) {
 
 async function buscarChamado(req, res) {
   try {
-    const dados = await caixaModel.listarPorEmpresa(fkNum);
-    return res.status(200).json(dados);
+    const fk = req.headers["mac"];
+
+    if (fk === undefined) {
+      return res.status(401).json({ erro: "Mac inválido" });
+    }
+
+    const fkNum = Number(fk);
+    if (!Number.isInteger(fkNum)) {
+      return res.status(400).json({ erro: "Máquina inválida na sessão" });
+    }
+    const baseUrl = process.env.URL_JIRA;
+    const username = process.env.USER_JIRA;
+    const token = process.env.TOKEN_JIRA;
+
+    const url = `${baseUrl}/rest/api/3/search/jql`;
+
+    const jsonBody = {
+      jql: `project = CHAMADO AND text ~ ${fkNum} ORDER BY created DESC`,
+      maxResults: 1,
+      fields: ["*all"],
+    };
+
+    const auth = btoa(`${username}:${token}`);
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(jsonBody),
+    });
+
+    if (!response.ok) {
+      console.log(`Erro HTTP ao buscar chamado: ${response.status}`);
+      const errorText = await response.text();
+      console.log(`Resposta: ${errorText}`);
+      return null;
+    }
+
+    const jsonResponse = await response.json();
+    if (!jsonResponse.issues || jsonResponse.issues.length === 0) {
+      console.log("Nenhum chamado encontrado");
+      return null;
+    }
+
+    return res.status(200).json(jsonResponse.issues);
   } catch (e) {
     console.error("erro:", e.code, e.sqlMessage || e.message);
     return res.status(500).json({ erro: "Falha ao consultar chamados" });

@@ -8,7 +8,7 @@
     <title>BlackScreen | Lista Alertas</title>
 
     <link rel="stylesheet" href="./../css/dashboards.css">
-    <link rel="stylesheet" href="./../css/dashboardRanking.css">
+    <link rel="stylesheet" href="./../css/dashboardLista.css">
     <link rel="stylesheet" href="./../css/dashboardFunc.css">
     <link rel="stylesheet" href="./../css/estilo.css" />
     <script src="../js/sessao.js"></script>
@@ -95,9 +95,6 @@
                     </a>
                 </div>
 
-
-
-
                 <div class="btn-nav-white">
                     <a href="./insight.html">
                         <span class="material-symbols-outlined">
@@ -150,7 +147,7 @@
 </body>
 
 <script>
-    let qtdAlertas = 0
+    var qtdAlertas = 0
 
     window.onload = async () => {
         await buscandoAlertasJiraKpi();
@@ -179,22 +176,22 @@
                 if (idMaquina.includes("ID ATM:")) {
                     if (!atmId.includes(idMaquina)) {
                         atmId.push(idMaquina);
-                        console.log(statusNome)
-                        console.log(idMaquina)
                     }
                 }
-
                 
-
-                if (idMaquina == idAnterio) {
-                    qtdAlertas++;
-                }else if (!idMaquina == idAnterio) {
-                    idAnterio = idMaquina;
-                    qtdAlertas = 0;
-                }
+                
+                console.log(statusNome)
+                console.log(idMaquina)
+                /*while(idAnterio == idMaquina){
+                    qtdAlertas++
+                    idAnterio = idMaquina
+                    }*/
+                //    for(i=0; i<=atmId.length; i++){
+                //        console.log(i+": "+atmId[i])
+                //     }
+                })
+                //console.log(qtdAlertas)
             })
-            console.log(qtdAlertas)
-        })
     }
 
     function carregarATMs() {
@@ -207,6 +204,7 @@
         })
             .then(response => response.json())
             .then(data => {
+            
                 atmsData = data;
                 const listaContent = document.querySelector(".lista-content");
                 listaContent.innerHTML = "";
@@ -216,10 +214,10 @@
                     return;
                 }
 
+                console.log(data)
                 data.forEach(atm => {
                     const item = document.createElement("div");
                     item.classList.add("lista-item");
-
                     const endereco = `${atm.Logradouro}, ${atm.Bairro}`;
                     const cidadeUF = `${atm.Cidade}/${atm.UF}`;
 
@@ -230,15 +228,19 @@
                         <p class="country">${cidadeUF}</p>
                         <p class="alertas" id="comp_count_${atm.id}">${qtdAlertas}</p>
                         <p class="acao">
-                            <a class="link" href="./visao_detalhada.html"> Visão Detalhada </a> 
+                            <a class="link"  onclick="armazenarIdMaquina(${atm.Macaddress})" href="./visao_detalhada.html"> Visão Detalhada </a> 
                         </p>
                     `;
                     listaContent.appendChild(item);
-
                 });
             })
             .catch(error => {
                 console.error("Erro ao carregar ATMs:", error);
             });
     }
+
+    function armazenarIdMaquina(macaddress){
+     const idEscolhido= sessionStorage.IDMAQUINAESCOLHIDA =  macaddress;
+    }
+
 </script>

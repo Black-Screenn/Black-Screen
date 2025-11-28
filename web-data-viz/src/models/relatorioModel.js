@@ -1,7 +1,7 @@
 var database = require("../database/config")
 
-function cadastrar(link, empresa, texto) {
-    var instrucaoSql = `INSERT INTO Relatorio (Link_Relatorio, Fk_Empresa, Conteudo_Texto) VALUES ('${link}', ${empresa}, '${texto}');`;
+function cadastrar(link, empresa, texto, periodoInicio, periodoFim) {
+    var instrucaoSql = `INSERT INTO Relatorio (Link_Relatorio, Fk_Empresa, Conteudo_Texto, Periodo_Inicio, Periodo_Fim) VALUES ('${link}', ${empresa}, '${texto}', '${periodoInicio}', '${periodoFim}');`;
     return database.executar(instrucaoSql);
 }
 

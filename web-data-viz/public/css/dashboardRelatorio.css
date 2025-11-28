@@ -689,9 +689,11 @@ button.metric-card:hover .bg-icon {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 12px;
     background: #E0EAFC;
     background: -webkit-linear-gradient(to right, #CFDEF3, #E0EAFC);
     background: linear-gradient(to right, #CFDEF3, #E0EAFC);
+    z-index: 2;
 }
 .loaderBody .robot .sparkles{
     position: absolute;
@@ -706,7 +708,37 @@ button.metric-card:hover .bg-icon {
     border: 1px solid #ccc;
     width: 28px;
     height: 28px;
+    z-index: 1;
 }
+.loaderBody .robot::after{
+    position: absolute;
+    content: "";
+    display: block;
+    border-radius: 50%;
+    width: 97%;
+    height: 97%;
+    z-index: -1;
+    border: 1px solid #062644;
+    animation: pulse infinite 1s ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+}
+
 .loaderBody h2{
     margin: 0;
 }

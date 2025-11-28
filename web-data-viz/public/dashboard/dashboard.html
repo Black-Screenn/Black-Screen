@@ -449,21 +449,89 @@
         let mapAnyChart;
         let chartInstance = null;
         let anyChartInitialized = false;
+        let dadosBucketCache = []; // Cache para evitar requisições repetidas
 
-        // Dados Fictícios para o AnyChart (Substitua por fetch do seu backend futuramente)
+        // Função para buscar dados do bucket e processar para o mapa
+        async function fetchAndProcessBucketData() {
+            try {
+                const response = await fetch('/bucket/processos');
+                const dados = await response.json();
+                dadosBucketCache = dados;
+                
+                // Processar dados para o formato do AnyChart
+                // Agrupar por UF
+                const dadosPorEstado = {};
+                
+                dados.forEach(d => {
+                    // Tenta identificar a UF. Ajuste a chave conforme seu JSON.
+                    // Ex: d['uf'], d['estado'], d['UF']
+                    const uf = d['uf'] || d['UF'] || d['estado'] || 'SP'; // Default SP para teste se falhar
+                    const idMap = `BR.${uf.toUpperCase()}`;
+                    
+                    if (!dadosPorEstado[idMap]) {
+                        dadosPorEstado[idMap] = { 
+                            id: idMap, 
+                            value: 0, 
+                            name: uf, 
+                            processos: [],
+                            total: 0 
+                        };
+                    }
+                    
+                    dadosPorEstado[idMap].value += 1; // Contagem de processos/logs
+                    dadosPorEstado[idMap].processos.push(d);
+                });
+
+                // Converter para array
+                return Object.values(dadosPorEstado).map(estado => {
+                    // Encontrar processo com maior consumo de CPU neste estado
+                    let maxCpu = 0;
+                    let maxProcess = "N/A";
+                    
+                    estado.processos.forEach(p => {
+                        const cpu = parseFloat(p['uso_cpu'] || p['cpu'] || 0);
+                        if (cpu > maxCpu) {
+                            maxCpu = cpu;
+                            maxProcess = p['processo'] || p['nome'] || 'N/A';
+                        }
+                    });
+
+                    return {
+                        id: estado.id,
+                        value: estado.value, // Quantidade de registros
+                        name: estado.name,
+                        custom_max: maxProcess,
+                        total: estado.value // Total de registros
+                    };
+                });
+
+            } catch (error) {
+                console.error("Erro ao buscar dados para o mapa:", error);
+                return [];
+            }
+        }
+
         const worldData = [
             { id: "BR", value: 950, name: "Brasil" }
         ];
 
-        const brazilData = [
-            { id: "BR.SP", value: 450, name: "São Paulo", custom_max: "chrome.exe", total: 15430 },
-            { id: "BR.RJ", value: 320, name: "Rio de Janeiro", custom_max: "java.exe", total: 8200 },
-            { id: "BR.MG", value: 280, name: "Minas Gerais", custom_max: "mysqld", total: 6500 },
-            { id: "BR.RS", value: 210, name: "Rio Grande do Sul", custom_max: "python", total: 4100 }
-        ];
+        // Dados iniciais vazios, serão preenchidos pelo fetch
+        let brazilData = [];
 
-        function initAnyChart() {
+        async function initAnyChart() {
             if(anyChartInitialized) return;
+            
+            // Carregar dados antes de renderizar
+            const dadosProcessados = await fetchAndProcessBucketData();
+            if (dadosProcessados.length > 0) {
+                brazilData = dadosProcessados;
+            } else {
+                // Fallback se não tiver dados
+                brazilData = [
+                    { id: "BR.SP", value: 0, name: "São Paulo", custom_max: "N/A", total: 0 }
+                ];
+            }
+
             renderWorldMap();
             anyChartInitialized = true;
         }
@@ -539,22 +607,82 @@
         }
 
         // --- 4. Lógica do Novo Modal IA ---
-        function openIaModal(estadoNome) {
+        async function openIaModal(estadoNome) {
             const modal = document.getElementById('modal-ia');
             document.getElementById('modal-ia-title').innerText = `Análise: ${estadoNome}`;
             
-            // Dados Aleatórios (Substituir por lógica real)
-            document.getElementById('ia-cpu').innerText = Math.floor(Math.random() * 40 + 40) + "%";
-            document.getElementById('ia-ram').innerText = (Math.random() * 8 + 4).toFixed(1) + " GB";
-            
-            const tbody = document.getElementById('process-table-body');
-            tbody.innerHTML = `
-                <tr><td>chrome.exe</td><td>4120</td><td><span class="badge high">12%</span></td><td>High</td></tr>
-                <tr><td>java.exe</td><td>1102</td><td><span class="badge ok">4%</span></td><td>Running</td></tr>
-                <tr><td>node.exe</td><td>5521</td><td><span class="badge ok">2%</span></td><td>Running</td></tr>
-            `;
+            // Loading state
+            document.getElementById('ia-cpu').innerText = "...";
+            document.getElementById('ia-ram').innerText = "...";
+            document.getElementById('process-table-body').innerHTML = '<tr><td colspan="4">Carregando dados...</td></tr>';
 
             modal.style.display = 'flex';
+            
+            // Usar dados do cache se disponíveis, senão buscar
+            let dados = dadosBucketCache;
+            if (!dados || dados.length === 0) {
+                try {
+                    const response = await fetch('/bucket/processos');
+                    dados = await response.json();
+                    dadosBucketCache = dados;
+                } catch (error) {
+                    console.error("Erro ao buscar dados:", error);
+                    return;
+                }
+            }
+
+            // Filtrar dados pelo estado selecionado (estadoNome vem do mapa, ex: "São Paulo")
+            // Precisamos mapear o nome do estado para a sigla se o JSON usar sigla
+            // Simplificação: assumindo que o JSON tem campo 'estado' ou 'uf'
+            
+            const dadosEstado = dados.filter(d => {
+                // Tenta dar match no nome ou sigla
+                const uf = d['uf'] || d['estado'] || '';
+                // Mapeamento simples (pode ser melhorado)
+                return estadoNome.includes(uf) || (uf === 'SP' && estadoNome === 'São Paulo'); 
+            });
+
+            if (dadosEstado.length === 0) {
+                 document.getElementById('process-table-body').innerHTML = '<tr><td colspan="4">Nenhum dado encontrado para esta região.</td></tr>';
+                 return;
+            }
+
+            // Calcular KPIs reais baseados nos dados filtrados
+            let totalCpu = 0;
+            let totalRam = 0;
+            dadosEstado.forEach(d => {
+                totalCpu += parseFloat(d['uso_cpu'] || d['cpu'] || 0);
+                totalRam += parseFloat(d['uso_ram'] || d['ram'] || 0);
+            });
+            
+            const mediaCpu = (totalCpu / dadosEstado.length).toFixed(1);
+            const mediaRam = (totalRam / dadosEstado.length).toFixed(1);
+
+            document.getElementById('ia-cpu').innerText = mediaCpu + "%";
+            document.getElementById('ia-ram').innerText = mediaRam + " GB"; // Assumindo que o dado vem em GB ou MB, ajustar conforme necessário
+            
+            const tbody = document.getElementById('process-table-body');
+            tbody.innerHTML = '';
+
+            // Exibe os top 10 processos por uso de CPU
+            dadosEstado
+                .sort((a, b) => parseFloat(b['uso_cpu'] || 0) - parseFloat(a['uso_cpu'] || 0))
+                .slice(0, 10)
+                .forEach(d => {
+                    const nome = d['processo'] || d['nome'] || 'Desconhecido';
+                    const pid = d['pid'] || d['id'] || 'N/A';
+                    const cpu = d['uso_cpu'] || d['cpu'] || '0';
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${nome}</td>
+                        <td>${pid}</td>
+                        <td><span class="badge ${parseFloat(cpu) > 10 ? 'high' : 'ok'}">${cpu}%</span></td>
+                        <td>Running</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
             renderChart();
         }
 

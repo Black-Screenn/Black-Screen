@@ -287,7 +287,7 @@
         </div>
     </div>
 
-    <div id="loaderOverlay" class="loader-overlay" style="display:  none;">
+    <div id="loaderOverlay" class="loader-overlay" style="display: none;">
         <div class="loaderBody">
             <div class="loading-bar"></div>
             <div class="icon-bot robot">
@@ -333,8 +333,9 @@
         listaEl.innerHTML = '';
 
         rows.forEach(r => {
-            const periodoInicioText = r.Periodo_Inicio || r.Periodo || '';
-            const periodoFimText = r.Periodo_Fim || '';
+            console.log(r)
+            const periodoInicioText = new Date(r.Periodo_Inicio);
+            const periodoFimText = new Date(r.Periodo_Fim);
             const titulo = r.Titulo || r.Nome || (r.Link_Relatorio ? `Relatório ${r.Id_Relatorio || ''}` : 'Relatório IA');
             const nota = r.Nota || r.Score || '';
             const link = r.Link_Relatorio || r.link || r.Link || '';
@@ -345,9 +346,21 @@
             card.innerHTML = `
                 <div class="periodo">
                     <p>
-                        ${(periodoInicioText)}
+                        ${(
+                            periodoInicioText.toLocaleDateString('pt-BR', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            })
+                        )}
                         <span class="material-symbols-outlined">arrow_forward</span>
-                        ${(periodoFimText)}
+                        ${(
+                            periodoFimText.toLocaleDateString('pt-BR', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            })
+                        )}
                     </p>
                 </div>
                 <div class="titulo">
@@ -355,7 +368,7 @@
                     <p>${(r.Conteudo_Texto ? (r.Conteudo_Texto.substr(0, 80) + '...') : '')}</p>
                 </div>
                 <div class="nota">
-                    <p class="material-symbols-outlined nota_star">${(String(nota))}</p>
+                    <p class="material-symbols-outlined nota_star">${nota}</p>
                 </div>
                 <button onclick="abrirRelatorio(${r.Id_Relatorio})">
                     Visualizar
@@ -439,6 +452,7 @@
     function modalGerarRelatorio() {
         document.getElementById("modalGerarRelatorio").style.display = "flex";
         document.getElementById("data_inicio").value = "";
+        document.getElementById("data_fim").value = "";
 
         const hoje = new Date();
         const yyyy = hoje.getFullYear();
@@ -452,8 +466,6 @@
 
     function fecharModal() {
         document.getElementById("modalGerarRelatorio").style.display = "none";
-        document.getElementById("data_inicio").value = "";
-        document.getElementById("data_fim").value = "";
     }
 
     async function gerarRelatorio() {
@@ -462,12 +474,18 @@
         try {
             fecharModal();
             showLoading();
+            const periodoInicio = document.getElementById("data_inicio").value
+            const periodoFim = document.getElementById("data_fim").value
 
             console.log("Solicitando Relatório...");
             const response = await fetch('/relatorio/gerar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fkEmpresa: fkEmpresa })
+                body: JSON.stringify({ 
+                    fkEmpresa: fkEmpresa,
+                    periodoInicio: periodoInicio,
+                    periodoFim: periodoFim
+                })
             });
 
             const tipoConteudo = response.headers.get('content-type');

@@ -145,13 +145,6 @@ INSERT INTO Usuario (Nome, Email, Senha, Fk_Empresa, Fk_Cargo) VALUES
 ('Ana Analista', 'ana@blackscreen.com', '12345', 1, 2),
 ('Pedro Suporte', 'pedro@blackscreen.com', '12345', 1, 3);
 
--- AQUI ESTÃO AS CAIXAS (Seu MAC 8016... é a caixa ID 3)
-INSERT INTO Caixa (Macaddress, codigoCaixa, Fk_Endereco_Maquina, Fk_Empresa) VALUES
-('764275743843724', 'TOTEM-JK-01', 2, 1), -- ID 1
-('038473474382445', 'TOTEM-SE-02', 3, 1), -- ID 2
-('80160640191877', 'TOTEM-JK-02', 2, 1),  -- ID 3 (SUA MÁQUINA DO CSV)
-('185691056330935', 'TOTEM-SE-03', 3, 1); -- ID 4
-
 -- AQUI ADICIONEI OS COMPONENTES DO SEU CSV
 INSERT INTO Componentes (Nome_Componente, Unidade, Fk_Empresa) VALUES
 ('CPU', '%', 1),                    -- ID 1
@@ -161,22 +154,10 @@ INSERT INTO Componentes (Nome_Componente, Unidade, Fk_Empresa) VALUES
 ('Rede - Bytes Recebidos', 'Bytes', 1),  -- ID 5
 ('Rede - Pacotes Perdidos', 'Qtd', 1);   -- ID 6
 
--- AQUI LIGAMOS OS COMPONENTES ÀS CAIXAS
--- Ligando tudo na sua máquina (ID 3 - 80160640191877) para testar
-INSERT INTO Caixa_Componente (Fk_Caixa, Fk_Componente) VALUES
-(1, 1), (1, 2), (1, 3), -- Caixa 1 tem CPU, RAM, Disco
-(2, 1), (2, 2), (2, 3), -- Caixa 2 tem CPU, RAM, Disco
-(3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6); -- Caixa 3 (SUA) tem TUDO!
-
--- AQUI ESTÃO OS PARÂMETROS PARA GERAR ALERTAS (Trigger Points)
--- Baseado no seu CSV:
--- CPU chega a 97.8 -> Limite 90 (VAI ALERTA)
--- RAM chega a 88.8 -> Limite 80 (VAI ALERTA)
--- Pacotes Perdidos chega a 5491 -> Limite 5000 (VAI ALERTA)
 INSERT INTO Parametros (Valor_Parametrizado, Fk_Componente) VALUES
-(90.00, 1),  -- Alerta CPU > 90%
-(80.00, 2),  -- Alerta RAM > 80%
-(5000.00, 6); -- Alerta Pacotes Perdidos > 5000
+(85.00, 1),
+(80.00, 2),
+(30.00, 6);
 
 INSERT INTO Permissao (Nome_Permissao, Descricao_Permissao) VALUES
 ('DASHBOARD_FULL', 'Acesso completo aos gráficos'),
@@ -186,3 +167,39 @@ INSERT INTO CargoPermissao (Fk_Cargo, Fk_Permissao) VALUES
 (1, 1),
 (2, 1),
 (3, 2);
+
+
+-- Novos Endereços gerados aleatoriamente (Copie a saída do script Python aqui)
+INSERT INTO Enderecos (Cep, Pais, Cidade, UF, Logradouro, Numero, Latitude, Longitude, Bairro, Complemento) VALUES
+('01310-100', 'Brasil', 'São Paulo', 'SP', 'Av. Paulista', 1000, -23.56168, -46.65598, 'Bela Vista', 'Andar 10'),
+('04543-907', 'Brasil', 'São Paulo', 'SP', 'Av. Pres. Juscelino Kubitschek', 2041, -23.58998, -46.68987, 'Vila Olímpia', 'Shopping JK'),
+('01001-000', 'Brasil', 'São Paulo', 'SP', 'Praça da Sé', 1, -23.55052, -46.63331, 'Sé', 'Ao lado do metrô'),
+('69000-000', 'Brasil', 'Manaus', 'AM', 'Rua das Flores', 452, -3.10194, -60.02528, 'Centro', 'Loja 1'),
+('40000-000', 'Brasil', 'Salvador', 'BA', 'Av. Oceânica', 1230, -12.97111, -38.51083, 'Barra', 'Loja 2'),
+('90000-000', 'Brasil', 'Porto Alegre', 'RS', 'Av. Borges de Medeiros', 300, -30.02778, -51.22833, 'Centro Histórico', 'Loja 3'),
+('70000-000', 'Brasil', 'Brasília', 'DF', 'Esplanada dos Ministérios', 5, -15.79423, -47.88251, 'Zona Cívico-Administrativa', 'Loja 4'),
+('30000-000', 'Brasil', 'Belo Horizonte', 'MG', 'Av. Afonso Pena', 1500, -19.91668, -43.93449, 'Centro', 'Loja 5'),
+('80000-000', 'Brasil', 'Curitiba', 'PR', 'Rua XV de Novembro', 800, -25.42969, -49.27136, 'Centro', 'Loja 6'),
+('50000-000', 'Brasil', 'Recife', 'PE', 'Av. Boa Viagem', 4500, -8.06206, -34.89311, 'Boa Viagem', 'Loja 7');
+
+INSERT INTO Caixa (Macaddress, codigoCaixa, Fk_Endereco_Maquina, Fk_Empresa)
+VALUES
+('02bbbdc02bf9', 'ATM-SP-AVP-01', 1, 1),
+('16c3ad24476b', 'ATM-SP-JKB-01', 2, 1),
+('1817c27bfb2d', 'ATM-SP-PSE-01', 3, 1),
+('28b582796f26', 'ATM-MAO-CEN-01', 4, 1),
+('56d446c142d2', 'ATM-SAL-BAR-01', 5, 1),
+('963c48bb0adf', 'ATM-POA-HIS-01', 6, 1),
+('bc7673e2bc48', 'ATM-BSB-CIV-01', 7, 1),
+('c8a006971278', 'ATM-BHZ-CEN-01', 8, 1),
+('d8408e1114d1', 'ATM-CUR-CEN-01', 9, 1),
+('f0185cdf891b', 'ATM-REC-BOA-01', 10, 1);
+
+INSERT INTO Caixa_Componente (Fk_Caixa, Fk_Componente)
+SELECT c.Id_Caixa, comp.Id_Componente
+FROM Caixa c
+JOIN Componentes comp ON c.Fk_Empresa = comp.Fk_Empresa
+WHERE c.Macaddress IN ('02bbbdc02bf9', '16c3ad24476b', '1817c27bfb2d', '28b582796f26', '56d446c142d2', '963c48bb0adf', 'bc7673e2bc48', 'c8a006971278', 'd8408e1114d1', 'f0185cdf891b')
+  AND c.Fk_Empresa = 1
+ON DUPLICATE KEY UPDATE
+  Caixa_Componente.Data_Associacao = Caixa_Componente.Data_Associacao;
