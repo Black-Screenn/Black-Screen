@@ -7,7 +7,7 @@ const { uploadRelatorioS3 } = require('./cloudController.js');
 const { buscarParametroPorComponente } = require('../models/componenteModel.js')
 const { cadastrar, listar } = require('../models/relatorioModel.js');
 
-const genAI = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY});
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const modelo = "gemini-2.5-flash";
 const md = new MarkdownIt();
 
@@ -74,7 +74,7 @@ async function agenteAnalise(dadosJSON) {
     `;
 
     const promptUsuario = `
-        Você é o primeiro modulo do meu relatório, eu preciso que você pegue esse JSON, e refatore ele e me retorne o inicio do relatório sem qualquer julgamento, pois será responsabilidade dos proximos modulos. É importante que ele comece com um subtítulo (##) "Relatório de Monitoramento".
+        Você é o primeiro modulo do meu relatório, eu preciso que você pegue esse JSON, e refatore ele e me retorne o inicio do relatório sem qualquer julgamento, adicionando os alertas com base nos parametros, pois será responsabilidade dos proximos modulos. É importante que ele comece com um subtítulo (##) "Relatório de Monitoramento".
         \`\`\`json
         ${JSON.stringify(dadosJSON, null, 2)}
         \`\`\`
@@ -203,54 +203,214 @@ async function gerarRelatorio(req, res) {
             "limites_saudaveis": componentesParametro,
             "todos_atms_monitorados": [
                 {
-                "id_atm": "00:00:00:00:00:00",
-                "metricas_historico": {
-                    "cpu_max_registrado": 92.5,
-                    "cpu_media": 51.5,
-                    "ram_max_registrada": 86.1,
-                    "disco_percent_atual": 35.6,
-                    "pacotes_perdidos_total": 780
-                },
-                "historico_alertas_etl": [
-                    "Alerta de CPU, 00:00:00:00:00:00, Pico de uso da CPU atingiu 92.5%, 2025-11-11 10:30:35",
-                    "Alerta de RAM, 00:00:00:00:00:00, Pico de uso da RAM atingiu 86.1%, 2025-11-11 10:32:00",
-                    "Alerta de Rede, 00:00:00:00:00:00, Perda de pacotes (780) excedeu limite, 2025-11-11 11:00:00"
-                ]
-                },
-                {
-                "id_atm": "00:0A:95:9D:68:16",
-                "metricas_historico": {
-                    "cpu_max_registrado": 70.0,
-                    "cpu_media": 30.2,
-                    "ram_max_registrada": 65.0,
-                    "disco_percent_atual": 94.2,
-                    "pacotes_perdidos_total": 50
-                },
-                "historico_alertas_etl": [
-                    "Alerta de Disco, 00:0A:95:9D:68:16, Uso de Disco Atingiu 94.2%, 2025-11-11 08:22:00"
-                ]
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 14:15:04.245965",
+                    "cpu": 17.2,
+                    "ram": 77.3,
+                    "disco": 39.2,
+                    "uptime": 14242.307592,
+                    "bytes_enviados": 308.468031,
+                    "bytes_recebidos": 629.257738,
+                    "pacotes_perdidos": 963,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
                 },
                 {
-                "id_atm": "00:1A:55:7D:14:B2",
-                "metricas_historico": {
-                    "cpu_max_registrado": 45.0,
-                    "cpu_media": 22.1,
-                    "ram_max_registrada": 50.5,
-                    "disco_percent_atual": 25.0,
-                    "pacotes_perdidos_total": 10
-                },
-                "historico_alertas_etl": []
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 14:27:12.667619",
+                    "cpu": 20.3,
+                    "ram": 80.8,
+                    "disco": 39.2,
+                    "uptime": 14970.729246,
+                    "bytes_enviados": 319.765816,
+                    "bytes_recebidos": 675.349318,
+                    "pacotes_perdidos": 963,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
                 },
                 {
-                "id_atm": "00:1B:44:11:3A:B7",
-                "metricas_historico": {
-                    "cpu_max_registrado": 68.0,
-                    "cpu_media": 30.0,
-                    "ram_max_registrada": 61.0,
-                    "disco_percent_atual": 33.0,
-                    "pacotes_perdidos_total": 5
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 14:38:41.326391",
+                    "cpu": 21.0,
+                    "ram": 75.6,
+                    "disco": 39.2,
+                    "uptime": 15659.388018,
+                    "bytes_enviados": 342.677807,
+                    "bytes_recebidos": 751.768904,
+                    "pacotes_perdidos": 964,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
                 },
-                "historico_alertas_etl": []
+                {
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 14:42:58.178761",
+                    "cpu": 23.3,
+                    "ram": 90.3,
+                    "disco": 39.2,
+                    "uptime": 15916.240388,
+                    "bytes_enviados": 376.225850,
+                    "bytes_recebidos": 838.217766,
+                    "pacotes_perdidos": 964,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
+                },
+                {
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 14:54:35.609946",
+                    "cpu": 18.9,
+                    "ram": 79.2,
+                    "disco": 39.2,
+                    "uptime": 16613.671572,
+                    "bytes_enviados": 410.688309,
+                    "bytes_recebidos": 881.859894,
+                    "pacotes_perdidos": 964,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
+                },
+                {
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 15:00:24.706902",
+                    "cpu": 25.8,
+                    "ram": 75.9,
+                    "disco": 39.2,
+                    "uptime": 16962.768529,
+                    "bytes_enviados": 435.204862,
+                    "bytes_recebidos": 930.637543,
+                    "pacotes_perdidos": 964,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
+                },
+                {
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 15:04:24.891051",
+                    "cpu": 11.9,
+                    "ram": 83.9,
+                    "disco": 39.2,
+                    "uptime": 17202.952677,
+                    "bytes_enviados": 473.971904,
+                    "bytes_recebidos": 1003.043835,
+                    "pacotes_perdidos": 966,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
+                },
+                {
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 15:12:56.323658",
+                    "cpu": 25.6,
+                    "ram": 76.2,
+                    "disco": 39.2,
+                    "uptime": 17714.385284,
+                    "bytes_enviados": 493.249750,
+                    "bytes_recebidos": 1050.378194,
+                    "pacotes_perdidos": 967,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
+                },
+                {
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 15:26:51.348624",
+                    "cpu": 12.7,
+                    "ram": 80.0,
+                    "disco": 39.2,
+                    "uptime": 18549.410250,
+                    "bytes_enviados": 508.727367,
+                    "bytes_recebidos": 1099.695653,
+                    "pacotes_perdidos": 967,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
+                },
+                {
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 15:30:25.438983",
+                    "cpu": 30.7,
+                    "ram": 81.0,
+                    "disco": 39.2,
+                    "uptime": 18763.500609,
+                    "bytes_enviados": 538.255428,
+                    "bytes_recebidos": 1140.544399,
+                    "pacotes_perdidos": 967,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
+                },
+                {
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 15:36:51.259849",
+                    "cpu": 27.2,
+                    "ram": 83.7,
+                    "disco": 39.2,
+                    "uptime": 19149.321475,
+                    "bytes_enviados": 555.306600,
+                    "bytes_recebidos": 1191.651711,
+                    "pacotes_perdidos": 967,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
+                },
+                {
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 15:46:28.290360",
+                    "cpu": 25.6,
+                    "ram": 81.7,
+                    "disco": 39.2,
+                    "uptime": 19726.351986,
+                    "bytes_enviados": 598.212009,
+                    "bytes_recebidos": 1209.139260,
+                    "pacotes_perdidos": 968,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
+                },
+                {
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 15:51:38.350132",
+                    "cpu": 14.9,
+                    "ram": 80.7,
+                    "disco": 39.2,
+                    "uptime": 20036.411758,
+                    "bytes_enviados": 607.519072,
+                    "bytes_recebidos": 1298.818674,
+                    "pacotes_perdidos": 969,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
+                },
+                {
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 16:05:35.214437",
+                    "cpu": 34.9,
+                    "ram": 79.8,
+                    "disco": 39.2,
+                    "uptime": 20873.276063,
+                    "bytes_enviados": 626.463830,
+                    "bytes_recebidos": 1354.467063,
+                    "pacotes_perdidos": 970,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
+                },
+                {
+                    "macaddress": 207280876152857,
+                    "datetime": "2025-11-27 16:16:37.727469",
+                    "cpu": 18.0,
+                    "ram": 81.9,
+                    "disco": 39.2,
+                    "uptime": 21535.789096,
+                    "bytes_enviados": 656.411077,
+                    "bytes_recebidos": 1399.472615,
+                    "pacotes_perdidos": 972,
+                    "usuario": "dandansousa",
+                    "ip_publico": "177.92.67.154",
+                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
                 }
             ]
         };
@@ -362,7 +522,7 @@ async function gerarRelatorio(req, res) {
             </html>
         `;
 
-        const browser = await puppeteer.launch({ 
+        const browser = await puppeteer.launch({
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
@@ -373,11 +533,11 @@ async function gerarRelatorio(req, res) {
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
-            margin: { 
+            margin: {
                 top: '20mm',
-                bottom: '20mm', 
-                left: '15mm', 
-                right: '15mm' 
+                bottom: '20mm',
+                left: '15mm',
+                right: '15mm'
             },
             footerTemplate: `
                 <div style="font-size: 10px; width: 100%; text-align: right; padding-right: 20px;">
@@ -386,7 +546,7 @@ async function gerarRelatorio(req, res) {
             `
         });
 
-        console.log("[GERAR RELATÓRIO PDF] [4/4] Tamanho do PDF Gerado:", pdfBuffer.length, "bytes"); 
+        console.log("[GERAR RELATÓRIO PDF] [4/4] Tamanho do PDF Gerado:", pdfBuffer.length, "bytes");
 
         await browser.close();
         console.log("[GERAR RELATÓRIO Sucesso] Enviando PDF");
@@ -394,11 +554,11 @@ async function gerarRelatorio(req, res) {
         const dadosUnicos = Date.now().toString() + Math.random().toString();
         const hash = crypto.createHash('md5').update(dadosUnicos).digest('hex');
 
-        link = await uploadRelatorioS3(pdfBuffer, "relatorio_"+hash, fkEmpresa);
-        cadastrar(link, fkEmpresa, relatorioFinal)
+        link = await uploadRelatorioS3(pdfBuffer, "relatorio_" + hash, fkEmpresa);
+        cadastrar(link, fkEmpresa, relatorioFinal, periodoInicio, periodoFim)
 
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline; filename=relatorio.pdf'); 
+        res.setHeader('Content-Disposition', 'inline; filename=relatorio.pdf');
         res.end(pdfBuffer, 'binary');
     } catch (error) {
         console.error("Erro no fluxo 'gerarRelatorio':", error);
