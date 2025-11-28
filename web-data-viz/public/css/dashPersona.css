@@ -178,6 +178,7 @@ h1 {
     font-size: 15px;
 }
 
+
 .kpi_metrica{
     width: 100%;
     height: 60%;
@@ -186,7 +187,7 @@ h1 {
     align-items: center;
     justify-items: center;
     flex-wrap: wrap;
-    gap: 30px;
+    gap: 25px;
     color: white;
     margin: 25px;
 }
@@ -361,6 +362,12 @@ h1 {
     border-radius: 12px;
     width: 100%;
     height: 90%;
+    display: flex;
+    flex-direction: row;
+    justify-items: center;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
 }
 .iachart-container{
      background-color: #f5f5f5f5;
