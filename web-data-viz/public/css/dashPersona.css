@@ -3,58 +3,95 @@
     height: 100%;    
 }
 
+/* KPI Cards - Aumentado e otimizado */
 .perosna-kpi {
     background-color: #004076;
-    border-radius: 10px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
-    justify-self: center;
-    height: 140px;
-    width: 100%;
-    gap: 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);   
-    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+    justify-content: flex-start;
+    height: 190px;
+    width: 455px;
+    gap: 22px;
+    padding: 20px 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);   
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .perosna-kpi:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgb(0, 0, 0);
-    background-color: #008cff73; 
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 140, 255, 0.4);
+    background-color: #005a9e; 
+}
+
+/* Ajuste geral para todos os spans dentro das KPIs */
+.perosna-kpi span {
+    width: 95px;
+    height: 95px;
+    margin: 0;
+    flex-shrink: 0;
 }
 
 .icon_kpi {
-    width: 62px;
-    height: 63px;
-    font-size: 55px !important;
+    width: 95px;
+    height: 95px;
+    font-size: 62px !important;
     color: rgb(0, 0, 0);
     background-color: #ffffff;
-    margin-left: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    margin: 0;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+/* Força o tamanho do ícone Material Symbols */
+.icon_kpi.material-symbols-outlined {
+    font-variation-settings: 
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 48;
+    line-height: 1;
+}
+
+.perosna-kpi .metric-info {
+    flex: 1;
+    overflow: hidden;
 }
 
 .perosna-kpi .metric-info h3,
 .perosna-kpi .metric-info h4 {
-    font-weight: 500;
+    font-weight: 600;
     color: white !important; 
-    font-size: 20px;
+    font-size: 27px;
+    margin-bottom: 10px;
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .perosna-kpi:hover .metric-info h3,
 .perosna-kpi:hover .metric-info h4 {
-    color: rgb(0, 0, 0) !important;
+    color: rgb(255, 255, 255) !important;
 }
+
 .perosna-kpi .metric-info p {
-        font-size: 20px;
-    font-weight: 700;
-    font-style: italic;
-}
-.perosna-kpi .metric-info p {
+    font-size: 26px;
+    font-weight: 600;
+    font-style: normal;
     color: white !important;
+    line-height: 1.3;
+    letter-spacing: -0.2px;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .perosna-kpi:hover .metric-info p {
-    color: black !important;
+    color: white !important;
 }
 
 h1 {
@@ -66,30 +103,52 @@ h1 {
 
 .classCompontes{
     display: flex;
-    flex-direction: column;
-    width: 132px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 8px 12px;
+    align-items: center;
 }
 
 .componente, .atms{
-    height: 23px;
+    height: auto;
     display: flex;
     flex-direction: row;
     justify-self: center;
-    margin: 0px;
-    gap: 10px;
+    margin: 0;
+    gap: 8px;
+    align-items: center;
+    font-size: 22px;
+    font-weight: 500;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
-.componente svg{
-    filter: drop-shadow(2px 2px 2px rgb(0, 0, 0));
+.componente svg, .atms svg{
+    width: 28px !important;
+    height: 28px !important;
+    filter: drop-shadow(2px 2px 3px rgb(0, 0, 0));
     vertical-align: middle;
-    margin-left: 8px;
+    flex-shrink: 0;
 }
 
 .material_color_kpi{
     background-color: rgb(255 0 0 / 79%);
     color: white;
-    margin-left: 12px;
-    width: 60px;
+    width: 95px;
+    height: 95px;
+    font-size: 62px !important;
+    margin: 0;
+    padding: 0;
+}
+
+/* Ajuste específico para ícones coloridos */
+.material_color_kpi.material-symbols-outlined {
+    font-variation-settings: 
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 48;
+    line-height: 1;
 }
 
 .chamado-titulo {
@@ -104,29 +163,33 @@ h1 {
     width: 100%;
     flex-wrap: wrap;
 }
+
 .chamado-titulo svg{
-    width: 23px;
+   width: 23px;
+    background-color: red;
+    height: 23px;
+       border-radius: 5px;
+    padding: 3px;
 }
 
 .chamado-item{
-    width: 250px;
+    width: 210px;
     height: auto;
     font-size: 15px;
 }
 
 .kpi_metrica{
     width: 100%;
-    height: 100%;
+    height: 60%;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-items: center;
     flex-wrap: wrap;
     gap: 30px;
-    color: black;
+    color: white;
+    margin: 25px;
 }
-
-
 
 .info {
     width: 215px;
@@ -139,9 +202,9 @@ h1 {
 
 .chamado-titulo{
     font-size: 17px;
-    font-weight: 600;
+    font-weight: 400;
     font-style: italic;
-    color: #004076;
+    color: white;
 }
 
 .chamado-detalhes{
@@ -157,45 +220,116 @@ h1 {
 
 .tituloAlerta{
     color: white;
-    font-size: 20px;
-    font-weight: 400;
-    margin-top: 5px;
-
+    font-size: 27px;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 10px;
+    letter-spacing: -0.3px;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .perosna-kpi:hover .tituloAlerta {
-    color: black !important;
+    color: white !important;
 }
 
 .infoAlerta{
     color: white;
-    font-size: 35px;
-    font-weight: 600;
+    font-size: 50px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .perosna-kpi:hover .infoAlerta {
-    color: black !important;
+    color: white !important;
 }
 
 .classCompontes_alertas, .ATM_Alerta{
     display: flex;
     flex-direction: column;
     color: white;
+    width: 100%;
 }
-.perosna-kpi .metric-info .ATM_Alerta .atms{
-    font-size: 27px !important;
-    font-style: italic;
-}
-.perosna-kpi:hover .classCompontes_alertas, .ATM_Alerta {
-    color: black !important;
 
+.perosna-kpi .metric-info .ATM_Alerta .atms{
+    font-size: 42px !important;
+    font-style: italic;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
+
+.perosna-kpi:hover .classCompontes_alertas, 
+.perosna-kpi:hover .ATM_Alerta {
+    color: white !important;
+}
+
 .atm_color{
     background-color: rgba(255, 247, 205, 1);
-    width: 57px;
-    padding: 6px;
+    width: 95px;
+    height: 95px;
+    padding: 0;
+    margin: 0;
     color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 62px !important;
+}
 
+/* Ajuste específico para ícone ATM */
+.atm_color.material-symbols-outlined {
+    font-variation-settings: 
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 48;
+    line-height: 1;
+}
+
+/* Otimização do gráfico de linha */
+#chart-previsao {
+    min-height: 280px !important;
+    max-height: 280px;
+    width: 100%;
+    margin: -10px 0 0 0;
+    padding: 0;
+}
+
+/* Estilização do container do gráfico dentro da KPI */
+.perosna-kpi .metric-info > div {
+    width: 100%;
+}
+
+/* Alerta de quebra */
+#alerta-quebra {
+    font-size: 13px;
+    margin-top: 5px;
+    font-weight: bold;
+    color: #4ade80;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 8px;
+    border-radius: 8px;
+}
+
+/* Override para cores do ApexCharts no fundo azul */
+.apexcharts-text,
+.apexcharts-yaxis-label,
+.apexcharts-xaxis-label {
+    fill: rgba(255, 255, 255, 0.85) !important;
+}
+
+.apexcharts-gridline {
+    stroke: rgba(255, 255, 255, 0.15) !important;
+}
+
+.apexcharts-tooltip {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #1f2937 !important;
 }
 
 .grafico{
@@ -207,23 +341,33 @@ h1 {
     padding: 0;
     padding: auto;
 }
+
 .grafico h3{
     margin: 0;
-    padding-bottom:-50px ;
+    padding-bottom: -50px;
 }
 
-
-
-
-
 .container_jira .chart-container {
+    background-color: #f5f5f5;
     max-height: 400px; 
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 10px; 
+    border-radius: 12px;
     
 }
-
+.chart-container{
+    background-color: #f5f5f5f5;
+    border-radius: 12px;
+    width: 100%;
+    height: 90%;
+}
+.iachart-container{
+     background-color: #f5f5f5f5;
+    border-radius: 12px;
+    width: 90%;
+    height: 90%;
+}
 
 .container_jira .chart-container::-webkit-scrollbar {
     width: 8px;
@@ -243,19 +387,17 @@ h1 {
     background: #555;
 }
 
-#myChart{
-    height: auto;
-    margin-top: -30px;
-}
-
 #chart{
-    height: 100%;
-  
-}
-.apexcharts-legend{
-     flex-direction: row-reverse;   
 }
 
+
+.apexcharts-legend{
+    flex-direction: row-reverse;   
+}
+.apexcharts-datalabels-group text{  
+    fill: black !important;
+
+}
 .insights_ia{
     display: flex;
     flex-direction: column;
@@ -265,25 +407,22 @@ h1 {
     font-weight: 300;
     font-style: italic;
 }
+
 .insights-container{
     display: flex;
     flex-direction: column;
     gap: 20px;
     color: black;
 }
+
 .insights-container h3{
     color: red !important;
     font-size: 20px !important;
     font-weight: 500 !important;
 }
 
-
-
-
-
-
 .card-jira {
-    background-color: white;
+    background-color: #004076;
     padding: 15px;
     border-radius: 8px;
     cursor: pointer;
@@ -294,12 +433,14 @@ h1 {
     align-content: center;
     justify-content: space-evenly;
     align-items: center;
-    height: 150px;
+    height: 120px;
 }
 
 .card-jira:hover {
-    transform: translateY(-2px);
-    background-color: #f8f9fa;
+  transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 140, 255, 0.4);
+    background-color: #005a9e; 
+
 }
 
 .modal-container {
@@ -316,7 +457,11 @@ h1 {
 }
 
 .modal-content {
-    background: #004076;
+
+
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 140, 255, 0.4);
+    background-color: #005a9e; 
     padding: 20px;
     border-radius: 20px;
     min-width: 430px;
@@ -327,11 +472,13 @@ h1 {
 
 .fechar {
     position: absolute;
-    top: 10px; right: 15px;
+    top: 10px;
+    right: 15px;
     cursor: pointer;
     font-size: 20px;
     font-weight: bold;
 }
+
 .divSvg{
     background-color: white;
     display: flex;
@@ -349,11 +496,145 @@ h1 {
     margin-top: 13px;
     height: 50px;
 }
+
 .divSvg svg{
     width: 30px;
     height: auto;
     gap: 20px;
 }
+
 .atms strong{
-    font-size: 20px;
+    font-size: 28px;
+    font-weight: 700;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
+
+.graficoBolha {
+    width: 100%;
+    height: 100%; 
+    display: flex;
+    flex-direction: column; 
+
+
+   
+}
+
+.graficoBolha > div:not(h3) {
+    flex: 1;
+    width: 100%;
+    height: 100%; 
+    overflow: hidden; 
+}
+
+
+
+
+
+
+
+.graficoBolhacontainer{    
+   
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 1563px;
+    min-height: 500px;
+    
+}
+
+#kpi_metrica-bubble {
+    align-self: center;
+    justify-items: center;
+
+}
+
+
+
+
+.apexcharts-datalabel {
+    display: none !important;
+}
+.perosna-kpi .icon_kpi svg {
+  width: 80px;
+  height: 80px;
+  display: block;
+  
+  align-self: center;
+  justify-self: center;
+}
+.perosna-kpi svg path{
+    width: 100%;
+    height: 100%;
+}
+.atm{
+   
+    justify-content: center !important;
+    align-content: center !important;
+}
+.atm svg{
+    width: 70px !important;
+    height: 70px !important;
+    justify-self: center !important;
+    align-self: center !important;
+}
+
+.apexcharts-yaxis-texts-g text, 
+.apexcharts-yaxis-texts-g tspan {
+    fill: black !important; /* Use 'fill' para SVG text color */
+    font-size: 15px !important; /* Aumenta o tamanho da fonte */
+    
+}
+
+/* Para a cor do texto do eixo X (os rótulos da parte inferior, se existirem) */
+.apexcharts-xaxis-texts-g text,
+.apexcharts-xaxis-texts-g tspan {
+    fill: black !important;
+}
+
+/* Para a cor do texto da legenda (Semana Atual/Anterior) */
+.apexcharts-legend-text {
+    fill: black !important;
+    font-size: 16px !important; /* Ajuste o tamanho da fonte da legenda aqui */
+    color: black !important; /* Adicionado por precaução, embora fill seja o principal */
+}
+
+/* Para o título do eixo X (Onde você definiu 'Componentes') */
+.apexcharts-xaxis-title-text {
+    fill: black !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+}
+
+
+
+
+/* força cor preta nos labels e nos titles do ApexCharts */
+.apexcharts-xaxis text,
+.apexcharts-yaxis text,
+.apexcharts-xaxis .apexcharts-xaxis-label,
+.apexcharts-yaxis .apexcharts-yaxis-label,
+.apexcharts-yaxis-title,
+.apexcharts-xaxis-title {
+  fill: #000 !important;
+  color: #000 !important;
+  margin-left: 25px !important;
+}
+.apexcharts-yaxis-title text{
+    min-width: 20px !important;
+    min-height: 50px !important;
+    fill: red !important;
+    gap: 50px !important;
+    padding: 50px !important;
+    margin: 50px !important;
+
+}
+
+
+
+.apexcharts-yaxis{
+    min-width: 50px !important;
+    min-height: 50px !important;
+
+}   
+
+   
