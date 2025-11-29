@@ -501,6 +501,9 @@
                 throw new Error(`Erro HTTP: ${response.status}`);
             }
 
+            
+            buscarRelatorios();
+
             const blob = await response.blob();
             const arquivoPdf = new Blob([blob], { type: 'application/pdf' });
 
