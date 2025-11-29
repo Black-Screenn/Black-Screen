@@ -16,6 +16,25 @@ const SQL_BASE = `
   where e.Latitude is not null and e.Longitude is not null
 `;
 
+function buscarMacAddres(macaddress){
+  sql = `
+    SELECT 
+    c.Macaddress, 
+    c.codigoCaixa,
+    e.Cidade,
+    e.Numero, 
+    e.Bairro,
+    e.Complemento 
+FROM 
+    Caixa c 
+INNER JOIN 
+    Enderecos e ON e.Id_Endereco = c.Fk_Endereco_Maquina 
+WHERE 
+    c.Macaddress = '${macaddress}';
+  `
+  return db.executar(sql);
+}
+
 function listarTodos() {
   const sql = SQL_BASE + " order by c.Id_Caixa";
   return db.executar(sql);
@@ -81,7 +100,9 @@ async function cadastrar(caixa) {
     `;
     return db.executar(sql).then(() => idCaixa);
   });
+
 }
+
 
 module.exports = {
   listarTodos,
@@ -89,4 +110,5 @@ module.exports = {
   cadastrar,
   buscarPorMac,
   listarInfo,
+  buscarMacAddres
 };
