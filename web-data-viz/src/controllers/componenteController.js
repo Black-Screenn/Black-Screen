@@ -160,6 +160,20 @@ function listarPorCaixa(req, res) {
     }
 }
 
+
+
+function buscarParametros(req, res){
+   componenteModel.buscarValoresComponentes()
+   .then(function(resultado){
+    console.log(resultado)
+    res.json(resultado)
+   })
+   .catch(function(erro){
+    console.log(erro)
+   })
+
+}
+
 module.exports = {
     cadastrar,
     listar,
@@ -167,5 +181,6 @@ module.exports = {
     excluir,
     associarCaixa,
     desassociarCaixa,
-    listarPorCaixa
+    listarPorCaixa,
+    buscarParametros
 }

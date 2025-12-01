@@ -22,6 +22,20 @@ var database = require("../database/config")
         });
     }
 
+    function buscarValoresComponentes(){
+        console.log('buscando valores dos componentes \n');
+        var instrucaoSql = `
+                select 
+                    C.Nome_Componente, 
+                    P.Valor_Parametrizado,
+                    C.Unidade
+                    from Componentes as C
+                    inner join Parametros  as P on Fk_Componente = Id_Componente;
+`;   
+        console.log("Executando query ", instrucaoSql)
+        return database.executar(instrucaoSql)
+    }
+
     function listar(fkEmpresa) {
         console.log("ACESSEI O COMPONENTE MODEL - LISTAR \n \n\t\t >> Empresa:", fkEmpresa);
 
@@ -155,5 +169,6 @@ var database = require("../database/config")
         associarCaixa,
         desassociarCaixa,
         listarPorCaixa,
-        buscarParametroPorComponente
+        buscarParametroPorComponente,
+        buscarValoresComponentes
     }
