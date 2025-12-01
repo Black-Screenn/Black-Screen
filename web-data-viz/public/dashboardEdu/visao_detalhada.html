@@ -134,7 +134,7 @@
             <div class="listaAtm">
                 <div class="header">
                     Lista de Chamados do Jira
-                    <select name="Componente" id="filtro_componente">
+                    <select name="Componente" id="filtro_componente" onchange="carregarChamados()">
                         <option value="sem_filtro">Filtrar por Componente</option>
                         <option value="filtro_cpu">CPU</option>
                         <option value="filtro_ram">RAM</option>
@@ -159,10 +159,10 @@
 </body>
 
 <script>
-    let cpu = 0;
-    let ram = 0;
-    let disco = 0;
-    let rede = 0;
+    var cpu = 0;
+    var ram = 0;
+    var disco = 0;
+    var rede = 0;
 
     window.onload = () => {
         somandoComponenteAlertaJiraKpi();
@@ -223,10 +223,13 @@
       }]
     }
 
+    /*for (i = 0; i < resposta.length; i++) {
+      dados.datasets[0].data.push(cpu,ram,disco,rede);
+    }
         const config = {
             type: 'bar',
             data: dados,
-        };  
+        };  */
   }
    
    function carregarChamados() {
@@ -257,6 +260,10 @@
                 let componente_limpo = sem_aviso.split("|",1)
 
                 let dia_hora_limpo = hora.split(/T|\./,2)
+
+                var filtro = document.getElementById("filtro_componente").value
+
+                if(filtro =="sem_filtro"){
                     item.innerHTML = `
                         
                         <p class="atm">${chave}</p>
@@ -267,6 +274,59 @@
                         </p>
                     `;
                     listaContent.appendChild(item);
+                } if(filtro == "filtro_cpu"){
+                    if(componente_limpo = "CPU"){
+                        item.innerHTML = `
+                        
+                        <p class="atm">${chave}</p>
+                        <p class="address">${componente_limpo}</p>
+                        <p class="country">${dia_hora_limpo}</p>
+                        <p class="acao">
+                            <a class="link" href="${link}"> Link Chamado </a> 
+                        </p>
+                    `;
+                    listaContent.appendChild(item);
+                    }
+                } if(filtro == "filtro_ram"){
+                    if(componente_limpo = "RAM"){
+                        item.innerHTML = `
+                        
+                        <p class="atm">${chave}</p>
+                        <p class="address">${componente_limpo}</p>
+                        <p class="country">${dia_hora_limpo}</p>
+                        <p class="acao">
+                            <a class="link" href="${link}"> Link Chamado </a> 
+                        </p>
+                    `;
+                    listaContent.appendChild(item);
+                    }
+                } if(filtro == "filtro_disco"){
+                    if(componente_limpo = "Disco"){
+                        item.innerHTML = `
+                        
+                        <p class="atm">${chave}</p>
+                        <p class="address">${componente_limpo}</p>
+                        <p class="country">${dia_hora_limpo}</p>
+                        <p class="acao">
+                            <a class="link" href="${link}"> Link Chamado </a> 
+                        </p>
+                    `;
+                    listaContent.appendChild(item);
+                    }
+                } if(filtro == "filtro_rede"){
+                    if(componente_limpo = "Rede"){
+                        item.innerHTML = `
+                        
+                        <p class="atm">${chave}</p>
+                        <p class="address">${componente_limpo}</p>
+                        <p class="country">${dia_hora_limpo}</p>
+                        <p class="acao">
+                            <a class="link" href="${link}"> Link Chamado </a> 
+                        </p>
+                    `;
+                    listaContent.appendChild(item);
+                    }
+                }
             })
             })
                 
