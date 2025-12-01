@@ -197,9 +197,9 @@
                                 ><strong>Selecionar período:</strong></label
                             >
                             <select id="periodSelect" class="dropdown">
-                                <option value="7">Últimos 7 dias</option>
-                                <option value="30">Últimos 30 dias</option>
-                                <option value="90">Últimos 3 meses</option>
+                                <option value="7">7 dias</option>
+                                <option value="30">30 dias</option>
+                                <option value="90">3 meses</option>
                             </select>
                         </div>
                         <div class="graficos-row">
@@ -234,6 +234,7 @@
             b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
             const urlparam = new URLSearchParams(window.location.search);
             const mac = urlparam.get("id");
+            var nomeEmpresa = "";
             maquinaid.innerHTML = "Caixa #" + urlparam.get("id");
 
             fetch("/caixas/listarinfo", {
@@ -251,6 +252,7 @@
                     estado.innerHTML = data[0].UF;
                     cidade.innerHTML = data[0].Cidade;
                     bairro.innerHTML = data[0].Bairro;
+                    nomeEmpresa = data[0].Nome_Empresa;
                 })
                 .catch((error) => {
                     console.error(error);
@@ -299,6 +301,29 @@
 
 
                       `;
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+
+            fetch("/caixas/ping", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    var latencia = data.latencia;
+                    var perda = data.perda;
+                    if (perda < 100) {
+                        document.getElementById("status").innerHTML = "Online";
+                    } else {
+                        document.getElementById("status").innerHTML = "Offline";
+                    }
+                    document.getElementById("pacotes").innerHTML = `${perda}%`;
+                    document.getElementById("latencia").innerHTML =
+                        `${latencia}ms`;
                 })
                 .catch((error) => {
                     console.error(error);
