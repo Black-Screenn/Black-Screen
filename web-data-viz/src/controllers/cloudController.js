@@ -207,10 +207,11 @@ async function buscaCSVgrafico(req, res) {
     const local = req.query.local;
     const empresa = req.query.empresa;
     const maquina = req.query.maquina;
+    const campo = req.query.campo;
 
-    if (!local || !empresa || !maquina) {
+    if (!local || !empresa || !maquina || !campo) {
       return res.status(400).json({
-        erro: "Parâmetros 'local', 'empresa' e 'maquina' são obrigatórios",
+        erro: "Parâmetros 'local', 'empresa', 'maquina' e 'campo' são obrigatórios",
       });
     }
 
@@ -232,17 +233,18 @@ async function buscaCSVgrafico(req, res) {
 
     const csvContent = await streamToString(response.Body);
 
-    // QUEBRA A STRING CSV EM ARRAY DE OBJETOS {data, valor}
     const linhas = csvContent
       .trim()
       .split("\n")
       .filter((l) => l.trim());
+
     const dadosConvertidos = linhas
       .map((linha) => {
         const campos = linha.split(";");
+        const indiceCampo = parseInt(campo);
         return {
-          data: campos[0].trim(), // datetime (primeiro campo)
-          valor: parseFloat(campos[4].trim()) || 0, // disponibilidade (5º campo - índice 4)
+          data: campos[0].trim(),
+          valor: parseFloat(campos[indiceCampo]?.trim()) || 0,
         };
       })
       .filter((item) => !isNaN(item.valor));

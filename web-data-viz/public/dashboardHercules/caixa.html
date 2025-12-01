@@ -525,7 +525,6 @@
                 });
 
                 /*
-                // Gráfico 2 - Chamados (PRONTO - só descomentar)
                 let ultimos2 = dadosGrafico2.slice(-dias);
                 if (dias === 30) {
                     ultimos2 = agruparPorSemana(ultimos2);
@@ -547,24 +546,37 @@
                 });
                 */
 
-                /*
-                // Gráfico 3 - Probabilidade de falha (PRONTO - só descomentar)
                 const primeiros3 = dadosGrafico3.slice(0, dias);
                 lineChart2.updateOptions({
                     xaxis: {
-                        categories: primeiros3.map(d => formatarData(d.data))
+                        categories: primeiros3.map((d) => formatarData(d.data)),
                     },
-                    series: [{
-                        data: primeiros3.map(d => d.valor)
-                    }]
+                    series: [
+                        {
+                            data: primeiros3.map((d) => d.valor),
+                        },
+                    ],
+                    yaxis: {
+                        labels: {
+                            formatter: function (val) {
+                                return Number(val).toFixed(1) + "%";
+                            },
+                        },
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function (val) {
+                                return Number(val).toFixed(1) + "%";
+                            },
+                        },
+                    },
                 });
-                */
             }
 
             async function carregarDadosGraficos() {
                 try {
                     const res1 = await fetch(
-                        `/cloud/buscaCSVgrafico?local=mensal&empresa=${nomeEmpresa}&maquina=${mac}`,
+                        `/cloud/buscaCSVgrafico?local=mensal&empresa=${nomeEmpresa}&maquina=${mac}&campo=4`,
                     ).then((r) => r.json());
                     dadosGrafico1 = res1.sort(
                         (a, b) => new Date(a.data) - new Date(b.data),
@@ -591,14 +603,12 @@
                     /*
                     const res2 = await fetch(``).then(r => r.json());
                     dadosGrafico2 = res2.sort((a, b) => new Date(a.data) - new Date(b.data));
-
-                    const res3 = await fetch(``).then(r => r.json());
-                    dadosGrafico3 = res3.sort((a, b) => new Date(a.data) - new Date(b.data));
-                    */
-
-                    console.log(
-                        "Dados carregados - Gráfico 1:",
-                        dadosGrafico1.length,
+*/
+                    const res3 = await fetch(
+                        `/cloud/buscaCSVgrafico?local=regressao&empresa=${nomeEmpresa}&maquina=${mac}&campo=1`,
+                    ).then((r) => r.json());
+                    dadosGrafico3 = res3.sort(
+                        (a, b) => new Date(a.data) - new Date(b.data),
                     );
                 } catch (error) {
                     console.error(
@@ -616,11 +626,14 @@
                     optionsLine1,
                 );
                 // barChart = new ApexCharts(document.querySelector("#barChart"), optionsBar);
-                // lineChart2 = new ApexCharts(document.querySelector("#lineChart2"), optionsLine2);
+                lineChart2 = new ApexCharts(
+                    document.querySelector("#lineChart2"),
+                    optionsLine2,
+                );
 
                 lineChart1.render();
                 // barChart.render();
-                // lineChart2.render();
+                lineChart2.render();
 
                 atualizarGraficos(7);
             }
@@ -642,15 +655,14 @@
                 xaxis: { categories: [], title: { text: "Dias" } },
                 yaxis: { title: { text: "Volume" } }
             };
-
+*/
             const optionsLine2 = {
                 chart: { type: "line", height: 300, toolbar: { show: false } },
                 series: [{ name: "Prob. Falha", data: [], color: "#004076" }],
                 stroke: { curve: "smooth", width: 3 },
                 xaxis: { categories: [], title: { text: "Dias" } },
-                yaxis: { title: { text: "Tendência" } }
+                yaxis: { title: { text: "Tendência" } },
             };
-            */
         </script>
     </body>
 </html>
