@@ -164,7 +164,7 @@
 
         }).then(resposta => {
             const chamados = resposta.issues;
-            let atmId = []
+            let listaATM = []
             let ATM_Alerta = document.querySelector('.ATM_Alerta')
             chamados.forEach(chamado => {
 
@@ -172,25 +172,22 @@
                 let chave = chamado.key;
                 let idMaquina = chamado.fields.description.content[0].content[0].text;
 
-                let idAnterio = idMaquina;
-                if (idMaquina.includes("ID ATM:")) {
-                    if (!atmId.includes(idMaquina)) {
-                        atmId.push(idMaquina);
+                let idATM = [
+                    {id_chamado: chave, id_maquina: idMaquina}
+                ];
+
+                //console.log(idATM)
+                console.log(chamado)
+                for(const item of idATM){
+                    let atmAnterior = item.id_maquina;   
+                    if(atmAnterior != item.id_maquina){
+                        qtdAlertas = 1
+                        atmAnterior = item.id_maquina
+                    }else if(atmAnterior == item.id_maquina){
+                        qtdAlertas++
                     }
                 }
-                
-                
-                console.log(statusNome)
-                console.log(idMaquina)
-                /*while(idAnterio == idMaquina){
-                    qtdAlertas++
-                    idAnterio = idMaquina
-                    }*/
-                //    for(i=0; i<=atmId.length; i++){
-                //        console.log(i+": "+atmId[i])
-                //     }
                 })
-                //console.log(qtdAlertas)
             })
     }
 
@@ -240,7 +237,7 @@
     }
 
     function armazenarIdMaquina(macaddress){
-     const idEscolhido= sessionStorage.IDMAQUINAESCOLHIDA =  macaddress;
+        sessionStorage.IDMAQUINAESCOLHIDA =  macaddress;
     }
 
 </script>

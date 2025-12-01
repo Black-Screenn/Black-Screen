@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlackScreen | Visão Detalhada</title>
     
-     <link rel="stylesheet" href="./../css/dashboards.css">
+    <link rel="stylesheet" href="./../css/dashboards.css">
     <link rel="stylesheet" href="./../css/dashboardLista.css">
     <link rel="stylesheet" href="./../css/dashboardFunc.css">
     <link rel="stylesheet" href="./../css/estilo.css" />
@@ -134,7 +134,7 @@
             <div class="listaAtm">
                 <div class="header">
                     Lista de Chamados do Jira
-                    <select name="Componente" id="filtro_componente">
+                    <select name="Componente" id="filtro_componente" onchange="carregarChamados()">
                         <option value="sem_filtro">Filtrar por Componente</option>
                         <option value="filtro_cpu">CPU</option>
                         <option value="filtro_ram">RAM</option>
@@ -146,7 +146,7 @@
                     <div class="lista-header">
                         <p class="atm">Código Chamado</p>
                         <p class="address">Componente</p>
-                        <p class="country">Horario</p>
+                        <p class="country">Data e Hora</p>
                         <p class="alertas">Link do Chamado</p>
                     </div>
                     <div class="lista-content">
@@ -159,17 +159,18 @@
 </body>
 
 <script>
-    let cpu = 0;
-    let ram = 0;
-    let disco = 0;
-    let rede = 0;
+    var cpu = 0;
+    var ram = 0;
+    var disco = 0;
+    var rede = 0;
 
     window.onload = () => {
         somandoComponenteAlertaJiraKpi();
         plotarGrafico();
+        carregarChamados();
     };
 
-    //console.log(sessionStorage.getItem(IDMAQUINAESCOLHIDA))
+    console.log(sessionStorage.IDMAQUINAESCOLHIDA)
 
     function somandoComponenteAlertaJiraKpi() {
         fetch('http://98.83.124.125:8080/chamadosJira', {
@@ -190,7 +191,7 @@
                 chave = chamado.key;
                 idMaquina = chamado.fields.description.content[0].content[0].text;
             
-                if(IDMAQUINAESCOLHIDA == idMaquina){
+                if(sessionStorage.IDMAQUINAESCOLHIDA == idMaquina){
                     if (nomeComponente.includes("CPU")) {
                         cpu++
                     }
@@ -203,9 +204,8 @@
                         rede++
                     }
                 }
-                console.log("RAM:"+ram)
+                //console.log(chamado)
             })
-             console.log("RAM:"+ram)
         })
     }
 
@@ -223,48 +223,112 @@
       }]
     }
 
+    /*for (i = 0; i < resposta.length; i++) {
+      dados.datasets[0].data.push(cpu,ram,disco,rede);
+    }
         const config = {
             type: 'bar',
             data: dados,
-        };  
+        };  */
   }
    
    function carregarChamados() {
-        fetch("/caixas/listar", {
+        fetch('http://98.83.124.125:8080/chamadosJira', {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                "Fk_Empresa": sessionStorage.FK_EMPRESA
             }
         })
-            .then(response => response.json())
+            .then(response => response.json() )
             .then(data => {
-                atmsData = data;
-                const listaContent = document.querySelector(".lista-content");
-                listaContent.innerHTML = "";
+            const listaContent = document.querySelector(".lista-content");
+            const chamados = data.issues;
+            listaContent.innerHTML = ""
+            if (chamados.length === 0) {
+                listaContent.innerHTML = "<p style='padding: 20px; text-align: center;'>Nenhum Chamado no Jira.</p>";
+                return;
+            }
+            chamados.forEach(chamado =>{
+                const item = document.createElement("div");
+                item.classList.add("lista-item");
+                let componente = chamado.fields.summary;
+                let chave = chamado.key;
+                let hora = chamado.fields.created;
+                let link = chamado.self;
+                
+                let sem_aviso = componente.substring(8);
+                let componente_limpo = sem_aviso.split("|",1)
 
-                if (data.length === 0) {
-                    listaContent.innerHTML = "<p style='padding: 20px; text-align: center;'>Nenhum Chamado no Jira.</p>";
-                    return;
-                }
+                let dia_hora_limpo = hora.split(/T|\./,2)
 
-                data.forEach(chamado => {
+                var filtro = document.getElementById("filtro_componente").value
 
+                if(filtro =="sem_filtro"){
                     item.innerHTML = `
                         
-                        <p class="Codigo">${atm.codigoCaixa}</p>
-                        <p class="Componente">${endereco}</p>
-                        <p class="Horario" id="comp_count_${atm.id}">${qtdAlertas}</p>
-                        <p class="Link">
-                            <a class="link" href="./visao_detalhada.html"> Visão Detalhada </a> 
+                        <p class="atm">${chave}</p>
+                        <p class="address">${componente_limpo}</p>
+                        <p class="country">${dia_hora_limpo}</p>
+                        <p class="acao">
+                            <a class="link" href="${link}"> Link Chamado </a> 
                         </p>
                     `;
                     listaContent.appendChild(item);
-                    
-                });
+                } if(filtro == "filtro_cpu"){
+                    if(componente_limpo = "CPU"){
+                        item.innerHTML = `
+                        
+                        <p class="atm">${chave}</p>
+                        <p class="address">${componente_limpo}</p>
+                        <p class="country">${dia_hora_limpo}</p>
+                        <p class="acao">
+                            <a class="link" href="${link}"> Link Chamado </a> 
+                        </p>
+                    `;
+                    listaContent.appendChild(item);
+                    }
+                } if(filtro == "filtro_ram"){
+                    if(componente_limpo = "RAM"){
+                        item.innerHTML = `
+                        
+                        <p class="atm">${chave}</p>
+                        <p class="address">${componente_limpo}</p>
+                        <p class="country">${dia_hora_limpo}</p>
+                        <p class="acao">
+                            <a class="link" href="${link}"> Link Chamado </a> 
+                        </p>
+                    `;
+                    listaContent.appendChild(item);
+                    }
+                } if(filtro == "filtro_disco"){
+                    if(componente_limpo = "Disco"){
+                        item.innerHTML = `
+                        
+                        <p class="atm">${chave}</p>
+                        <p class="address">${componente_limpo}</p>
+                        <p class="country">${dia_hora_limpo}</p>
+                        <p class="acao">
+                            <a class="link" href="${link}"> Link Chamado </a> 
+                        </p>
+                    `;
+                    listaContent.appendChild(item);
+                    }
+                } if(filtro == "filtro_rede"){
+                    if(componente_limpo = "Rede"){
+                        item.innerHTML = `
+                        
+                        <p class="atm">${chave}</p>
+                        <p class="address">${componente_limpo}</p>
+                        <p class="country">${dia_hora_limpo}</p>
+                        <p class="acao">
+                            <a class="link" href="${link}"> Link Chamado </a> 
+                        </p>
+                    `;
+                    listaContent.appendChild(item);
+                    }
+                }
             })
-            .catch(error => {
-                console.error("Erro ao carregar os Chamados:", error);
-            });
+            })
+                
     }
 </script>

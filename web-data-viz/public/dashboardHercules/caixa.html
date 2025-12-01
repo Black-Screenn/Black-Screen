@@ -128,37 +128,69 @@
                             <div class="coluna1">
                                 <div class="infosdentro">
                                     <p>Logradouro:</p>
-                                    <span id="rua">valor</span>
+                                    <span id="rua">Aguarde....</span>
                                 </div>
                                 <div class="infosdentro">
                                     <p>Bairro:</p>
-                                    <span id="bairro">valor</span>
+                                    <span id="bairro">Aguarde....</span>
                                 </div>
                                 <div class="infosdentro">
                                     <p>Cidade:</p>
-                                    <span id="cidade">valor</span>
+                                    <span id="cidade">Aguarde....</span>
                                 </div>
                                 <div class="infosdentro">
                                     <p>Estado:</p>
-                                    <span id="estado">valor</span>
+                                    <span id="estado">Aguarde....</span>
                                 </div>
                             </div>
                             <div class="coluna2">
                                 <div class="infosdentro">
                                     <p>Disponibilidade:</p>
-                                    <span id="disponibilidade">valor</span>
+                                    <span
+                                        id="bolinha-disponibilidade"
+                                        class="bolinha-alerta"
+                                    ></span>
+                                    <span id="disponibilidade"
+                                        >Aguarde....</span
+                                    >
+                                    <span
+                                        id="helpDisponibilidade"
+                                        class="help-icon"
+                                        >?</span
+                                    >
                                 </div>
                                 <div class="infosdentro">
                                     <p>Latência:</p>
-                                    <span id="latencia">valor</span>
+                                    <span
+                                        id="bolinha-latencia"
+                                        class="bolinha-alerta"
+                                    ></span>
+                                    <span id="latencia">Aguarde....</span>
+                                    <span id="helpLatencia" class="help-icon"
+                                        >?</span
+                                    >
                                 </div>
                                 <div class="infosdentro">
                                     <p>Perda de pacotes:</p>
-                                    <span id="pacotes">valor</span>
+                                    <span
+                                        id="bolinha-pacotes"
+                                        class="bolinha-alerta"
+                                    ></span>
+                                    <span id="pacotes">Aguarde....</span>
+                                    <span id="helpPacotes" class="help-icon"
+                                        >?</span
+                                    >
                                 </div>
                                 <div class="infosdentro">
                                     <p>Status:</p>
-                                    <span id="status">valor</span>
+                                    <span
+                                        id="bolinha-status"
+                                        class="bolinha-alerta"
+                                    ></span>
+                                    <span id="status">Aguarde....</span>
+                                    <span id="helpStatus" class="help-icon"
+                                        >?</span
+                                    >
                                 </div>
                             </div>
                         </div>
@@ -179,10 +211,10 @@
                         >
                             <h3>Último chamado</h3>
                             <div id="ultimoChamado">
-                                <div class="keyChamada">CHAMADO-123</div>
-                                <div class="nome">COMPONENTE</div>
-                                <div class="horario">00:00 01/01/1970</div>
-                                <div class="status concluido">Concluído</div>
+                                <div class="keyChamada">Aguarde....</div>
+                                <div class="nome">Aguarde....</div>
+                                <div class="horario">Aguarde....</div>
+                                <div class="status concluido">Aguarde....</div>
                             </div>
                         </div>
                     </div>
@@ -197,9 +229,9 @@
                                 ><strong>Selecionar período:</strong></label
                             >
                             <select id="periodSelect" class="dropdown">
-                                <option value="7">Últimos 7 dias</option>
-                                <option value="30">Últimos 30 dias</option>
-                                <option value="90">Últimos 3 meses</option>
+                                <option value="7">7 dias</option>
+                                <option value="30">30 dias</option>
+                                <option value="90">3 meses</option>
                             </select>
                         </div>
                         <div class="graficos-row">
@@ -230,11 +262,85 @@
             </div>
         </div>
 
+        <div id="modalAjuda" class="modal-ajuda" style="display: none">
+            <div class="modal-ajuda-content">
+                <span id="fecharAjuda" class="fechar-ajuda">&times;</span>
+                <p id="textoAjuda"></p>
+            </div>
+        </div>
         <script>
             b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
             const urlparam = new URLSearchParams(window.location.search);
             const mac = urlparam.get("id");
+            var nomeEmpresa = "";
             maquinaid.innerHTML = "Caixa #" + urlparam.get("id");
+
+            let valoresMetrica = {
+                disponibilidade: 96.6,
+                latencia: null,
+                perda: null,
+                status: null,
+            };
+
+            function obterTextoAjuda(tipo) {
+                const valores = valoresMetrica;
+
+                switch (tipo) {
+                    case "disponibilidade":
+                        if (valores.disponibilidade === null)
+                            return "Disponibilidade ainda não calculada.";
+                        if (valores.disponibilidade > 99)
+                            return "A disponibilidade está ótima.";
+                        if (valores.disponibilidade > 95)
+                            return "A disponibilidade está ok.";
+                        return "Disponibilidade baixa. Verifique infraestrutura e chamados recentes.";
+
+                    case "latencia":
+                        if (valores.latencia === null)
+                            return "Latência ainda não medida.";
+                        if (valores.latencia < 150)
+                            return "Latência aceitável (0-150ms).";
+                        if (valores.latencia < 300)
+                            return "Latência média (150-300ms). Pode causar lentidão.";
+                        return "Latência alta (>300ms). Investigue a rede.";
+
+                    case "pacotes":
+                        if (valores.perda === null)
+                            return "Perda de pacotes ainda não calculada.";
+                        if (valores.perda < 5)
+                            return "Perda baixa. Conexão estável.";
+                        if (valores.perda < 20)
+                            return "Perda moderada. Pode causar falhas em transações.";
+                        return "Perda alta. Alto risco de falha no envio.";
+
+                    case "status":
+                        if (valores.status === null)
+                            return "Status ainda não disponível.";
+                        if (valores.status === "Online")
+                            return "Máquina online.";
+                        return "Máquina offline.";
+                }
+            }
+
+            const modalAjuda = document.getElementById("modalAjuda");
+            const textoAjuda = document.getElementById("textoAjuda");
+            const fecharAjuda = document.getElementById("fecharAjuda");
+
+            document.querySelectorAll(".help-icon").forEach((icon) => {
+                icon.addEventListener("click", function () {
+                    const tipo = this.id.replace("help", "").toLowerCase();
+                    textoAjuda.textContent = obterTextoAjuda(tipo);
+                    modalAjuda.style.display = "flex";
+                });
+            });
+
+            fecharAjuda.addEventListener(
+                "click",
+                () => (modalAjuda.style.display = "none"),
+            );
+            window.addEventListener("click", (e) => {
+                if (e.target === modalAjuda) modalAjuda.style.display = "none";
+            });
 
             fetch("/caixas/listarinfo", {
                 method: "GET",
@@ -251,6 +357,7 @@
                     estado.innerHTML = data[0].UF;
                     cidade.innerHTML = data[0].Cidade;
                     bairro.innerHTML = data[0].Bairro;
+                    nomeEmpresa = data[0].Nome_Empresa;
                 })
                 .catch((error) => {
                     console.error(error);
@@ -299,6 +406,75 @@
 
 
                       `;
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+
+            fetch("/caixas/ping", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    valoresMetrica.latencia = data.latencia;
+                    valoresMetrica.perda = data.perda;
+                    if (valoresMetrica.perda < 100) {
+                        if (valoresMetrica.perda >= 20) {
+                            document
+                                .getElementById("bolinha-pacotes")
+                                .classList.replace(
+                                    "bolinha-alerta",
+                                    "bolinha-critico",
+                                );
+                        } else if (valoresMetrica.perda < 5) {
+                            document
+                                .getElementById("bolinha-pacotes")
+                                .classList.replace(
+                                    "bolinha-alerta",
+                                    "bolinha-ok",
+                                );
+                        }
+                        document.getElementById("status").innerHTML = "Online";
+                        valoresMetrica.status = "Online";
+                        document
+                            .getElementById("bolinha-status")
+                            .classList.replace("bolinha-alerta", "bolinha-ok");
+                    } else {
+                        document.getElementById("status").innerHTML = "Offline";
+                        valoresMetrica.status = "Offline";
+                        document
+                            .getElementById("bolinha-status")
+                            .classList.replace(
+                                "bolinha-alerta",
+                                "bolinha-critico",
+                            );
+                        document
+                            .getElementById("bolinha-pacotes")
+                            .classList.replace(
+                                "bolinha-alerta",
+                                "bolinha-critico",
+                            );
+                    }
+                    if (valoresMetrica.latencia <= 150) {
+                        document
+                            .getElementById("bolinha-latencia")
+                            .classList.replace("bolinha-alerta", "bolinha-ok");
+                    } else if (valoresMetrica.latencia > 300) {
+                        document
+                            .getElementById("bolinha-latencia")
+                            .classList.replace(
+                                "bolinha-alerta",
+                                "bolinha-critico",
+                            );
+                    }
+
+                    document.getElementById("pacotes").innerHTML =
+                        `${valoresMetrica.perda}%`;
+                    document.getElementById("latencia").innerHTML =
+                        `${valoresMetrica.latencia}ms`;
                 })
                 .catch((error) => {
                     console.error(error);

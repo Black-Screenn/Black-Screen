@@ -440,6 +440,24 @@
                     group.addTo(map);
                     try { map.fitBounds(group.getBounds().pad(0.2)); } catch (_) { }
                 }
+                    // Atualizar contadores do dashboard com a lista retornada
+                    try {
+                        const total = lista.length;
+                        let ativos = lista.filter(c => c.Ativo == 1 || c.ativo == 1 || c.status == 'Ativo' || c.status == 'ativo' || c.Status == 'ativo' || c.Status == 'Ativo').length;
+                        // Se não houver informação de status no resultado, assume que todas as caixas retornadas estão ativas
+                        if (ativos === 0) ativos = total;
+                        const inativos = Math.max(0, total - ativos);
+
+                        const elTotal = document.getElementById('totalCaixas');
+                        const elAtivos = document.getElementById('caixasAtivos');
+                        const elInativos = document.getElementById('caixasInativos');
+
+                        if (elTotal) elTotal.textContent = total;
+                        if (elAtivos) elAtivos.textContent = ativos;
+                        if (elInativos) elInativos.textContent = inativos;
+                    } catch (e) {
+                        console.error('Erro ao atualizar contadores de caixas:', e);
+                    }
             })
             .catch(err => console.error("Falha ao carregar /caixas:", err));
         

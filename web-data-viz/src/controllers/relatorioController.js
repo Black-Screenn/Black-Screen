@@ -1,90 +1,189 @@
 const { GoogleGenAI } = require('@google/genai');
+const fs = require('fs').promises;
 const MarkdownIt = require('markdown-it');
 const puppeteer = require('puppeteer');
 const crypto = require('crypto');
 
-const { uploadRelatorioS3 } = require('./cloudController.js');
+const { uploadRelatorioS3, dadosS3PorPeriodo } = require('./cloudController.js');
 const { buscarParametroPorComponente } = require('../models/componenteModel.js')
 const { cadastrar, listar } = require('../models/relatorioModel.js');
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const modelo = "gemini-2.5-flash";
+const modelo = "gemini-2.0-flash-lite";
 const md = new MarkdownIt();
 
-async function agenteAnalise(dadosJSON) {
+function converterParaCSV(dataArray) {
+    if (!dataArray || dataArray.length === 0) return "";
+
+    const headers = Object.keys(dataArray[0]).join(',');
+    const rows = dataArray.map(obj => Object.values(obj).join(','));
+    return [headers, ...rows].join('\n');
+}
+
+async function uploadArquivoParaGemini(buffer, fileName, mimeType) {
+    const tempFilePath = `/tmp/${fileName}`;
+    await fs.writeFile(tempFilePath, buffer);
+
+    const uploadedFile = await genAI.files.upload({
+        file: tempFilePath,
+        mimeType: mimeType,
+        displayName: fileName,
+    });
+
+    console.log(`Arquivo ${uploadedFile.displayName} (${uploadedFile.name}) carregado com sucesso.`);
+    await fs.unlink(tempFilePath);
+
+    return uploadedFile;
+}
+
+
+async function agenteAnalise(dadosJSON, uploadedFile) {
     console.log("[GERAR RELATORIO] [1/4] Iniciando Módulo de Análise");
 
     const instrucaoSistemaAnalise = `
         **AVISO: SUA ÚNICA TAREFA É REFORMATAR DADOS. VOCÊ É UM ESCRITURÁRIO DE DADOS.**
-        
-        Sua única função é fazer relatório em Markdown puramente factual.
-        
-        **REGRAS DE PROIBIÇÃO (MUITO IMPORTANTE):**
-        1.  **NÃO USE** as palavras: "Sumário Executivo", "Conclusões", "Recomendações", "Resumo", "Próximos Passos".
-        2.  **NÃO USE** palavras de julgamento: "Crítico", "Alerta", "Saudável", "Problema", "Risco", "Exigindo atenção", "Intervenção imediata".
-        3.  **NÃO ANALISE** ou dê "Observações". Apenas liste os fatos.
-        4. **NÃO RETORNE** Json ou Código.
-        
-        Outros agentes farão a análise e as recomendações. Você será penalizado por adicionar qualquer opinião.
 
-        **Formato de Saída (Obrigatório):**
-        1.  Crie uma seção "## Sumário Factual". Liste APENAS contagens (Total Monitorado, Com Alertas, Sem Alertas).
-        2.  Crie uma seção "## Detalhamento de ATMs APENAS COM ALERTAS".
-        3.  Para CADA ATM nesta seção, crie "### ID: [ID_ATM]".
-        4.  Liste as métricas que VIOLARAM o limite (use **negrito**).
-        5.  Liste os alertas brutos da ETL.
-        6.  Crie uma seção "## ATMs Sem Alertas".
-        7.  Nesta seção, **NÃO LISTE MÉTRICAS**. Se houver 10 ou menos, liste apenas os IDs. Se hove mais de 10, informe apenas a contagem (Ex: "1022 ATMs operando normalmente").
-        8. SUA SAIDA É APENAS EM **MARKDOWN**
+        Você recebe dados de monitoramento de ATMs (CSV/JSON) e deve produzir um RELATÓRIO EM MARKDOWN puramente factual, em formato RESUMIDO.
 
-        **SIGA RIGOROSAMENTE ESSE PADRAO DE SAIDA:**
+        Outros agentes farão análise e recomendações. Você será penalizado por adicionar qualquer opinião ou julgamento.
+
+        --------------------
+        REGRAS DE PROIBIÇÃO (MUITO IMPORTANTE)
+        --------------------
+        1. **NÃO USE** as palavras: "Sumário Executivo", "Conclusões", "Recomendações", "Resumo", "Próximos Passos".
+        2. **NÃO USE** palavras de julgamento: "Crítico", "Alerta", "Saudável", "Problema", "Risco", "Exigindo atenção", "Intervenção imediata" ou similares.
+        3. **NÃO ANALISE** e não escreva "Observações". Apenas descreva fatos objetivos (contagens, médias, máximos, mínimos, existência de alertas).
+        4. **NÃO RETORNE** JSON, código, ou blocos de código.
+        5. **NÃO REPLIQUE O CSV** nem crie tabelas com todos os registros. Você deve **RESUMIR**.
+        6. **NÃO COLOQUE TABELAS DETALHADAS** com todas as linhas. No máximo, liste IDs e contagens em listas com bullets.
+        7. NÃO FAÇA TEXTO ENORME.
+        8. SUA SAÍDA É APENAS TEXTO EM MARKDOWN.
+
+        --------------------
+        REGRAS ESPECÍFICAS PARA ALERTAS
+        --------------------
+        - Você receberá dados com métricas como CPU, RAM, DISCO, PACOTES_PERDIDOS, etc.
+        - Considere que os limites de alerta já vêm indicados nos dados ou nos parâmetros do usuário. NÃO invente limites.
+        - Para cada métrica (CPU, RAM, DISCO, PACOTES_PERDIDOS, etc.), você deve:
+        - Contar quantos alertas dessa métrica ocorreram no período analisado (somatória de erros por componente).
+        - Informar essa contagem em texto, por exemplo:
+            - "Total de alertas em **CPU**: 37"
+            - "Total de alertas em **RAM**: 12"
+            - "Total de alertas em **PACOTES_PERDIDOS**: 8"
+        - Para cada ATM com alertas, você deve identificar:
+        - O dia (data) em que houve MAIOR quantidade de alertas para aquele ATM.
+        - A quantidade de alertas nessa data.
+        - Exemplo de formato:
+            - "Para o ATM \`[ID_ATM]\`, o dia com maior número de alertas foi [YYYY-MM-DD], com N alertas registrados."
+        - NÃO liste alerta por alerta, nem repita o mesmo tipo de alerta linha a linha.
+        - Priorize SEMPRE:
+        - Somatórios por componente (CPU, RAM, etc.).
+        - O dia com mais alertas por ATM.
+
+        --------------------
+        FORMATO DE SAÍDA (OBRIGATÓRIO)
+        --------------------
+
+        1. O RELATÓRIO DEVE COMEÇAR COM:
+        ## Relatório de Monitoramento
+
+        2. Em seguida, crie a seção:
         ## Sumário Factual
-        * Total de ATMs Monitorados (Amostra): 4
-        * Total com Alertas: 2
-        * Total Sem Alertas: 2
 
-        ---
+        Nesta seção, liste APENAS contagens gerais (em bullets), por exemplo:
+        - Total de ATMs monitorados (amostra): X
+        - Total de ATMs com alertas: Y
+        - Total de ATMs sem alertas: Z
 
-        ## Detalhamento de ATMs com Alertas
+        3. Depois crie a seção:
+        ## Detalhamento de ATMs APENAS COM ALERTAS
 
-        ### ID: 00:00:00:00:00:00
-        * Métricas (Picos):
-            * **CPU: 92.5%** (Limite: 80.0%)
-            * **RAM: 86.1%** (Limite: 85.0%)
-            * **Pacotes Perdidos: 780** (Limite: 500)
-            * Disco Atual: 35.6%
-        * Alertas Registrados (ETL):
-            * "Alerta de CPU, 00:00:00:00:00:00, Pico de uso da CPU atingiu 92.5%, 2025-11-11 10:30:35"
-            * "Alerta de RAM, 00:00:00:00:00:00, Pico de uso da RAM atingiu 86.1%, 2025-11-11 10:32:00"
-            * "Alerta de Rede, 00:00:00:00:00:00, Perda de pacotes (780) excedeu limite, 2025-11-11 11:00:00"
+        Para CADA ATM COM ALERTA:
+        - Crie um subtítulo: \`### ID: [ID_ATM]\`
+        - Liste as métricas que violaram o limite, usando **negrito**, por exemplo:
+            - Métricas com violações: **CPU**, **RAM**
+        - Liste os alertas brutos da ETL, caso existam campos de alerta (copie os textos dos alertas, sem interpretar).
 
-        ### ID: 00:0A:95:9D:68:16
-        * Métricas (Picos):
-            * **Disco Atual: 94.2%** (Limite: 90.0%)
-            * CPU: 70.0%
-            * RAM: 65.0%
-            * Pacotes Perdidos: 50
-        * Alertas Registrados (ETL):
-            * "Alerta de Disco, 00:0A:95:9D:68:16, Uso de Disco Atingiu 94.2%, 2025-11-11 08:22:00"
-
-        ---
-
+        4. Em seguida, crie a seção:
         ## ATMs Sem Alertas
-        00:1A:55:7D:14:B2, 00:1B:44:11:3A:B7
+
+        - **NÃO LISTE MÉTRICAS INDIVIDUAIS** nesta seção.
+        - Se houver **10 ou menos** ATMs sem alertas, liste apenas os IDs em bullets, por exemplo:
+            - ID: 02bbbdc02bf9
+        - Se houver **mais de 10** ATMs sem alertas, não liste IDs; apenas informe a contagem, por exemplo:
+            - 1022 ATMs operando normalmente (sem alertas)
+
+        5. NÃO CRIE NENHUMA OUTRA SEÇÃO além de:
+        - "## Relatório de Monitoramento"
+        - "## Sumário Factual"
+        - "## Detalhamento de ATMs APENAS COM ALERTAS"
+        - "## ATMs Sem Alertas"
+
+        6. NÃO USE TABELAS MARKDOWN (| colunas |). Use apenas texto e listas com "- ".
+
+        --------------------
+        EXEMPLO DE FORMATO (APENAS FORMATO, NÃO COPIE OS VALORES)
+        --------------------
+
+        ## Relatório de Monitoramento
+
+        ## Sumário Factual
+        - Total de ATMs monitorados (amostra): 4
+        - Total de ATMs com alertas: 2
+        - Total de ATMs sem alertas: 2
+
+        ---
+
+        ## Detalhamento de ATMs APENAS COM ALERTAS
+
+        ### ID: ATM-001
+        - Métricas com violações: **CPU**, **RAM**
+        - Alertas ETL:
+            - "CPU acima do limite configurado"
+            - "RAM acima do limite configurado"
+
+        ### ID: ATM-002
+        - Métricas com violações: **DISCO**
+        - Alertas ETL:
+            - "Uso de disco acima do limite configurado"
+
+        ---
     `;
 
     const promptUsuario = `
-        Você é o primeiro modulo do meu relatório, eu preciso que você pegue esse JSON, e refatore ele e me retorne o inicio do relatório sem qualquer julgamento, adicionando os alertas com base nos parametros, pois será responsabilidade dos proximos modulos. É importante que ele comece com um subtítulo (##) "Relatório de Monitoramento".
-        \`\`\`json
+        Você é o primeiro módulo do meu relatório.
+
+        Sua tarefa é:
+        - Ler os dados de monitoramento de ATMs (fornecidos em CSV ou JSON).
+        - Identificar quantos ATMs existem, quantos têm alertas e quantos não têm alertas.
+        - Para cada ATM com alerta, listar apenas:
+        - ID do ATM.
+        - Métricas que violaram o limite (em **negrito**).
+        - Textos dos alertas brutos da ETL.
+
+        Não faça análise, não recomende nada. Apenas siga o FORMATO DE SAÍDA definido na instrução do sistema, começando obrigatoriamente com:
+
+        ## Relatório de Monitoramento
+
+        Abaixo estão os dados em JSON para você usar como base factual:
+
         ${JSON.stringify(dadosJSON, null, 2)}
-        \`\`\`
     `;
 
     try {
         const result = await genAI.models.generateContent({
             model: modelo,
             systemInstruction: instrucaoSistemaAnalise,
-            contents: promptUsuario
+            contents: [
+                {
+                    role: "user",
+                    parts: [
+                        { text: promptUsuario },
+                        { fileData: { mimeType: uploadedFile.mimeType, fileUri: uploadedFile.uri } }
+                    ]
+                }
+            ]
+
         });
         console.log("[GERAR RELATORIO] Agente de Análise concluiu.");
         return result.text;
@@ -192,7 +291,14 @@ async function gerarRelatorio(req, res) {
         const periodoInicio = req.body.periodoInicio || '';
         const periodoFim = req.body.periodoFim || '';
 
+        const dadosCompletosS3 = await dadosS3PorPeriodo(fkEmpresa, periodoInicio, periodoFim);
+
         const componentesParametro = await buscarParametroPorComponente();
+
+        const csvString = converterParaCSV(dadosCompletosS3);
+        const csvBuffer = Buffer.from(csvString, 'utf-8');
+
+        const arquivoGemini = await uploadArquivoParaGemini(csvBuffer, 'relatorio_dados.csv', 'text/csv');
 
         if (req.url === '/favicon.ico') {
             return res.status(204).end();
@@ -200,222 +306,14 @@ async function gerarRelatorio(req, res) {
 
         let dadosDoRequest = {
             "periodo_analise": `${periodoInicio} a ${periodoFim}`,
-            "limites_saudaveis": componentesParametro,
-            "todos_atms_monitorados": [
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 14:15:04.245965",
-                    "cpu": 17.2,
-                    "ram": 77.3,
-                    "disco": 39.2,
-                    "uptime": 14242.307592,
-                    "bytes_enviados": 308.468031,
-                    "bytes_recebidos": 629.257738,
-                    "pacotes_perdidos": 963,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 14:27:12.667619",
-                    "cpu": 20.3,
-                    "ram": 80.8,
-                    "disco": 39.2,
-                    "uptime": 14970.729246,
-                    "bytes_enviados": 319.765816,
-                    "bytes_recebidos": 675.349318,
-                    "pacotes_perdidos": 963,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 14:38:41.326391",
-                    "cpu": 21.0,
-                    "ram": 75.6,
-                    "disco": 39.2,
-                    "uptime": 15659.388018,
-                    "bytes_enviados": 342.677807,
-                    "bytes_recebidos": 751.768904,
-                    "pacotes_perdidos": 964,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 14:42:58.178761",
-                    "cpu": 23.3,
-                    "ram": 90.3,
-                    "disco": 39.2,
-                    "uptime": 15916.240388,
-                    "bytes_enviados": 376.225850,
-                    "bytes_recebidos": 838.217766,
-                    "pacotes_perdidos": 964,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 14:54:35.609946",
-                    "cpu": 18.9,
-                    "ram": 79.2,
-                    "disco": 39.2,
-                    "uptime": 16613.671572,
-                    "bytes_enviados": 410.688309,
-                    "bytes_recebidos": 881.859894,
-                    "pacotes_perdidos": 964,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 15:00:24.706902",
-                    "cpu": 25.8,
-                    "ram": 75.9,
-                    "disco": 39.2,
-                    "uptime": 16962.768529,
-                    "bytes_enviados": 435.204862,
-                    "bytes_recebidos": 930.637543,
-                    "pacotes_perdidos": 964,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 15:04:24.891051",
-                    "cpu": 11.9,
-                    "ram": 83.9,
-                    "disco": 39.2,
-                    "uptime": 17202.952677,
-                    "bytes_enviados": 473.971904,
-                    "bytes_recebidos": 1003.043835,
-                    "pacotes_perdidos": 966,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 15:12:56.323658",
-                    "cpu": 25.6,
-                    "ram": 76.2,
-                    "disco": 39.2,
-                    "uptime": 17714.385284,
-                    "bytes_enviados": 493.249750,
-                    "bytes_recebidos": 1050.378194,
-                    "pacotes_perdidos": 967,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 15:26:51.348624",
-                    "cpu": 12.7,
-                    "ram": 80.0,
-                    "disco": 39.2,
-                    "uptime": 18549.410250,
-                    "bytes_enviados": 508.727367,
-                    "bytes_recebidos": 1099.695653,
-                    "pacotes_perdidos": 967,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 15:30:25.438983",
-                    "cpu": 30.7,
-                    "ram": 81.0,
-                    "disco": 39.2,
-                    "uptime": 18763.500609,
-                    "bytes_enviados": 538.255428,
-                    "bytes_recebidos": 1140.544399,
-                    "pacotes_perdidos": 967,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 15:36:51.259849",
-                    "cpu": 27.2,
-                    "ram": 83.7,
-                    "disco": 39.2,
-                    "uptime": 19149.321475,
-                    "bytes_enviados": 555.306600,
-                    "bytes_recebidos": 1191.651711,
-                    "pacotes_perdidos": 967,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 15:46:28.290360",
-                    "cpu": 25.6,
-                    "ram": 81.7,
-                    "disco": 39.2,
-                    "uptime": 19726.351986,
-                    "bytes_enviados": 598.212009,
-                    "bytes_recebidos": 1209.139260,
-                    "pacotes_perdidos": 968,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 15:51:38.350132",
-                    "cpu": 14.9,
-                    "ram": 80.7,
-                    "disco": 39.2,
-                    "uptime": 20036.411758,
-                    "bytes_enviados": 607.519072,
-                    "bytes_recebidos": 1298.818674,
-                    "pacotes_perdidos": 969,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 16:05:35.214437",
-                    "cpu": 34.9,
-                    "ram": 79.8,
-                    "disco": 39.2,
-                    "uptime": 20873.276063,
-                    "bytes_enviados": 626.463830,
-                    "bytes_recebidos": 1354.467063,
-                    "pacotes_perdidos": 970,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                },
-                {
-                    "macaddress": 207280876152857,
-                    "datetime": "2025-11-27 16:16:37.727469",
-                    "cpu": 18.0,
-                    "ram": 81.9,
-                    "disco": 39.2,
-                    "uptime": 21535.789096,
-                    "bytes_enviados": 656.411077,
-                    "bytes_recebidos": 1399.472615,
-                    "pacotes_perdidos": 972,
-                    "usuario": "dandansousa",
-                    "ip_publico": "177.92.67.154",
-                    "isp": "AS17222 MUNDIVOX DO BRASIL LTDA"
-                }
-            ]
+            "limites_saudaveis": componentesParametro
         };
 
-        const textoAnalise = await agenteAnalise(dadosDoRequest);
+        const textoAnalise = await agenteAnalise(dadosDoRequest, arquivoGemini);
+
+        await genAI.files.delete({ name: arquivoGemini.name });
+
+        console.log(textoAnalise)
 
         const textoRecomendacoes = await agenteRecomendacoes(textoAnalise);
 
