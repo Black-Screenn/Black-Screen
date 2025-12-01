@@ -228,7 +228,11 @@
                             <label for="periodSelect"
                                 ><strong>Selecionar período:</strong></label
                             >
-                            <select id="periodSelect" class="dropdown">
+                            <select
+                                id="periodSelect"
+                                class="dropdown"
+                                onchange="atualizarGraficos(parseInt(this.value))"
+                            >
                                 <option value="7">7 dias</option>
                                 <option value="30">30 dias</option>
                                 <option value="90">3 meses</option>
@@ -274,6 +278,10 @@
             const mac = urlparam.get("id");
             var nomeEmpresa = "";
             maquinaid.innerHTML = "Caixa #" + urlparam.get("id");
+            let dadosGrafico1 = [],
+                dadosGrafico2 = [],
+                dadosGrafico3 = [];
+            let lineChart1, barChart, lineChart2;
 
             let valoresMetrica = {
                 disponibilidade: 96.6,
@@ -357,7 +365,9 @@
                     estado.innerHTML = data[0].UF;
                     cidade.innerHTML = data[0].Cidade;
                     bairro.innerHTML = data[0].Bairro;
-                    nomeEmpresa = data[0].Nome_Empresa;
+                    nomeEmpresa = data[0].eNome.replace(/\s+/g, "_");
+
+                    inicializarPagina();
                 })
                 .catch((error) => {
                     console.error(error);
@@ -480,120 +490,167 @@
                     console.error(error);
                 });
 
-            const optionsLine1 = {
-                chart: {
-                    type: "line",
-                    height: 300,
-                    toolbar: { show: false },
-                },
-                series: [
-                    {
-                        name: "Série 1",
-                        data: [10, 41, 35, 51, 49, 62, 69],
-                        color: "#004076",
+            function formatarData(dataStr) {
+                const data = new Date(dataStr);
+                const dia = String(data.getDate()).padStart(2, "0");
+                const mes = String(data.getMonth() + 1).padStart(2, "0");
+                return `${dia}/${mes}`;
+            }
+
+            function atualizarGraficos(dias) {
+                const ultimos1 = dadosGrafico1.slice(-dias);
+                lineChart1.updateOptions({
+                    xaxis: {
+                        categories: ultimos1.map((d) => formatarData(d.data)),
                     },
-                ],
-                stroke: {
-                    curve: "smooth",
-                    width: 3,
-                },
-                xaxis: {
-                    categories: [
-                        "Jan",
-                        "Feb",
-                        "Mar",
-                        "Apr",
-                        "May",
-                        "Jun",
-                        "Jul",
+                    series: [
+                        {
+                            data: ultimos1.map((d) => d.valor),
+                        },
                     ],
-                    title: { text: "Meses" },
-                },
-                yaxis: {
-                    title: { text: "Quantidade" },
-                },
+                    yaxis: {
+                        labels: {
+                            formatter: function (val) {
+                                return Number(val).toFixed(1) + "%";
+                            },
+                        },
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function (val) {
+                                return Number(val).toFixed(1) + "%";
+                            },
+                        },
+                    },
+                });
+
+                /*
+                // Gráfico 2 - Chamados (PRONTO - só descomentar)
+                let ultimos2 = dadosGrafico2.slice(-dias);
+                if (dias === 30) {
+                    ultimos2 = agruparPorSemana(ultimos2);
+                } else if (dias === 90) {
+                    ultimos2 = agruparPorMes(ultimos2);
+                }
+                const categorias2 = ultimos2.map(d => {
+                    if (dias === 30) return `S${d.semana}`;
+                    if (dias === 90) return d.mes;
+                    return formatarData(d.data);
+                });
+                const valores2 = ultimos2.map(d => {
+                    if (dias === 30 || dias === 90) return d.valorMedio;
+                    return d.valor;
+                });
+                barChart.updateOptions({
+                    xaxis: { categories: categorias2 },
+                    series: [{ data: valores2 }]
+                });
+                */
+
+                /*
+                // Gráfico 3 - Probabilidade de falha (PRONTO - só descomentar)
+                const primeiros3 = dadosGrafico3.slice(0, dias);
+                lineChart2.updateOptions({
+                    xaxis: {
+                        categories: primeiros3.map(d => formatarData(d.data))
+                    },
+                    series: [{
+                        data: primeiros3.map(d => d.valor)
+                    }]
+                });
+                */
+            }
+
+            async function carregarDadosGraficos() {
+                try {
+                    const res1 = await fetch(
+                        `/cloud/buscaCSVgrafico?local=mensal&empresa=${nomeEmpresa}&maquina=${mac}`,
+                    ).then((r) => r.json());
+                    dadosGrafico1 = res1.sort(
+                        (a, b) => new Date(a.data) - new Date(b.data),
+                    );
+                    valoresMetrica.disponibilidade =
+                        dadosGrafico1[dadosGrafico1.length - 1]?.valor;
+
+                    document.getElementById("disponibilidade").innerHTML =
+                        `${valoresMetrica.disponibilidade}%`;
+
+                    if (valoresMetrica.disponibilidade > 99) {
+                        document
+                            .getElementById("bolinha-disponibilidade")
+                            .classList.replace("bolinha-alerta", "bolinha-ok");
+                    } else if (valoresMetrica.disponibilidade <= 95) {
+                        document
+                            .getElementById("bolinha-disponibilidade")
+                            .classList.replace(
+                                "bolinha-alerta",
+                                "bolinha-critico",
+                            );
+                    }
+
+                    /*
+                    const res2 = await fetch(``).then(r => r.json());
+                    dadosGrafico2 = res2.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+                    const res3 = await fetch(``).then(r => r.json());
+                    dadosGrafico3 = res3.sort((a, b) => new Date(a.data) - new Date(b.data));
+                    */
+
+                    console.log(
+                        "Dados carregados - Gráfico 1:",
+                        dadosGrafico1.length,
+                    );
+                } catch (error) {
+                    console.error(
+                        "Erro ao carregar dados dos gráficos:",
+                        error,
+                    );
+                }
+            }
+
+            async function inicializarPagina() {
+                await carregarDadosGraficos();
+
+                lineChart1 = new ApexCharts(
+                    document.querySelector("#lineChart1"),
+                    optionsLine1,
+                );
+                // barChart = new ApexCharts(document.querySelector("#barChart"), optionsBar);
+                // lineChart2 = new ApexCharts(document.querySelector("#lineChart2"), optionsLine2);
+
+                lineChart1.render();
+                // barChart.render();
+                // lineChart2.render();
+
+                atualizarGraficos(7);
+            }
+
+            const optionsLine1 = {
+                chart: { type: "line", height: 300, toolbar: { show: false } },
+                series: [
+                    { name: "Disponibilidade", data: [], color: "#004076" },
+                ],
+                stroke: { curve: "smooth", width: 3 },
+                xaxis: { categories: [], title: { text: "Dias" } },
+                yaxis: { title: { text: "%" } },
             };
 
+            /*
             const optionsBar = {
-                chart: {
-                    type: "bar",
-                    height: 300,
-                    toolbar: { show: false },
-                },
-                series: [
-                    {
-                        name: "Série 2",
-                        data: [23, 12, 54, 61, 32, 56, 81],
-                        color: "#004076",
-                    },
-                ],
-                xaxis: {
-                    categories: [
-                        "Jan",
-                        "Feb",
-                        "Mar",
-                        "Apr",
-                        "May",
-                        "Jun",
-                        "Jul",
-                    ],
-                    title: { text: "Meses" },
-                },
-                yaxis: {
-                    title: { text: "Volume" },
-                },
+                chart: { type: "bar", height: 300, toolbar: { show: false } },
+                series: [{ name: "Chamados", data: [], color: "#004076" }],
+                xaxis: { categories: [], title: { text: "Dias" } },
+                yaxis: { title: { text: "Volume" } }
             };
 
             const optionsLine2 = {
-                chart: {
-                    type: "line",
-                    height: 300,
-                    toolbar: { show: false },
-                },
-                series: [
-                    {
-                        name: "Série 3",
-                        data: [30, 20, 60, 40, 70, 50, 90],
-                        color: "#004076",
-                    },
-                ],
-                stroke: {
-                    curve: "smooth",
-                    width: 3,
-                },
-                xaxis: {
-                    categories: [
-                        "Jan",
-                        "Feb",
-                        "Mar",
-                        "Apr",
-                        "May",
-                        "Jun",
-                        "Jul",
-                    ],
-                    title: { text: "Meses" },
-                },
-                yaxis: {
-                    title: { text: "Tendência" },
-                },
+                chart: { type: "line", height: 300, toolbar: { show: false } },
+                series: [{ name: "Prob. Falha", data: [], color: "#004076" }],
+                stroke: { curve: "smooth", width: 3 },
+                xaxis: { categories: [], title: { text: "Dias" } },
+                yaxis: { title: { text: "Tendência" } }
             };
-
-            const lineChart1 = new ApexCharts(
-                document.querySelector("#lineChart1"),
-                optionsLine1,
-            );
-            const barChart = new ApexCharts(
-                document.querySelector("#barChart"),
-                optionsBar,
-            );
-            const lineChart2 = new ApexCharts(
-                document.querySelector("#lineChart2"),
-                optionsLine2,
-            );
-
-            lineChart1.render();
-            barChart.render();
-            lineChart2.render();
+            */
         </script>
     </body>
 </html>
