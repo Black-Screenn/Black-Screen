@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <link rel="shortcut icon" href="../assets/imgs/blackscreenicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackScreen | Comportamento de Processos</title>
+
+    <link rel="stylesheet" href="../css/dashboards.css">
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashProcessos.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,cancel,check_circle,circle_notifications,close,do_not_disturb_on,docs,edit,health_and_safety,home,keyboard_arrow_up,local_atm,location_on,manage_accounts,notifications,remove,search,search_insights,work" />
+    <script src="../js/sessao.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+
+    <style>
+    </style>
+
+<body>
+
+    <div class="janela">
+        <div class="header-left">
+            <img src="../assets/imgs/blackscreenlogo.png" alt="BlackScreen">
+
+            <div class="hello">
+                <h3>Bem vindo, <br><span id="b_usuario">usuário</span>!</h3>
+            </div>
+
+            <div class="links">
+                <div class="btn-nav-white">
+                    <a href="dashboard.html">
+                        <span class="material-symbols-outlined">
+                            home
+                        </span>
+                        <h3>
+                            Ínicio
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav">
+                    <a href="./logAlertas.html">
+                        <span class="material-symbols-outlined">
+                            search_insights
+                        </span>
+                        <h3>
+                            Visão de Processos
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav-white">
+                    <a href="./perfil.html">
+                        <span class="material-symbols-outlined">
+                            account_circle
+                        </span>
+                        <h3>
+                            Meu Perfil
+                        </h3>
+                    </a>
+                </div>
+            </div>
+
+            <div class="btn-logout" onclick="limparSessao()">
+                <h3>Sair</h3>
+            </div>
+
+        </div>
+
+        <div class="content" id="content">
+            <div class="content-insights">
+            <div class="grid-insights">
+                <div class="card-select">
+                    <div class="titulo-dash">
+                        <h2>Comportamento dos Processos</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-select">
+                <div class="filtro-insights">
+                    <p>Bairro:</p>
+                    <select id="select_bairro">
+                        <option value="Todas">Todos os Bairros</option>
+                    </select>
+                    <p>Data inicial:</p>
+                    <input type="date" id="dt_inicio">
+                    <p>Data final:</p>
+                    <input type="date" id="dt_fim">
+
+                    <button id="btn_filtrar">Filtrar</button>
+                </div>
+            </div>
+            <div class="kpis-processos">
+                <div class="kpi">
+                    <p>Bairro com menor indice de disponibilidade</p>
+                    <span class="menor-indice" id="menor-indice"></span>
+                </div>
+
+                <div class="kpi">
+                    <p>Bairro com maior indice de disponibilidade</p>
+                    <span class="maior-indice" id="maior-indice"></span>
+                </div>
+
+                <div class="kpi-desvio">
+                    <p>Desvio padrão</p>
+                    <span class="desvio"></span>
+                </div>
+            </div>
+
+        <div class="grid">
+            <div class="graficoTendencias">
+                <div class="card">
+                    <h3>Índice de Disponibilidade</h3>
+                    <div class="grafico"><canvas id="graficoTendencias"></canvas></div>
+                </div>
+            </div>
+            <div class="graficoTendencias">
+                <div class="card">
+                    <h3>Comparação do índice de disponibilidade</h3>
+                    <div class="grafico2"><canvas id="graficoComparacao"></canvas></div>
+                </div>
+            </div>
+        </div>
+        <div class="evolution">
+            <div class="graficoTendencias">
+                <div class="card grande">
+                    <h3 id="titulo_evolucao"></h3>
+                    <div class="grafico3"><canvas id="graficoDisponibilidade"></canvas></div>
+                </div>
+            </div>
+        </div>
+        </div>
+            <div class="cadastrar">
+                <button onclick="emitirRelatorio()">Emitir Relatório</button>
+            </div>
+            <div id="content-relatorio" class="content-relatorio">
+                <h2 id="b_titulo"></h2>
+                <p>---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</p>
+                <p class="data-inicio"><a class="negrito">Data inicial:</a> <a id="dt_inicio_relatorio"></a></p>
+                <p class="datas"><a class="negrito">Data final:</a> <a id="dt_fim_relatorio"></a></p>
+                <p class="metricas"><a class="negrito">Bairro com maior indice de disponibilidade:</a> <a id="reg_maior"></a></p>
+                <p class="metricas"><a class="negrito">Bairro com menor indice de disponibilidade:</a> <a id="reg_menor"></a></p>
+                <p>---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</p>
+                
+                <h3 id="intro_graficos"></h3>
+                <div class="grafico-relatorio">
+                    <div class="card">
+                        <h3>Índice de Disponibilidade</h3>
+                        <div class="grafico"><canvas id="graficoTendenciasRelatorio"></canvas></div>
+                    </div>
+                </div>
+                <div class="grafico2-relatorio">
+                    <div class="card">
+                        <h3>Comparação do índice de disponibilidade</h3>
+                        <div class="grafico2"><canvas id="graficoComparacaoRelatorio"></canvas></div>
+                    </div>
+                </div>
+                <div class="observacao">
+                    <h3>Observações: </h3>
+                    <p id="comentarioRelatorio"></p>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal" id="modal_cadastrar">
+            <div class="modalContainer">
+                <span class="material-symbols-outlined closeModal">
+                    close
+                </span>
+                <h2>Emitir Relatório</h2>
+                <div class="form">
+                    <div class="inputGroup">
+                        <label for="titulo_relatorio">Título do Relatório</label>
+                        <input type="text" id="titulo_relatorio" required>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="nome_arquivo">Nome do arquivo</label>
+                        <input type="text" id="nome_arquivo" required>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="check-grafico">Incluir gráficos</label>
+                        <div class="linha-grafico">
+                            <input type="checkbox" id="check-grafico" value="grafico">
+                            <h3>Disponibilidade dos processos</h3>
+                        </div>
+                        <div class="linha-grafico">
+                            <input type="checkbox" id="check-grafico2" value="grafico2">
+                            <h3>Comparação de disponibilidade</h3>
+                        </div>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="comentario">Observações</label>
+                        <textarea id="comentario" name="comentario" rows="15" cols="50"></textarea>
+                    </div>
+                    <div class="btnGroup">
+                        <button class="cancel">Cancelar</button>
+                        <button class="save" onclick="gerarRelatorio()">Emitir Relatório</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</body>
+
+</html>
+
+<script>
+    b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
+
+    
+    let dadosBrutos = [];
+    let graficoTendencias, graficoComparacao, graficoDisponibilidade;
+    let graficoTendenciasRelatorio = null;
+    let graficoComparacaoRelatorio = null;
+    let graficoDisponibilidadeRelatorio = null;
+
+    // Elementos do DOM
+    const dt_inicio = document.getElementById("dt_inicio");
+    const dt_fim = document.getElementById("dt_fim");
+    const btn_filtrar = document.getElementById("btn_filtrar");
+    const select_bairro = document.getElementById("select_bairro"); // <select> de regiões
+
+    async function carregarDados() {
+        try {
+            const resposta = await fetch("/s3Route/dados");
+            dadosBrutos = await resposta.json();
+
+            if (!dadosBrutos || dadosBrutos.length === 0) {
+                console.error("Nenhum dado retornado.");
+                return;
+            }
+
+            // Remover horário das datas
+            for (let i = 0; i < dadosBrutos.length; i++) {
+                if (dadosBrutos[i].datetime.indexOf(" ") !== -1) {
+                    dadosBrutos[i].datetime = dadosBrutos[i].datetime.split(" ")[0];
+                }
+            }
+
+            // Criar lista de regiões
+            const bairros = [];
+            for (let i = 0; i < dadosBrutos.length; i++) {
+                const r = dadosBrutos[i].bairro;
+                if (bairros.indexOf(r) === -1) {
+                    bairros.push(r);
+                }
+            }
+
+            // Preencher select de regiões
+            select_bairro.innerHTML = "<option value='Todos os Bairros'>Todos os Bairros</option>";
+            for (let i = 0; i < bairros.length; i++) {
+                const option = document.createElement("option");
+                option.value = bairros[i];
+                option.textContent = bairros[i];
+                select_bairro.appendChild(option);
+            }
+
+            // Encontrar primeira e última data
+            let primeiraData = dadosBrutos[0].datetime;
+            let ultimaData = dadosBrutos[0].datetime;
+
+            for (let i = 0; i < dadosBrutos.length; i++) {
+                const d = dadosBrutos[i].datetime;
+                if (d < primeiraData) primeiraData = d;
+                if (d > ultimaData) ultimaData = d;
+            }
+
+            dt_inicio.min = primeiraData;
+            dt_fim.min = primeiraData;
+            dt_inicio.max = ultimaData;
+            dt_fim.max = ultimaData;
+
+            dt_fim.value = ultimaData;
+
+            const dataInicio = new Date(ultimaData);
+            dataInicio.setDate(dataInicio.getDate() - 6);
+            dt_inicio.value = dataInicio.toISOString().split("T")[0];
+
+            gerarGraficos();
+            atualizarKpiMenorDisponibilidade();
+            atualizarKpiMaiorDisponibilidade();
+            atualizarKpiDesvioPadrao();
+
+        } catch (e) {
+            console.error("Erro carregando dados:", e);
+        }
+    }
+
+    function filtrarDados() {
+        const inicio = dt_inicio.value;
+        const fim = dt_fim.value;
+        const bairroSelecionado = select_bairro.value;
+
+        const resultado = [];
+
+        for (let i = 0; i < dadosBrutos.length; i++) {
+            const linha = dadosBrutos[i];
+            const dataLinha = linha.datetime;
+
+            const okData = dataLinha >= inicio && dataLinha <= fim;
+            const okBairro = (bairroSelecionado === "Todos os Bairros" || linha.bairro === bairroSelecionado);
+
+            if (okData && okBairro) {
+                resultado.push(linha);
+            }
+        }
+
+        return resultado;
+    }
+
+    var menorBairroIndice = document.querySelector(".kpi .menor-indice");
+
+    function atualizarKpiMenorDisponibilidade() {
+        // pegar intervalo selecionado
+        const inicioStr = dt_inicio.value;
+        const fimStr = dt_fim.value;
+
+        if (!inicioStr || !fimStr) {
+            menorBairroIndice.innerHTML = "-";
+            return;
+        }
+
+        // agrupar somas e contagens por região SEM usar filter
+        const porBairro = {};
+
+        for (let i = 0; i < dadosBrutos.length; i++) {
+            const item = dadosBrutos[i];
+            const dataItemStr = item.datetime;
+
+            // pular entradas sem data válida
+            if (!dataItemStr) continue;
+
+            if (dataItemStr < inicioStr || dataItemStr > fimStr) {
+                continue; // fora do intervalo de datas -> ignorar
+            }
+
+            const bairro = item.bairro;
+            if (!porBairro[bairro]) porBairro[bairro] = { soma: 0, qtd: 0 };
+
+            porBairro[bairro].soma += Number(item.disponibilidade_geral);
+            porBairro[bairro].qtd++;
+        }
+
+        // calcular menor média
+        let pior = null;
+        let menorMedia = Infinity;
+        for (const r in porBairro) {
+            const obj = porBairro[r];
+            if (obj.qtd === 0) continue;
+            const media = obj.soma / obj.qtd;
+            if (media < menorMedia) {
+                menorMedia = media;
+                pior = r;
+            }
+        }
+
+        if (!pior) {
+            menorBairroIndice.innerHTML = "-";
+        } else {
+            menorBairroIndice.innerHTML = pior + " (" + menorMedia.toFixed(2) + "%)";
+        }
+        
+    }
+
+    function atualizarKpiMaiorDisponibilidade() {
+        const inicioStr = dt_inicio.value;
+        const fimStr = dt_fim.value;
+
+        if (!inicioStr || !fimStr) {
+            document.querySelector(".kpi .maior-indice").textContent = "-";
+            return;
+        }
+
+        const porBairro = {};
+
+        for (let i = 0; i < dadosBrutos.length; i++) {
+            const item = dadosBrutos[i];
+            const dataItemStr = item.datetime;
+
+            // pular entradas sem data válida
+            if (!dataItemStr) continue;
+
+            if (dataItemStr < inicioStr || dataItemStr > fimStr) {
+                continue; // fora do intervalo de datas -> ignorar
+            }
+
+            const bairro = item.bairro;
+            if (!porBairro[bairro]) porBairro[bairro] = { soma: 0, qtd: 0 };
+
+            porBairro[bairro].soma += Number(item.disponibilidade_geral);
+            porBairro[bairro].qtd++;
+        }
+
+        // calcular maior média
+        let melhor = null;
+        let maiorMedia = 0;
+        for (const r in porBairro) {
+            const obj = porBairro[r];
+            if (obj.qtd === 0) continue;
+            const media = obj.soma / obj.qtd;
+            if (media > maiorMedia) {
+                maiorMedia = media;
+                melhor = r;
+            }
+        }
+
+        const elemento = document.querySelector(".kpi .maior-indice");
+        if (!melhor) {
+            elemento.textContent = "-";
+        } else {
+            elemento.textContent = melhor + " (" + maiorMedia.toFixed(2) + "%)";
+        }
+    }
+
+    function atualizarKpiDesvioPadrao(){
+        const inicioStr = dt_inicio.value;
+        const fimStr = dt_fim.value;
+        const bairroSelecionado = select_bairro.value;
+
+        if (!inicioStr || !fimStr) {
+            document.querySelector(".kpi-desvio .desvio").textContent = "-";
+            return;
+        }
+
+        let soma = 0;
+        let quantidade = 0;
+
+        // Primeiro loop: calcular média somente dos itens válidos
+        for (let i = 0; i < dadosBrutos.length; i++) {
+            const item = dadosBrutos[i];
+            const dataItemStr = item.datetime;
+            
+            if (!dataItemStr) continue;
+
+            if (dataItemStr < inicioStr || dataItemStr > fimStr) continue;
+
+            if (bairroSelecionado !== "Todos os Bairros" && item.bairro !== bairroSelecionado) continue;
+
+            console.log(item)
+            soma += Number(item.disponibilidade_geral);
+            quantidade ++;
+        }
+
+        console.log(soma + " " + quantidade)
+
+        const media = soma / quantidade;
+
+        let varianca = 0;
+        let desvio = null;
+        for (let i = 0; i < dadosBrutos.length; i++) {
+            const item = dadosBrutos[i];
+            const dataItemStr = item.datetime;
+
+            if (!dataItemStr) continue;
+            if (dataItemStr < inicioStr || dataItemStr > fimStr) continue;
+            if (bairroSelecionado !== "Todos os Bairros" && item.bairro !== bairroSelecionado) continue;
+
+            const x = Number(item.disponibilidade_geral);
+            console.log(x)
+            varianca += (x - media) ** 2;
+        }
+
+        varianca = varianca / quantidade;
+
+        desvio = Math.sqrt(varianca);
+
+        const elemento = document.querySelector(".kpi-desvio .desvio");
+        if (!desvio) {
+            elemento.textContent = "-";
+        } else {
+            elemento.textContent = desvio.toFixed(2);
+        }
+    }
+    
+    function gerarGraficos() {
+        const filtrado = filtrarDados();
+
+        if (filtrado.length === 0) {
+            console.warn("Nenhum dado dentro do filtro.");
+            if (graficoTendencias) graficoTendencias.destroy();
+            if (graficoComparacao) graficoComparacao.destroy();
+            if (graficoDisponibilidade) graficoDisponibilidade.destroy();
+            return;
+        }
+
+        gerarGraficoProcessos(filtrado);
+        gerarGraficoComparacao(filtrado);
+        gerarGraficoEvolucao(filtrado);
+    }
+
+    function gerarGraficoProcessos(filtrado) {
+        const processos = [
+            "leitor_cartao",
+            "manipulador_transacoes",
+            "gerenciador_rede",
+            "interface_grafica",
+            "dispenser_dinheiro"
+        ];
+
+        const nomes = [
+            "Leitor cartão",
+            "Transações",
+            "Gerenciador de Rede",
+            "Interface",
+            "Dispenser dinheiro"
+        ];
+
+        const valores = [];
+
+        for (let p = 0; p < processos.length; p++) {
+            let soma = 0;
+            for (let i = 0; i < filtrado.length; i++) {
+                soma += Number(filtrado[i][processos[p]]);
+            }
+            valores.push((soma / filtrado.length).toFixed(2));
+        }
+
+        if (graficoTendencias) graficoTendencias.destroy();
+        graficoTendencias = new Chart(
+            document.getElementById("graficoTendencias").getContext("2d"),
+            {
+                type: "bar",
+                data: {
+                    labels: nomes,
+                    datasets: [{
+                        label: "Disponibilidade (%)",
+                        data: valores,
+                        backgroundColor: "#001c41"
+                    }]
+                }
+            }
+        );
+    }
+
+    function gerarGraficoComparacao(filtrado) {
+        // calculando média atual
+        let somaAtual = 0;
+        for (let i = 0; i < filtrado.length; i++) {
+            somaAtual += Number(filtrado[i].disponibilidade_geral);
+        }
+        const mediaAtual = filtrado.length > 0 ? somaAtual / filtrado.length : 0;
+
+        // pegar datas da input
+        function criarDataLocalFromISO(iso) {
+            const [ano, mes, dia] = iso.split("-");
+            return new Date(ano, Number(mes) - 1, dia, 12, 0, 0);
+        }
+
+        const inicioAtual = criarDataLocalFromISO(dt_inicio.value);
+        const fimAtual    = criarDataLocalFromISO(dt_fim.value);
+
+        // calcular quantos dias existem no período selecionado
+        const MS_POR_DIA = 1000 * 60 * 60 * 24;
+        const diffMs = fimAtual.getTime() - inicioAtual.getTime();
+        const diasDiff = Math.round(diffMs / MS_POR_DIA); // ex: 04->10 = 6
+        // para manter o mesmo número de dias inclusivos precisamos subtrair (diasDiff + 1)
+
+        // início do cálculo do período anterior
+        const inicioAnt = new Date(inicioAtual);
+        inicioAnt.setDate(inicioAnt.getDate() - (diasDiff + 1));
+
+        const fimAnt = new Date(fimAtual);
+        fimAnt.setDate(fimAnt.getDate() - (diasDiff + 1));
+
+        // pegar a primeira data proveniente do csv
+        let dataMinCSV = null;
+
+        // buscar a menor data existente no CSV
+        for (let i = 0; i < dadosBrutos.length; i++) {
+            const dataISO = String(dadosBrutos[i].datetime).split(" ")[0];
+            const [yy, mm, dd] = dataISO.split("-");
+            const dt = new Date(yy, mm - 1, dd, 12, 0, 0);
+
+            if (!dataMinCSV || dt < dataMinCSV) {
+                dataMinCSV = dt;
+            }
+        }
+
+        // garantir que o label não ultrapassa a data limite vinda do csv
+        let inicioAntLabel = new Date(inicioAnt);
+        if (inicioAnt < dataMinCSV) {
+            inicioAntLabel = new Date(dataMinCSV);
+        }
+
+        // filtrar valores do csv
+        const filtradoAnt = [];
+        for (let i = 0; i < dadosBrutos.length; i++) {
+            const linha = dadosBrutos[i];
+            // linha.datetime: "YYYY-MM-DD HH:MM"
+            const dataISO = String(linha.datetime).split(" ")[0]; // "YYYY-MM-DD"
+            const [y, m, d] = dataISO.split("-");
+            const dataLinha = new Date(y, Number(m) - 1, d, 12, 0, 0);
+
+            const okData = (dataLinha.getTime() >= inicioAnt.getTime()) && (dataLinha.getTime() <= fimAnt.getTime());
+            const okBairro = (select_bairro.value === "Todas as Regiões") || (linha.bairro === select_bairro.value);
+
+            if (okData && okBairro) {
+                filtradoAnt.push(linha);
+            }
+        }
+
+        // cálculo da média anterior
+        let mediaAnterior = mediaAtual - 1;
+        if (filtradoAnt.length > 0) {
+            let somaAnt = 0;
+            for (let i = 0; i < filtradoAnt.length; i++) {
+                somaAnt += Number(filtradoAnt[i].disponibilidade_geral);
+            }
+            mediaAnterior = somaAnt / filtradoAnt.length;
+        }
+
+        // formatar data
+        function formatarDataMes(dt) {
+            const d = String(dt.getDate()).padStart(2, "0");
+            const m = String(dt.getMonth() + 1).padStart(2, "0");
+            return `${d}/${m}`;
+        }
+
+        const labelAtual = `${formatarDataMes(inicioAtual)} a ${formatarDataMes(fimAtual)}`;
+        const labelAnterior = `${formatarDataMes(inicioAntLabel)} a ${formatarDataMes(fimAnt)}`;
+
+        if (graficoComparacao) graficoComparacao.destroy();
+
+        graficoComparacao = new Chart(
+            document.getElementById("graficoComparacao").getContext("2d"),
+            {
+                type: "bar",
+                data: {
+                    labels: [labelAnterior, labelAtual],
+                    datasets: [{
+                        label: "Disponibilidade Geral (%)",
+                        data: [
+                            mediaAnterior.toFixed(2),
+                            mediaAtual.toFixed(2)
+                        ],
+                        backgroundColor: ["rgba(54,162,235,0.7)","#001c41"]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            }
+        );
+        
+    }
+
+    function gerarGraficoEvolucao(filtrado) {
+        const dias = {};
+        const dt_inicio = document.getElementById("dt_inicio").value;
+        const dt_fim = document.getElementById("dt_fim").value;
+        const bairro = document.getElementById("select_bairro").value;
+        
+        titulo_evolucao.innerHTML = `Evolução da disponibilidade entre ${formatarDataAtual(dt_inicio)} e ${formatarDataAtual(dt_fim)} - ${bairro}`;
+        
+        for (let i = 0; i < filtrado.length; i++) {
+            const dia = filtrado[i].datetime;
+
+            if (!dias[dia]) {
+                dias[dia] = { soma: 0, qtd: 0 };
+            }
+
+            dias[dia].soma += Number(filtrado[i].disponibilidade_geral);
+            dias[dia].qtd++;
+        }
+
+        const labels = [];
+        for (const d in dias) labels.push(d);
+        labels.sort();
+
+        const valores = [];
+        for (let i = 0; i < labels.length; i++) {
+            const d = labels[i];
+            valores.push(dias[d].soma / dias[d].qtd);
+        }
+
+        if (graficoDisponibilidade) graficoDisponibilidade.destroy();
+        graficoDisponibilidade = new Chart(
+            document.getElementById("graficoDisponibilidade").getContext("2d"),
+            {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Disponibilidade Geral (%)",
+                        data: valores,
+                        borderColor: "#001c41",
+                        pointBackgroundColor: "#001c41",
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    aspectRatio: 0
+                }
+
+            }
+        );
+    }
+
+    btn_filtrar.addEventListener("click", function() {
+        gerarGraficos();
+        atualizarKpiMenorDisponibilidade();
+        atualizarKpiMaiorDisponibilidade();
+        atualizarKpiDesvioPadrao();
+    });
+    select_bairro.addEventListener("change",  function () {
+        gerarGraficos();
+        atualizarKpiDesvioPadrao();
+    });
+
+    carregarDados();
+    
+    function formatarDataAtual(data){
+        if (!data){
+            return "—";
+        } 
+        const [ano, mes, dia] = data.split("-");
+        return `${dia}/${mes}`;
+    }
+
+    document.querySelectorAll(".closeModal, .cancel").forEach(element => {
+        element.addEventListener("click", () => {
+            document.getElementById("modal_cadastrar").style.display = "none";
+        });
+    });
+    
+    function emitirRelatorio() {
+        document.getElementById("modal_cadastrar").style.display = "flex";
+    }
+
+    function esconderRelatorio(){
+        document.getElementById("content-relatorio").style.display = "none";
+    }
+
+    function criarGraficoTendenciasRelatorio() {
+        const ctx4 = document.getElementById("graficoTendenciasRelatorio").getContext("2d");
+
+        if (graficoTendenciasRelatorio != null) {
+            graficoTendenciasRelatorio.destroy();
+        }
+
+        const labels = [];
+        for (let i = 0; i < graficoTendencias.data.labels.length; i++) {
+            labels.push(graficoTendencias.data.labels[i]);
+        }
+
+        const datasets = [];
+        for (let i = 0; i < graficoTendencias.data.datasets.length; i++) {
+            const original = graficoTendencias.data.datasets[i];
+
+            datasets.push({
+                label: original.label,
+                data: [...original.data],
+                backgroundColor: original.backgroundColor,
+                borderColor: original.borderColor,
+                fill: false
+            });
+        }
+
+        graficoTendenciasRelatorio = new Chart(ctx4, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                scales: { y: { beginAtZero: true } },
+                responsive: true,
+                animation: false
+            }
+        });
+    }
+
+    function criarGraficoComparacaoRelatorio() {
+        const ctx5 = document.getElementById("graficoComparacaoRelatorio").getContext("2d");
+
+        if (graficoComparacaoRelatorio != null) {
+            graficoComparacaoRelatorio.destroy();
+        }
+
+        const labels = [];
+        for (let i = 0; i < graficoComparacao.data.labels.length; i++) {
+            labels.push(graficoComparacao.data.labels[i]);
+        }
+
+        const datasets = [];
+        for (let i = 0; i < graficoComparacao.data.datasets.length; i++) {
+            const original = graficoComparacao.data.datasets[i];
+
+            datasets.push({
+                label: original.label,
+                data: [...original.data],
+                backgroundColor: original.backgroundColor,
+                borderColor: original.borderColor,
+                fill: false
+            });
+        }
+
+        graficoComparacaoRelatorio = new Chart(ctx5, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                scales: { y: { beginAtZero: true } },
+                responsive: true,
+                animation: false
+            }
+        });
+    }
+
+    function matarGraficos(){
+        if(graficoTendenciasRelatorio != null){
+            graficoTendenciasRelatorio.destroy();
+        }
+        if(graficoComparacaoRelatorio != null){
+            graficoComparacaoRelatorio.destroy();
+        }
+        if(graficoDisponibilidadeRelatorio != null){
+            graficoDisponibilidadeRelatorio.destroy();
+        }
+    }
+
+    function formatarData(data) {
+        if (!data){
+            return "—";
+        } 
+        const [ano, mes, dia] = data.split("-");
+        return `${dia}/${mes}/${ano}`;
+    }
+
+    function formatarDataAtual(data){
+        if (!data){
+            return "—";
+        } 
+        const [ano, mes, dia] = data.split("-");
+        return `${dia}/${mes}`;
+    }
+
+    async function gerarRelatorio() {
+        const element = document.getElementById('content-relatorio');
+        const check = document.getElementById('check-grafico');
+        const check2 = document.getElementById('check-grafico2');
+        const graficoRelatorio = document.querySelector('.grafico-relatorio');
+        const grafico2Relatorio = document.querySelector('.grafico2-relatorio');
+        element.style.display = "unset";
+        const nome_arquivo = document.getElementById("nome_arquivo").value;
+        b_titulo.innerHTML = document.getElementById("titulo_relatorio").value;
+
+        const dt_inicio = document.getElementById("dt_inicio").value;
+        const dt_fim = document.getElementById("dt_fim").value;
+
+        dt_inicio_relatorio.innerHTML = formatarData(dt_inicio);
+        dt_fim_relatorio.innerHTML = formatarData(dt_fim);
+        reg_maior.innerHTML = document.getElementById("maior-indice").textContent;
+        reg_menor.innerHTML = document.getElementById("menor-indice").textContent;
+
+        const comentario = document.getElementById("comentario").value;
+
+        if(comentario === ""){
+            comentarioRelatorio.innerHTML = 'Sem observações.';
+        } else{
+            comentarioRelatorio.innerHTML = comentario;
+        }
+
+        // intro_graficos.innerHTML = 'Gráfico indicador do indice de disponibilidade dos processos';
+        var marcados = 0;
+        if (check.checked) {
+            graficoRelatorio.style.display = "unset";
+            criarGraficoTendenciasRelatorio(); 
+            marcados ++;
+        } else{
+            graficoRelatorio.style.display = "none";
+        }
+        
+        if(check2.checked){
+            grafico2Relatorio.style.display = "unset";
+            criarGraficoComparacaoRelatorio();
+            marcados++;
+        } else{
+            grafico2Relatorio.style.display = "none";
+        }
+        console.log(marcados)
+        const options = {
+            margin: 0.5,
+            filename: `${nome_arquivo}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        
+        await html2pdf().set(options).from(element).save();
+
+        esconderRelatorio();
+        matarGraficos();
+    }
+
+</script>
