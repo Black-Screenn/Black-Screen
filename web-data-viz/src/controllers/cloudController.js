@@ -216,7 +216,7 @@ async function buscaCSVgrafico(req, res) {
     }
 
     const key = `hercules/${local}/${empresa}/${maquina}.csv`;
-    const bucketName = process.env.AWS_BUCKET_CURATED_NAME;
+    const bucketName = process.env.AWS_BUCKET_CLIENT_NAME;
 
     const command = new s3.GetObjectCommand({ Bucket: bucketName, Key: key });
     const response = await client.send(command);

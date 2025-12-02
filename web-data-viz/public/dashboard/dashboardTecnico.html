@@ -1,478 +1,232 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
+    <head>
+        <link
+            rel="shortcut icon"
+            href="../assets/imgs/blackscreenicon.ico"
+            type="image/x-icon"
+        />
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>BlackScreen | Mapa Principal</title>
 
-<head>
-    <link rel="shortcut icon" href="../assets/imgs/blackscreenicon.ico" type="image/x-icon">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlackScreen | Dashboards</title>
+        <link rel="stylesheet" href="./../css/dashboards.css" />
+        <link rel="stylesheet" href="./../css/style.css" />
+        <link rel="stylesheet" href="./../css/dashboardHome.css" />
 
-    <!-- CSS Originais -->
-    <link rel="stylesheet" href="./../css/dashboards.css">
-    <link rel="stylesheet" href="./../css/style.css" />
-    <link rel="stylesheet" href="./../css/dashboardHome.css">
-    <link rel="stylesheet" href="./../css/dashboardCalor.css">
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        />
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+        <script src="../js/sessao.js"></script>
+        <script src="./../js/alerta.js"></script>
 
-    <script src="../js/sessao.js"></script>
-    <script src="./../js/alerta.js"></script>
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""
+        />
+    </head>
+    <body>
+        <div class="janela">
+            <div class="header-left">
+                <img
+                    src="../assets/imgs/blackscreenlogo.png"
+                    alt="BlackScreen"
+                />
 
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-bundle.min.js"></script>
-    <script src="https://cdn.anychart.com/releases/8.11.0/geodata/custom/world/world.js"></script>
-    <script src="https://cdn.anychart.com/releases/8.11.0/geodata/countries/brazil/brazil.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.15/proj4.js"></script>
-    <link rel="stylesheet" href="https://cdn.anychart.com/releases/8.11.0/css/anychart-ui.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
-</head>
-<body>
-    <div class="janela">
-        <div class="header-left">
-            <img src="../assets/imgs/blackscreenlogo.png" alt="BlackScreen">
-
-            <div class="hello">
-                <h3>Bem vindo, <br><span id="b_usuario">usuário</span>!</h3>
-            </div>
-
-           <div class="links">
-                <div class="btn-nav">
-                    <a href="../dashboard/dashboard.html">
-                        <span class="material-symbols-outlined">
-                            home
-                        </span>
-                        <h3>
-                            Ínicio
-                        </h3>
-                    </a>
+                <div class="hello">
+                    <h3>
+                        Bem vindo, <br /><span id="b_usuario">usuário</span>!
+                    </h3>
                 </div>
 
-                <div class="btn-nav-white">
-                    <a href="../dashboard/logAlertas.html">
-                        <span class="material-symbols-outlined">
-                            notifications
-                        </span>
-                        <h3>
-                            Alertas
-                        </h3>
-                    </a>
-                </div>
-
-                <div class="btn-nav-white">
-                    <a href="../dashboard/atm.html">
-                        <span class="material-symbols-outlined">
-                            local_atm
-                        </span>
-                        <h3>
-                            ATMs
-                        </h3>
-                    </a>
-                </div>
-
-                <div class="btn-nav-white">
-                    <a href="../dashboard/cadastroComponentes.html">
-                        <span class="material-symbols-outlined">
-                            health_and_safety
-                        </span>
-                        <h3>
-                            Componentes
-                        </h3>
-                    </a>
-                </div>
-                <div class="btn-nav-white">
-                    <a href="../dashLukas/persona.html">
-                        <span class="material-symbols-outlined">
-                            signal_cellular_alt
-                        </span>
-                        <h3>
-                            Persona
-                        </h3>
-                    </a>
-                </div>
-                <div class="btn-nav-white">
-                    <a href="./insight.html">
-                        <span class="material-symbols-outlined">
-                            search_insights
-                        </span>
-                        <h3>
-                            Insights
-                        </h3>
-                    </a>
-                </div>
-                <div class="btn-nav-white">
-                    <a href="./perfil.html">
-                        <span class="material-symbols-outlined">
-                            account_circle
-                        </span>
-                        <h3>
-                            Meu Perfil
-                        </h3>
-                    </a>
-                </div>
-            </div>
-
-            <div class="btn-logout" onclick="limparSessao()">
-                <h3>Sair</h3>
-            </div>
-
-        </div>
-
-        <div class="content">
-            <div class="top">
-
-                <!-- se tirar isso quebra o mapa inteiro kkkkk -->
-
-
-                <div class="pesquisa-filtros">
-                    <div class="pesquisa-div">
-                        <input type="text" id="pesquisa" placeholder="Pesquisar..." onkeyup="">
-                        <span class="material-symbols-outlined">search</span>
+                <div class="links">
+                    <div class="btn-nav">
+                        <a href="../dashboard/dashboard.html">
+                            <span class="material-symbols-outlined">home</span>
+                            <h3>Ínicio</h3>
+                        </a>
                     </div>
-                    <select name="slt_tipo_mapa" id="select-mapa">
-                        <option value="padrao">Localização</option>
-                        <option value="operacionais">Mapa de Calor</option>
-                    </select>
+                    <div class="btn-nav-white">
+                        <a href="../dashboard/logAlertas.html">
+                            <span class="material-symbols-outlined"
+                                >notifications</span
+                            >
+                            <h3>Alertas</h3>
+                        </a>
+                    </div>
+                    <div class="btn-nav-white">
+                        <a href="../dashboard/atm.html">
+                            <span class="material-symbols-outlined"
+                                >local_atm</span
+                            >
+                            <h3>ATMs</h3>
+                        </a>
+                    </div>
+                    <div class="btn-nav-white">
+                        <a href="../dashboard/cadastroComponentes.html">
+                            <span class="material-symbols-outlined"
+                                >health_and_safety</span
+                            >
+                            <h3>Componentes</h3>
+                        </a>
+                    </div>
+                    <div class="btn-nav-white">
+                        <a href="../dashLukas/persona.html">
+                            <span class="material-symbols-outlined"
+                                >signal_cellular_alt</span
+                            >
+                            <h3>Persona</h3>
+                        </a>
+                    </div>
+                    <div class="btn-nav-white">
+                        <a href="./insight.html">
+                            <span class="material-symbols-outlined"
+                                >search_insights</span
+                            >
+                            <h3>Insights</h3>
+                        </a>
+                    </div>
+                    <div class="btn-nav-white">
+                        <a href="./perfil.html">
+                            <span class="material-symbols-outlined"
+                                >account_circle</span
+                            >
+                            <h3>Meu Perfil</h3>
+                        </a>
+                    </div>
+                    <div class="btn-logout" onclick="limparSessao()">
+                        <h3>Sair</h3>
+                    </div>
                 </div>
             </div>
-            <div id="map-container-wrapper">
-                <div id="map"></div>
-                <div id="container-anychart">
-                    <button id="btn-voltar-mundo" onclick="renderWorldMap()">
-                        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">arrow_back</span>
-                        Voltar ao Mundo
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div id="modal">
-            <div id="modalContainer">
-                <div class="header" onclick="closeModal()">
-                    <h1 id="caixa-name"></h1>
-                    <button class="material-symbols-outlined close">close</button>
-                </div>
-                <div class="contentModal">
-                    <div class="left">
-                        <div class="item">
-                            <div class="title">
-                                <span class="material-symbols-outlined">location_on</span>
-                                <h2>Localização</h2>
-                            </div>
-                            <p id="caixa-endereco">Rua Exemplo, 123 - Bairro, Cidade/UF</p>
-                        </div>
-                        <div class="item">
-                            <div class="title">
-                                <span class="material-symbols-outlined">docs</span>
-                                <h2>Visão Geral</h2>
-                            </div>
-                            <h3>Status:</h3>
-                            <p id="caixa-status" class="status ativo">
-                                <span class="material-symbols-outlined">check_circle</span>
-                                Ativo
-                            </p>
-                            <h3>Componentes:</h3>
-                            <div class="components" id="component-container">
-                                <p class="status bom">
-                                    <span class="material-symbols-outlined">check_circle</span>
-                                    Impressora de Recibos
-                                </p>
-                                <p class="status bom">
-                                    <span class="material-symbols-outlined">check_circle</span>
-                                    Teclado
-                                </p>
-                                <p class="status bom">
-                                    <span class="material-symbols-outlined">check_circle</span>
-                                    Conexão
-                                </p>
-                                <p class="status alerta">
-                                    <span class="material-symbols-outlined">circle_notifications</span>
-                                    Dispensador de Cédulas
-                                </p>
-                                <p class="status falha">
-                                    <span class="material-symbols-outlined">do_not_disturb_on</span>
-                                    Leitor de Cartão
-                                </p>
-                            </div>
-                            <h3>Alertas Recentes:</h3>
-                            <table>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Componente</th>
-                                    <th>Descrição</th>
-                                </tr>
-                                <tr>
-                                    <td>2024-06-15 14:32</td>
-                                    <td>CPU</td>
-                                    <td>Uso elevado da CPU (74%)</td>
-                                </tr>
-                                <!-- Linhas originais mantidas -->
-                            </table>
+
+            <div class="content">
+                <div class="top">
+                    <div class="pesquisa-filtros">
+                        <div class="pesquisa-div">
+                            <select id="select-caixa">
+                                <option value="">Selecione um caixa</option>
+                            </select>
+                            <span class="material-symbols-outlined"
+                                >arrow_drop_down</span
+                            >
                         </div>
                     </div>
-                    <div class="right">
-                        <div class="title">
-                            <span class="material-symbols-outlined">health_and_safety</span>
-                            <h2>Saúde do Sistema</h2>
-                        </div>
-                        <div class="stats cpu">
-                            <h3>CPU</h3>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 98%;"></div>
-                            </div>
-                            <div class="stat usoAtual">
-                                <div class="circle ruim"></div>
-                                <p>Uso: <span>98%</span></p>
-                            </div>
-                            <div class="stat tempAtual">
-                                <div class="circle bom"></div>
-                                <p>Temperatura: <span>55°C</span></p>
-                            </div>
-                            <div class="stat totalProcessos">
-                                <div class="circle bom"></div>
-                                <p>Total de Processos: <span>123</span></p>
-                            </div>
-                        </div>
-                        <!-- Outras stats mantidas... -->
-                    </div>
+                </div>
+
+                <div id="map-container-wrapper">
+                    <div id="map"></div>
                 </div>
             </div>
         </div>
 
+        <script
+            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""
+        ></script>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="">
-    </script>
-    <script src="../js/leaflet-heat.js"></script>
+        <script>
+            // Nome do usuário
+            document.getElementById("b_usuario").innerHTML =
+                sessionStorage.NOME_USUARIO || "usuário";
 
+            // Configuração do mapa Leaflet (mapa principal)
+            const icon = L.icon({
+                iconUrl: "../assets/imgs/marker.png",
+                shadowUrl: "../assets/imgs/marker_shadow.png",
+                iconSize: [48, 95],
+                shadowSize: [50, 64],
+                iconAnchor: [22, 94],
+                shadowAnchor: [0, 72],
+                popupAnchor: [-3, -76],
+            });
 
-    <script>
+            const map = L.map("map", { zoomControl: false }).setView(
+                [-23.55052, -46.633308],
+                12,
+            );
 
-        function closeModal(){
-            document.getElementById('modal').style.display = "none";
-        }
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                maxZoom: 19,
+                attribution: "© OpenStreetMap",
+            }).addTo(map);
 
-        // --- 2. Leaflet Map (Código Original Mantido) ---
-        const icon = L.icon({
-            iconUrl: '../assets/imgs/marker.png',
-            shadowUrl: '../assets/imgs/marker_shadow.png',
-            iconSize:     [48, 95],
-            shadowSize:   [50, 64],
-            iconAnchor:   [22, 94],
-            shadowAnchor: [0, 72],
-            popupAnchor:  [-3, -76]
-        });
+            const fkEmpresa = sessionStorage.getItem("FK_EMPRESA");
+            const selectCaixa = document.getElementById("select-caixa");
+            let allCaixas = [];
 
-        // ZOOM CONTROL DISABLED HERE
-        const map = L.map('map', { zoomControl: false }).setView([-23.55052, -46.633308], 12);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19, attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
-
-        const fkEmpresa = sessionStorage.getItem("FK_EMPRESA");
-
-        fetch('/caixas/listar', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'FK_EMPRESA': fkEmpresa
-            },
-        })
-            .then(r => r.json())
-            .then(lista => {
-                const group = L.featureGroup();
-                lista.forEach(c => {
-                    if (c.Latitude == null || c.Longitude == null) return;
-
-                    marker = L.marker([c.Latitude, c.Longitude], {icon: icon})
-                        .bindPopup(
-                            `<b>${c.codigoCaixa}</b><br>${c.Logradouro}<br>${c.Bairro} - ${c.Cidade}/${c.UF}<br> <i>Empresa dona: </i>${c.eNome}<br> <i>Código da empresa: </i> ${c.Id_Empresa}`
-                        )
-                        .addTo(group);
-                    marker.on('mouseover',function(ev) {
-                        ev.target.openPopup();
-                    });
-                    marker.on('mouseout',function(ev) {
-                        ev.target.closePopup();
-                    });
-
-                    marker.on('click', function (e){
-                        window.location.href = `../dashboardHercules/caixa.html?id=${c.Macaddress}`;
-                    });
-                });
-
-                if (group.getLayers().length) {
-                    group.addTo(map);
-                    try { map.fitBounds(group.getBounds().pad(0.2)); } catch (_) { }
-                }
+            // Carrega dados das caixas e popula o select
+            fetch("/caixas/listar", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    FK_EMPRESA: fkEmpresa,
+                },
             })
-            .catch(err => console.error("Falha ao carregar /caixas:", err));
+                .then((r) => r.json())
+                .then((lista) => {
+                    allCaixas = lista.filter(
+                        (c) => c.Latitude != null && c.Longitude != null,
+                    );
 
+                    // Popula o select com as caixas
+                    allCaixas.forEach((c) => {
+                        const option = document.createElement("option");
+                        option.value = c.Macaddress;
+                        option.textContent = `${c.codigoCaixa} - ${c.Logradouro}, ${c.Bairro}`;
+                        selectCaixa.appendChild(option);
+                    });
 
+                    // Cria markers no mapa
+                    const group = L.featureGroup();
+                    allCaixas.forEach((c) => {
+                        const marker = L.marker([c.Latitude, c.Longitude], {
+                            icon: icon,
+                        })
+                            .bindPopup(
+                                `<b>${c.codigoCaixa}</b><br>${c.Logradouro}<br>${c.Bairro} - ${c.Cidade}/${c.UF}<br> <i>Empresa dona: </i>${c.eNome}<br> <i>Código da empresa: </i> ${c.Id_Empresa}`,
+                            )
+                            .addTo(group);
 
-        // --- 3. Novas Funcionalidades (AnyChart + ApexCharts) ---
-        let mapAnyChart;
-        let chartInstance = null;
-        let anyChartInitialized = false;
+                        marker.on("mouseover", function (ev) {
+                            ev.target.openPopup();
+                        });
+                        marker.on("mouseout", function (ev) {
+                            ev.target.closePopup();
+                        });
 
-        // Dados Fictícios para o AnyChart (Substitua por fetch do seu backend futuramente)
-        const worldData = [
-            { id: "BR", value: 950, name: "Brasil" }
-        ];
+                        marker.on("click", function () {
+                            window.location.href = `../dashboardHercules/caixa.html?id=${c.Macaddress}`;
+                        });
+                    });
 
-        const brazilData = [
-            { id: "BR.SP", value: 450, name: "São Paulo", custom_max: "chrome.exe", total: 15430 },
-            { id: "BR.RJ", value: 320, name: "Rio de Janeiro", custom_max: "java.exe", total: 8200 },
-            { id: "BR.MG", value: 280, name: "Minas Gerais", custom_max: "mysqld", total: 6500 },
-            { id: "BR.RS", value: 210, name: "Rio Grande do Sul", custom_max: "python", total: 4100 }
-        ];
+                    if (group.getLayers().length) {
+                        group.addTo(map);
+                        try {
+                            map.fitBounds(group.getBounds().pad(0.2));
+                        } catch (_) {}
+                    }
+                })
+                .catch((err) =>
+                    console.error("Falha ao carregar /caixas:", err),
+                );
 
-        function initAnyChart() {
-            if(anyChartInitialized) return;
-            renderWorldMap();
-            anyChartInitialized = true;
-        }
-
-        function renderWorldMap() {
-            document.getElementById('container-anychart').innerHTML = '';
-            const btn = document.createElement('button');
-            btn.id = 'btn-voltar-mundo';
-            btn.onclick = renderWorldMap;
-            btn.innerHTML = '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">arrow_back</span> Voltar ao Mundo';
-            document.getElementById('container-anychart').appendChild(btn);
-            btn.style.display = 'none';
-
-            mapAnyChart = anychart.map();
-            mapAnyChart.geoData(anychart.maps.world);
-
-            var colorScale = anychart.scales.linearColor();
-            colorScale.colors(['#dbeafe', '#3b82f6', '#1e40af', '#051e3e']);
-
-            var series = mapAnyChart.choropleth(worldData);
-            series.colorScale(colorScale);
-            series.hovered().fill('#facc15');
-            series.labels(false);
-            series.tooltip().format("Máquinas: {%value}");
-
-            mapAnyChart.listen("pointClick", function(e) {
-                if(e.point.get("id") === "BR") renderBrazilMap();
+            // Evento do select - navega para a caixa selecionada
+            selectCaixa.addEventListener("change", function () {
+                if (this.value) {
+                    window.location.href = `../dashboardHercules/caixa.html?id=${this.value}`;
+                }
             });
-
-            if(mapAnyChart.zoomControl) {
-                mapAnyChart.zoomControl().render(mapAnyChart);
-            }
-
-            mapAnyChart.container("container-anychart");
-            mapAnyChart.draw();
-        }
-
-        function renderBrazilMap() {
-            document.getElementById('container-anychart').innerHTML = '';
-
-            const btn = document.createElement('button');
-            btn.id = 'btn-voltar-mundo';
-            btn.onclick = renderWorldMap;
-            btn.innerHTML = '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">arrow_back</span> Voltar ao Mundo';
-            btn.style.display = 'block';
-            document.getElementById('container-anychart').appendChild(btn);
-
-            mapAnyChart = anychart.map();
-            mapAnyChart.geoData(anychart.maps.brazil);
-
-            var colorScale = anychart.scales.linearColor();
-            colorScale.colors(['#bfdbfe', '#2563eb', '#051e3e']);
-
-            var series = mapAnyChart.choropleth(brazilData);
-            series.colorScale(colorScale);
-            series.labels(false);
-
-            series.tooltip().useHtml(true);
-            series.tooltip().format(function() {
-                return `Máquinas: <b>${this.value}</b><br/>Maior Consumo: <b>${this.getData("custom_max")}</b>`;
-            });
-
-            mapAnyChart.listen("pointClick", function(e) {
-                openIaModal(e.point.get("name"));
-            });
-
-             if(mapAnyChart.zoomControl) {
-                mapAnyChart.zoomControl().render(mapAnyChart);
-            }
-
-            mapAnyChart.container("container-anychart");
-            mapAnyChart.draw();
-        }
-
-        // --- 4. Lógica do Novo Modal IA ---
-        function openIaModal(estadoNome) {
-            const modal = document.getElementById('modal-ia');
-            document.getElementById('modal-ia-title').innerText = `Análise: ${estadoNome}`;
-
-            // Dados Aleatórios (Substituir por lógica real)
-            document.getElementById('ia-cpu').innerText = Math.floor(Math.random() * 40 + 40) + "%";
-            document.getElementById('ia-ram').innerText = (Math.random() * 8 + 4).toFixed(1) + " GB";
-
-            const tbody = document.getElementById('process-table-body');
-            tbody.innerHTML = `
-                <tr><td>chrome.exe</td><td>4120</td><td><span class="badge high">12%</span></td><td>High</td></tr>
-                <tr><td>java.exe</td><td>1102</td><td><span class="badge ok">4%</span></td><td>Running</td></tr>
-                <tr><td>node.exe</td><td>5521</td><td><span class="badge ok">2%</span></td><td>Running</td></tr>
-            `;
-
-            modal.style.display = 'flex';
-            renderChart();
-        }
-
-        function closeIaModal() {
-            document.getElementById('modal-ia').style.display = 'none';
-        }
-
-        function renderChart() {
-            if(chartInstance) chartInstance.destroy();
-
-            var options = {
-                chart: { type: 'area', height: 300, toolbar: {show: false} },
-                series: [{ name: 'CPU Prevista', data: [30,40,35,50,49,60,70,91,95,80,60,50] }],
-                colors: ['#2563eb'],
-                stroke: { curve: 'smooth' },
-                xaxis: { categories: ['00h','02h','04h','06h','08h','10h','12h','14h','16h','18h','20h','22h'] },
-                dataLabels: { enabled: false }
-            };
-
-            chartInstance = new ApexCharts(document.querySelector("#chart-regression"), options);
-            chartInstance.render();
-        }
-
-        // --- 5. Lógica de Troca de Mapas ---
-        document.getElementById('select-mapa').addEventListener('change', function() {
-            const divLeaflet = document.getElementById('map');
-            const divAnyChart = document.getElementById('container-anychart');
-
-            if(this.value === 'operacionais') {
-                // Esconde Leaflet, Mostra AnyChart
-                divLeaflet.style.display = 'none';
-                divAnyChart.style.display = 'block';
-                initAnyChart();
-            } else {
-                // Esconde AnyChart, Mostra Leaflet
-                divAnyChart.style.display = 'none';
-                divLeaflet.style.display = 'block';
-                // Corrige renderização do Leaflet ao voltar
-                setTimeout(() => map.invalidateSize(), 100);
-            }
-        });
-
-    </script>
-</body>
-
+        </script>
+    </body>
 </html>
-
-<script>
-    b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
-</script>
