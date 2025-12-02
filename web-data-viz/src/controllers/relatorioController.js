@@ -3,6 +3,7 @@ const fs = require('fs').promises;
 const MarkdownIt = require('markdown-it');
 const puppeteer = require('puppeteer');
 const crypto = require('crypto');
+const regression = require('regression');
 
 const { uploadRelatorioS3, dadosS3PorPeriodo } = require('./cloudController.js');
 const { buscarParametroPorComponente } = require('../models/componenteModel.js')
@@ -11,6 +12,58 @@ const { cadastrar, listar, avaliar } = require('../models/relatorioModel.js');
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const modelo = "gemini-2.0-flash-lite";
 const md = new MarkdownIt({ html: true });
+
+function otimizarDadosParaIA(dadosBrutos) {
+    const agrupado = {};
+
+    dadosBrutos.forEach(registro => {
+        const dataHora = new Date(registro.datetime || registro.data_hora);
+        dataHora.setMinutes(0, 0, 0);
+        const chave = `${registro.macaddress}_${dataHora.toISOString()}`;
+
+        if (!agrupado[chave]) {
+            agrupado[chave] = {
+                macaddress: registro.macaddress,
+                datetime: dataHora.toISOString(),
+                somaCpu: 0, count: 0,
+                somaRam: 0,
+                somaDisco: 0,
+                maxCpu: 0,
+                maxRam: 0,
+                maxDisco: 0
+            };
+        }
+
+        const item = agrupado[chave];
+        item.count++;
+
+        if (registro.cpu !== undefined) {
+            const val = parseFloat(registro.cpu);
+            item.somaCpu += val;
+            if (val > item.maxCpu) item.maxCpu = val;
+        }
+
+        if (registro.ram !== undefined) {
+            const val = parseFloat(registro.ram);
+            item.somaRam += val;
+            if (val > item.maxRam) item.maxRam = val;
+        }
+
+        if (registro.disco !== undefined) {
+            const val = parseFloat(registro.disco);
+            item.somaDisco += val;
+            if (val > item.maxDisco) item.maxDisco = val;
+        }
+    });
+
+    return Object.values(agrupado).map(item => ({
+        macaddress: item.macaddress,
+        datetime: item.datetime,
+        cpu: item.maxCpu > 0 ? item.maxCpu.toFixed(1) : 0,
+        ram: item.maxRam > 0 ? item.maxRam.toFixed(1) : 0,
+        disco: item.maxDisco > 0 ? item.maxDisco.toFixed(1) : 0
+    }));
+}
 
 function converterParaCSV(dataArray) {
     if (!dataArray || dataArray.length === 0) return "";
@@ -38,12 +91,160 @@ async function uploadArquivoParaGemini(buffer, fileName, mimeType) {
 
 function limparTextoIA(texto) {
     if (!texto) return "";
-    
+
     return texto
         .replace(/^```markdown\n?/i, '')
         .replace(/^```\n?/i, '')
         .replace(/```$/i, '')
         .trim();
+}
+
+function previsaoDados(historico, diasPrever = 7, ultimaDataHistorico) {
+    if (!historico || historico.length < 2) return [];
+
+    const dadosValor = historico.map((val, i) => [i, val]);
+
+    const resultado = regression.polynomial(dadosValor, { order: 1, precision: 3 });
+
+    let somaErro = 0;
+    dadosValor.forEach(([x, y]) => {
+        const valorPrevisto = resultado.predict(x)[1];
+        somaErro += Math.pow(y - valorPrevisto, 2);
+    });
+    const margemErro = Math.sqrt(somaErro / dadosValor.length);
+
+    const predicoes = [];
+    const indexUltimoPonto = historico.length - 1;
+    
+    const horasParaPrever = diasPrever * 24; 
+    
+    let dataReferencia = new Date(ultimaDataHistorico);
+
+    for (let i = 1; i <= horasParaPrever; i++) {
+        const futuroX = indexUltimoPonto + i;
+        const yPrevisto = resultado.predict(futuroX)[1];
+
+        dataReferencia.setHours(dataReferencia.getHours() + 1);
+
+        const labelFormatada = dataReferencia.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' + 
+                               dataReferencia.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+        const clamp = (n) => Math.max(0, Math.min(100, n));
+
+        predicoes.push({
+            label: labelFormatada,
+            value: clamp(yPrevisto),
+            min: clamp(yPrevisto - margemErro),
+            max: clamp(yPrevisto + margemErro)
+        });
+    }
+
+    return predicoes;
+}
+
+function gerarGraficoComponente(id, titulo, labels, dadosHistorico, dadosPrevisao, cor = '#000000') {
+
+    const html = `
+        <div class="chart-section" style="page-break-inside: avoid; margin-bottom: 30px;">
+            <h3 style="border-left: 4px solid ${cor}; padding-left: 10px; margin-bottom: 10px;">${titulo}</h3>
+            <div class="chart-container" style="position: relative; height: 250px; width: 100%;">
+                <canvas id="${id}"></canvas>
+            </div>
+        </div>
+    `;
+
+    const script = `
+        new Chart(document.getElementById('${id}').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: ${JSON.stringify(labels)},
+                datasets: [
+                    {
+                        label: 'Histórico',
+                        data: ${JSON.stringify(dadosHistorico)},
+                        borderColor: '${cor}',
+                        backgroundColor: '${cor}20', // 20 é transparencia hex
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHitRadius: 10
+                    },
+                    {
+                        label: 'Previsão',
+                        data: ${JSON.stringify(dadosPrevisao)},
+                        borderColor: '${cor}',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                animation: false,
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: '#f0f0f0' },
+                        ticks: { font: { size: 10 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { 
+                            font: { size: 10 },
+                            maxTicksLimit: 10 // Evita poluição visual no eixo X
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: true, labels: { font: { size: 10 } } }
+                }
+            }
+        });
+    `;
+
+    return { html, script };
+}
+
+function processarDadosParaGrafico(dadosBrutos, chaveMetrica) {
+    const dadosAgrupados = {};
+
+    dadosBrutos.forEach(registro => {
+        if (registro[chaveMetrica] === undefined || registro[chaveMetrica] === null) return;
+
+        const dataHora = new Date(registro.datetime);
+        dataHora.setMinutes(0, 0, 0); 
+        const chaveHora = dataHora.toISOString();
+
+        if (!dadosAgrupados[chaveHora]) {
+            dadosAgrupados[chaveHora] = { total: 0, count: 0, max: 0 };
+        }
+
+        const valor = parseFloat(registro[chaveMetrica]);
+        
+        dadosAgrupados[chaveHora].total += valor;
+        dadosAgrupados[chaveHora].count += 1;
+        
+        if (valor > dadosAgrupados[chaveHora].max) {
+            dadosAgrupados[chaveHora].max = valor;
+        }
+    });
+
+    const arrayResultado = Object.keys(dadosAgrupados).map(hora => {
+        const dados = dadosAgrupados[hora];
+        return {
+            datetime: hora,
+            media: parseFloat((dados.total / dados.count).toFixed(2)),
+            pico: parseFloat(dados.max.toFixed(2))
+        };
+    });
+
+    return arrayResultado.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
 }
 
 async function agenteAnalise(dadosJSON, uploadedFile) {
@@ -315,19 +516,21 @@ async function gerarRelatorio(req, res) {
 
         const dadosCompletosS3 = await dadosS3PorPeriodo(fkEmpresa, periodoInicio, periodoFim);
 
-        const dadosLimpos = dadosCompletosS3.map(item => {
+        const dadosOtimizados = otimizarDadosParaIA(dadosCompletosS3);
+
+        const dadosLimpos = dadosOtimizados.map(item => {
             const novoItem = { ...item };
 
-            if(!cpuCheck){
+            if (!cpuCheck) {
                 delete novoItem.cpu;
             }
-            if(!ramCheck){
+            if (!ramCheck) {
                 delete novoItem.ram;
             }
-            if(!discoCheck){
+            if (!discoCheck) {
                 delete novoItem.disco;
             }
-            if(!redeCheck){
+            if (!redeCheck) {
                 delete novoItem.bytes_enviados;
                 delete novoItem.bytes_recebidos;
                 delete novoItem.pacotes_perdidos;
@@ -335,6 +538,128 @@ async function gerarRelatorio(req, res) {
 
             return novoItem;
         });
+
+        const dadosGrafico = {};
+        
+        if (dadosCompletosS3.length > 0) {
+            if (cpuCheck) dadosGrafico.cpu = processarDadosParaGrafico(dadosCompletosS3, 'cpu');
+            if (ramCheck) dadosGrafico.ram = processarDadosParaGrafico(dadosCompletosS3, 'ram');
+            if (discoCheck) dadosGrafico.disco = processarDadosParaGrafico(dadosCompletosS3, 'disco');
+        }
+
+        const DIAS_VISIVEIS = 7;
+        const DIAS_PREVISAO = 3;
+
+        const filtrarUltimosDias = (dadosArray) => {
+            if (!dadosArray || dadosArray.length === 0) return [];
+            const ultimaData = new Date(dadosArray[dadosArray.length - 1].datetime);
+            const dataCorte = new Date(ultimaData);
+            dataCorte.setDate(dataCorte.getDate() - DIAS_VISIVEIS);
+
+            return dadosArray.filter(d => new Date(d.datetime) >= dataCorte);
+        };
+
+        if (dadosGrafico.cpu) dadosGrafico.cpu = filtrarUltimosDias(dadosGrafico.cpu);
+        if (dadosGrafico.ram) dadosGrafico.ram = filtrarUltimosDias(dadosGrafico.ram);
+        if (dadosGrafico.disco) dadosGrafico.disco = filtrarUltimosDias(dadosGrafico.disco);
+        
+        const previsoesFuturas = {};
+        
+        let ultimaDataISO = null;
+        if (dadosGrafico.cpu && dadosGrafico.cpu.length > 0) ultimaDataISO = dadosGrafico.cpu[dadosGrafico.cpu.length - 1].datetime;
+        else if (dadosGrafico.ram && dadosGrafico.ram.length > 0) ultimaDataISO = dadosGrafico.ram[dadosGrafico.ram.length - 1].datetime;
+        else if (dadosGrafico.disco && dadosGrafico.disco.length > 0) ultimaDataISO = dadosGrafico.disco[dadosGrafico.disco.length - 1].datetime;
+
+        if (ultimaDataISO) {
+            if (cpuCheck && dadosGrafico.cpu) {
+                previsoesFuturas.cpu = previsaoDados(dadosGrafico.cpu.map(d => d.media), DIAS_PREVISAO, ultimaDataISO);
+            }
+            if (ramCheck && dadosGrafico.ram) {
+                previsoesFuturas.ram = previsaoDados(dadosGrafico.ram.map(d => d.media), DIAS_PREVISAO, ultimaDataISO);
+            }
+            if (discoCheck && dadosGrafico.disco) {
+                previsoesFuturas.disco = previsaoDados(dadosGrafico.disco.map(d => d.media), DIAS_PREVISAO, ultimaDataISO);
+            }
+        }
+
+        let baseLabels = [];
+        if (dadosGrafico.cpu) baseLabels = dadosGrafico.cpu.map(d => d.datetime);
+        else if (dadosGrafico.ram) baseLabels = dadosGrafico.ram.map(d => d.datetime);
+        else if (dadosGrafico.disco) baseLabels = dadosGrafico.disco.map(d => d.datetime);
+
+        let graficosHTML = "";
+        let scriptsChartJS = "";
+
+        const labelsHistorico = baseLabels.map(isoDate => {
+            const d = new Date(isoDate);
+            return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' + 
+                   d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        });
+
+        const algumaPrevisao = previsoesFuturas.cpu || previsoesFuturas.ram || previsoesFuturas.disco;
+        const labelsFuturo = algumaPrevisao ? algumaPrevisao.map(p => p.label) : [];
+        const labelsTotal = [...labelsHistorico, ...labelsFuturo];
+
+
+        if (cpuCheck && dadosGrafico.cpu) {
+            const histData = dadosGrafico.cpu.map(d => d.media); 
+            const prevData = previsoesFuturas.cpu.map(p => p.value);
+
+            const histAjustado = [...histData, ...new Array(labelsFuturo.length).fill(null)];
+            const ultimoValor = histData[histData.length - 1];
+            const prevAjustado = [...new Array(labelsHistorico.length - 1).fill(null), ultimoValor, ...prevData];
+
+            const graficoCPU = gerarGraficoComponente(
+                'chartCpu',
+                'Monitoramento e Previsão de CPU (Média Horária)',
+                labelsTotal,
+                histAjustado,
+                prevAjustado,
+                '#2196F3'
+            );
+            graficosHTML += graficoCPU.html;
+            scriptsChartJS += graficoCPU.script;
+        }
+
+        if (ramCheck && dadosGrafico.ram) {
+            const histData = dadosGrafico.ram.map(d => d.media);
+            const prevData = previsoesFuturas.ram.map(p => p.value);
+
+            const histAjustado = [...histData, ...new Array(labelsFuturo.length).fill(null)];
+            const ultimoValor = histData[histData.length - 1];
+            const prevAjustado = [...new Array(labelsHistorico.length - 1).fill(null), ultimoValor, ...prevData];
+
+            const graficoRAM = gerarGraficoComponente(
+                'chartRam',
+                'Monitoramento e Previsão de RAM (Média Horária)',
+                labelsTotal,
+                histAjustado,
+                prevAjustado,
+                '#9C27B0'
+            );
+            graficosHTML += graficoRAM.html;
+            scriptsChartJS += graficoRAM.script;
+        }
+
+        if (discoCheck && dadosGrafico.disco) {
+            const histData = dadosGrafico.disco.map(d => d.media);
+            const prevData = previsoesFuturas.disco.map(p => p.value);
+
+            const histAjustado = [...histData, ...new Array(labelsFuturo.length).fill(null)];
+            const ultimoValor = histData[histData.length - 1];
+            const prevAjustado = [...new Array(labelsHistorico.length - 1).fill(null), ultimoValor, ...prevData];
+
+            const graficoDISCO = gerarGraficoComponente(
+                'chartDisco',
+                'Monitoramento e Previsão de Disco (Média Horária)',
+                labelsTotal,
+                histAjustado,
+                prevAjustado,
+                '#ec8815'
+            );
+            graficosHTML += graficoDISCO.html;
+            scriptsChartJS += graficoDISCO.script;
+        }
 
         const componentesParametro = await buscarParametroPorComponente();
 
@@ -364,7 +689,7 @@ async function gerarRelatorio(req, res) {
         textoAnalise = limparTextoIA(textoAnalise);
 
         console.log(textoAnalise)
-        
+
         let textoRecomendacoes = await agenteRecomendacoes(textoAnalise);
         textoRecomendacoes = limparTextoIA(textoRecomendacoes)
 
@@ -569,9 +894,21 @@ async function gerarRelatorio(req, res) {
                 
                 ${relatorioHTML}
 
+                <!-- 2. ÁREA DO GRÁFICO DE PREVISÃO -->
+                <h2>Análise de Tendência e Previsão</h2>
+                <p>O gráfico abaixo apresenta o comportamento histórico recente e a projeção matemática para os próximos dias.</p>
+                
+                ${graficosHTML}
+
                 <div style="margin-top: 50px; font-size: 12px; text-align: center; color: #888;">
                     Relatório gerado automaticamente por BlackAnalyst AI em ${new Date().toLocaleString()}
                 </div>
+
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+                <script>
+                    ${scriptsChartJS}
+                </script>
             </body>
             </html>
         `;
@@ -648,7 +985,7 @@ async function avaliarRelatorio(req, res) {
     const idRelatorio = req.body.idRelatorio;
     const avaliacao = req.body.avaliacao;
 
-    try{
+    try {
         const resultado = await avaliar(idRelatorio, avaliacao)
 
         return res.status(200).json({

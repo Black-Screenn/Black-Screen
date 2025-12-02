@@ -471,11 +471,12 @@
                     star${mediaNotas > 4 && mediaNotas < 5 ? "_half" : ""}
                 </span>
             `
-            hideLoadingRelatorios();
         } catch (error) {
             console.error('Erro ao listar relatórios:', error);
             document.querySelector('.lista').innerHTML = `<p class="error">Falha ao carregar relatórios.</p>`;
             document.getElementById("total_relatorios").innerText = '0';
+        } finally {
+            hideLoadingRelatorios();
         }
     }
 
