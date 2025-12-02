@@ -38,7 +38,7 @@
   height: 95px;
   font-size: 62px !important;
   color: rgb(0, 0, 0);
-  background-color: #ffffff;
+  
   margin: 0;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -129,7 +129,7 @@ h1 {
 }
 
 .material_color_kpi {
-  background-color: rgb(255 0 0 / 79%);
+ 
   color: white;
   width: 95px;
   height: 95px;
@@ -260,7 +260,7 @@ h1 {
 }
 
 .atm_color {
-  background-color: rgba(255, 247, 205, 1);
+  
   width: 95px;
   height: 95px;
   padding: 0;
@@ -352,12 +352,22 @@ h1 {
   align-content: center;
 }
 .iachart-container {
-  background-color: rgba(0, 143, 251, 0.85);
-  border-radius: 12px;
-  align-self: center;
-  justify-self: center;
-  width: 90%;
-  height: 90%;
+    background-image: linear-gradient(to bottom, rgba(0, 143, 251, 0.85), #005a9e);
+    border-radius: 12px;
+    align-self: center;
+    justify-self: center;
+    width: 100%;
+    height: 95%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-around;
+}
+.iachart-container svg{
+    align-self: flex-end;
+    justify-self: flex-end;
+    margin-top: 215px;
+    position: relative;
 }
 
 .container_jira .chart-container::-webkit-scrollbar {
@@ -389,16 +399,16 @@ h1 {
   flex-direction: column;
   align-items: center;
   justify-items: center;
-  font-size: 20px;
-  font-weight: 300;
-  font-style: italic;
 }
 
 .insights-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  color: black;
+      
+    gap: 13px;
+    color:white;
+    margin: 20px;
+    font-size: 25px;
+    font-style: oblique;
+    font-weight: 300;
 }
 
 .insights-container h3 {
@@ -445,14 +455,93 @@ h1 {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0, 140, 255, 0.4);
   background-color: #005a9e;
-  padding: 20px;
+  padding: 30px;
   border-radius: 20px;
-  min-width: 430px;
   position: relative;
   font-size: 30px;
   color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+  max-width: 600px;
+  min-width: 500px;
 }
 
+.modal-content .fechar {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal-content svg {
+  position: absolute;
+  bottom: 20px;
+  right: 30px;
+  width: 120px !important;
+  height: 120px !important;
+  opacity: 0.9;
+  z-index: 1;
+}
+
+.conteudoModal {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  z-index: 2;
+  position: relative;
+}
+
+.divSvg {
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 400;
+    font-style: italic;
+    color: #004076;
+    border-radius: 10px;
+    width: 450px;
+    height: 54px;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.conteudoModal > p {
+  font-size: 28px;
+  font-weight: 700;
+  font-style: oblique;
+  margin: 0;
+  text-align: center;
+  width: 100%;
+}
+
+.chamado-detalhes {
+ display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 470px;
+    font-size: 18px;
+    padding-bottom: 40px;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+}
+
+.chamado-detalhes p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.chamado-detalhes strong {
+  font-weight: 700;
+}
 .fechar {
   position: absolute;
   top: 10px;
@@ -460,36 +549,6 @@ h1 {
   cursor: pointer;
   font-size: 20px;
   font-weight: bold;
-}
-
-.divSvg {
-  background-color: white;
-  display: flex;
-  flex-direction: row;
-  gap: 25px;
-  font-size: 20px;
-  font-weight: 400;
-  font-style: italic;
-  color: #004076;
-  align-items: center;
-  justify-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  width: 430px;
-  margin-top: 13px;
-  height: 50px;
-}
-
-.divSvg svg {
-  width: 30px;
-  height: auto;
-  gap: 20px;
-}
-
-.atms strong {
-  font-size: 28px;
-  font-weight: 700;
-  font-family: "Inter", "Segoe UI", sans-serif;
 }
 
 .graficoBolha {
@@ -521,9 +580,7 @@ h1 {
   justify-items: center;
 }
 
-.apexcharts-datalabel {
-  display: none !important;
-}
+
 .perosna-kpi .icon_kpi svg {
   width: 80px;
   height: 80px;
@@ -596,6 +653,7 @@ h1 {
 
 .container_bottum{
     margin-top: 70px;
+    gap: 25px !important;
 }
 
 .kpi-analitica span{
@@ -614,29 +672,25 @@ h1 {
 }
 
 .kpi-analitica{
-       background-color: rgba(0, 143, 251, 0.85);
+   background-color: rgba(0, 143, 251, 0.85);
     border-radius: 18px;
     display: flex;
-    align-items: baseline;
-    justify-content: flex-start;
-    height: 190px;
-    width: 455px;
-    gap: 22px;
-    padding: 20px 25px;
+    align-items: center;
+    width: 315px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transition: transform 0.3s 
 ease, box-shadow 0.3s 
 ease, background-color 0.3s 
 ease;
-    font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-style: oblique;
     flex-direction: row-reverse;
     flex-wrap: nowrap;
 }
 
 .kpi-analitica:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20pxrgba(0, 143, 251, 0.85);;
-  background-color: rgba(0, 143, 251, 0.85);
+   transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 140, 255, 0.4);
+  background-color: #005a9e;
 }
 
 
@@ -644,16 +698,16 @@ ease;
    display: flex;
     flex-direction: column;
     align-items: stretch;
-    font-size: 40px;
+    
     font-weight: 300;   
     font-style: italic;
 }
 
-.metric-info .classCompontes_analitica_cpu{
+.metric-info .classCompontes-analitica-cpu{
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    font-size: 40px;
+    
     font-weight: 300;   
     font-style: italic;  
 }
@@ -661,16 +715,31 @@ ease;
      display: flex;
     flex-direction: column;
     align-items: stretch;
-    font-size: 40px;
+    
     font-weight: 300;   
     font-style: italic;  
 }
 
+.metric-info .classComponentes-analitica-disco{
+     display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    
+    font-weight: 300;   
+    font-style: italic;  
+}
 .infoMetrica_KPI{
   display: flex;
     flex-direction: column;
     align-items: stretch;
     flex-wrap: nowrap;
+    font-size: 35px;
+    
 
 
 }
+
+
+ #chart {
+    border-radius: 50px !important;
+ }
