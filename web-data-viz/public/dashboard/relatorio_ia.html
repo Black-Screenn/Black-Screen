@@ -125,23 +125,9 @@
                         <h3>Score Médio de Relatórios</h3>
                         <div class="score">
                             <h1 id="numero_score">4.8</h1>
-                            <p class="relatorios_bons">
+                            <p class="relatorios_bons" id="nota_relatorios">
 
-                                <span class="material-symbols-outlined fill">
-                                    star
-                                </span>
-                                <span class="material-symbols-outlined fill">
-                                    star
-                                </span>
-                                <span class="material-symbols-outlined">
-                                    star_half
-                                </span>
-                                <span class="material-symbols-outlined">
-                                    star
-                                </span>
-                                <span class="material-symbols-outlined">
-                                    star
-                                </span>
+                    
                             </p>
                         </div>
                     </div>
@@ -287,6 +273,12 @@
         </div>
     </div>
 
+    <div class="loader-bg" id="loader-relatorios">
+        <div class="loader">
+            
+        </div>
+    </div>
+
     <div id="loaderOverlay" class="loader-overlay" style="display: none;">
         <div class="loaderBody">
             <div class="loading-bar"></div>
@@ -298,10 +290,27 @@
         </div>
     </div>
 
+    <div id="toast_container"></div>
 </body>
 
 
 </html>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+        }
+    });
+</script>
 
 <script>
 
@@ -368,7 +377,23 @@
                     <p>${(r.Conteudo_Texto ? (r.Conteudo_Texto.substr(0, 80) + '...') : '')}</p>
                 </div>
                 <div class="nota">
-                    <p class="material-symbols-outlined nota_star">${nota}</p>
+                    <p class="material-symbols-outlined nota_star">
+                        <span class="material-symbols-outlined ${r.Avaliacao >= 1 ? "ativo" : ""}" onclick="avaliarRelatorio(${r.Id_Relatorio}, 1)">
+                            star
+                        </span>
+                        <span class="material-symbols-outlined ${r.Avaliacao >= 2 ? "ativo" : ""}" onclick="avaliarRelatorio(${r.Id_Relatorio}, 2)">
+                            star
+                        </span>
+                        <span class="material-symbols-outlined ${r.Avaliacao >= 3 ? "ativo" : ""}" onclick="avaliarRelatorio(${r.Id_Relatorio}, 3)">
+                            star
+                        </span>
+                        <span class="material-symbols-outlined ${r.Avaliacao >= 4 ? "ativo" : ""}" onclick="avaliarRelatorio(${r.Id_Relatorio}, 4)">
+                            star
+                        </span>
+                        <span class="material-symbols-outlined ${r.Avaliacao >= 5 ? "ativo" : ""}" onclick="avaliarRelatorio(${r.Id_Relatorio}, 5)">
+                            star
+                        </span>
+                    </p>
                 </div>
                 <button onclick="abrirRelatorio(${r.Id_Relatorio})">
                     Visualizar
@@ -395,6 +420,7 @@
 
     async function buscarRelatorios() {
         try {
+            showLoadingRelatorios();
             const resp = await fetch('/relatorio/listar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -415,11 +441,37 @@
             const rows = Array.isArray(dados) && dados.length > 0 && Array.isArray(dados[0]) ? dados[0] : dados;
 
             window._relatoriosRows = rows;
-            renderRelatorios(rows);
+            await renderRelatorios(rows);
 
             const totalEl = document.getElementById("total_relatorios");
             totalEl.innerText = String(rows.length || 0);
 
+            const totalNota = document.getElementById("numero_score")
+            const notas = rows.map(r => Number(r["Avaliacao"]));
+            console.log(notas)
+            const somaNotas = notas.reduce((acumulador, valorAtual) => acumulador + valorAtual, 0);
+            const mediaNotas = somaNotas / rows.length;
+            totalNota.innerText = mediaNotas.toFixed(2)
+
+            const starNota = document.getElementById("nota_relatorios");
+            starNota.innerHTML = `
+                <span class="material-symbols-outlined ${mediaNotas >= 0.1 ? "fill" : ""}">
+                    star${mediaNotas > 0 && mediaNotas < 1 ? "_half" : ""}
+                </span>
+                <span class="material-symbols-outlined ${mediaNotas >= 1.1 ? "fill" : ""}">
+                    star${mediaNotas > 1 && mediaNotas < 2 ? "_half" : ""}
+                </span>
+                <span class="material-symbols-outlined ${mediaNotas >= 2.1 ? "fill" : ""}">
+                    star${mediaNotas > 2 && mediaNotas < 3 ? "_half" : ""}
+                </span>
+                <span class="material-symbols-outlined ${mediaNotas >= 3.1 ? "fill" : ""}">
+                    star${mediaNotas > 3 && mediaNotas < 4 ? "_half" : ""}
+                </span>
+                <span class="material-symbols-outlined ${mediaNotas >= 4.1 ? "fill" : ""}">
+                    star${mediaNotas > 4 && mediaNotas < 5 ? "_half" : ""}
+                </span>
+            `
+            hideLoadingRelatorios();
         } catch (error) {
             console.error('Erro ao listar relatórios:', error);
             document.querySelector('.lista').innerHTML = `<p class="error">Falha ao carregar relatórios.</p>`;
@@ -474,8 +526,13 @@
         try {
             fecharModal();
             showLoading();
+
             const periodoInicio = document.getElementById("data_inicio").value
             const periodoFim = document.getElementById("data_fim").value
+            const cpuCheck = document.getElementById("cpu").checked
+            const ramCheck = document.getElementById("ram").checked
+            const discoCheck = document.getElementById("disco").checked
+            const redeCheck = document.getElementById("rede").checked
 
             console.log("Solicitando Relatório...");
             const response = await fetch('/relatorio/gerar', {
@@ -484,7 +541,11 @@
                 body: JSON.stringify({ 
                     fkEmpresa: fkEmpresa,
                     periodoInicio: periodoInicio,
-                    periodoFim: periodoFim
+                    periodoFim: periodoFim,
+                    cpu: cpuCheck,
+                    ram: ramCheck,
+                    disco: discoCheck,
+                    rede: redeCheck
                 })
             });
 
@@ -493,7 +554,10 @@
 
             if (tipoConteudo && tipoConteudo.includes('application/json')) {
                 const erroJson = await response.json();
-                alert("ERRO DO SERVIDOR: " + JSON.stringify(erroJson));
+                Toast.fire({
+                    icon: "error",
+                    title: "Erro ao gerar. Tente novamente."
+                });
                 return;
             }
 
@@ -502,17 +566,20 @@
             }
 
             
-            buscarRelatorios();
-
+            
             const blob = await response.blob();
             const arquivoPdf = new Blob([blob], { type: 'application/pdf' });
-
+            
             const fileURL = window.URL.createObjectURL(arquivoPdf);
+            await buscarRelatorios();
+            Toast.fire({
+                icon: "success",
+                title: "Relatório gerado com sucesso!"
+            });
             window.open(fileURL, '_blank');
 
         } catch (error) {
             console.error("Erro:", error);
-            alert("Falha: " + error.message);
         } finally {
             hideLoading();
         }
@@ -527,4 +594,53 @@
         const overlay = document.getElementById('loaderOverlay');
         if (overlay) overlay.style.display = 'none';
     }
+
+    function showLoadingRelatorios(){
+        const loader = document.getElementById("loader-relatorios")
+        loader.style.display = "flex"
+    }
+    
+    function hideLoadingRelatorios(){
+        const loader = document.getElementById("loader-relatorios")
+        loader.style.display = "none"
+    }
+
+    async function avaliarRelatorio(idRelatorio, avaliacao) {
+        try{
+            showLoadingRelatorios();
+
+            const resposta = await fetch("/relatorio/avaliar", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    idRelatorio: idRelatorio,
+                    avaliacao: avaliacao
+                })
+            });
+
+            if (!resposta.ok) {
+                const textoErro = await resposta.text();
+                throw new Error(textoErro || "Erro desconhecido no servidor");
+            }
+
+            await buscarRelatorios();
+            
+            hideLoadingRelatorios();
+            
+            Toast.fire({
+                icon: "success",
+                title: "Avaliação salva com sucesso!"
+            });
+        } catch (error) {
+            console.error("Erro na avaliação:", error);
+            Toast.fire({
+                icon: "error",
+                title: "Erro ao avaliar. Tente novamente."
+            });
+        }
+    }
+
+    setTimeout(async () => {
+        await buscarRelatorios();
+    }, 1000);
 </script>

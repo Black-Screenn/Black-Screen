@@ -6,7 +6,7 @@ function cadastrar(link, empresa, texto, periodoInicio, periodoFim) {
 }
 
 function listar(empresa) {
-    var instrucaoSql = `SELECT * FROM Relatorio WHERE Fk_Empresa = ${empresa};`;
+    var instrucaoSql = `SELECT * FROM Relatorio WHERE Fk_Empresa = ${empresa} ORDER BY Id_Relatorio DESC;`;
 
     return database.executar(instrucaoSql);
 }
@@ -23,8 +23,22 @@ function buscarPorId(idRelatorio) {
     return database.executar(instrucaoSql);
 }
 
+function avaliar(idRelatorio, avaliacao) {
+    console.log(`[Relatorio Model] Avaliando Relatório por ID: ${idRelatorio}`);
+    
+    const instrucaoSql = `
+        UPDATE Relatorio 
+        SET Avaliacao = ${avaliacao}
+        WHERE Id_Relatorio = ${idRelatorio};
+    `;
+
+    console.log("Executando a instrução SQL: \n" + instrucaoSql);
+    return database.executar(instrucaoSql);
+}
+
 module.exports = {
   cadastrar,
   listar,
-  buscarPorId
+  buscarPorId,
+  avaliar
 };
