@@ -4,7 +4,7 @@
 }
 
 .perosna-kpi {
-  background-color: #004076;
+  background-color: rgba(0, 143, 251, 0.85);;
   border-radius: 18px;
   display: flex;
   align-items: center;
@@ -352,8 +352,10 @@ h1 {
   align-content: center;
 }
 .iachart-container {
-  background-color: #f5f5f5f5;
+  background-color: rgba(0, 143, 251, 0.85);
   border-radius: 12px;
+  align-self: center;
+  justify-self: center;
   width: 90%;
   height: 90%;
 }
@@ -406,7 +408,7 @@ h1 {
 }
 
 .card-jira {
-  background-color: #004076;
+  background-color: rgba(0, 143, 251, 0.85);
   padding: 15px;
   border-radius: 8px;
   cursor: pointer;
@@ -592,8 +594,83 @@ h1 {
   min-height: 50px !important;
 }
 
-
-
 .container_bottum{
     margin-top: 70px;
+}
+
+.kpi-analitica span{
+    background-color: rgba(255, 255, 255, 0);
+    width: 150px;
+    height: 150px;
+    border-radius: 20px;
+    align-self: flex-end;
+
+}
+.kpi-analitica span svg {
+    justify-self: center;
+    align-self: center;
+    width: 100%;
+    height: 100%;
+}
+
+.kpi-analitica{
+       background-color: rgba(0, 143, 251, 0.85);
+    border-radius: 18px;
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    height: 190px;
+    width: 455px;
+    gap: 22px;
+    padding: 20px 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s 
+ease, box-shadow 0.3s 
+ease, background-color 0.3s 
+ease;
+    font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    flex-direction: row-reverse;
+    flex-wrap: nowrap;
+}
+
+.kpi-analitica:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20pxrgba(0, 143, 251, 0.85);;
+  background-color: rgba(0, 143, 251, 0.85);
+}
+
+
+.metric-info .classCompontes-analitica{
+   display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    font-size: 40px;
+    font-weight: 300;   
+    font-style: italic;
+}
+
+.metric-info .classCompontes_analitica_cpu{
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    font-size: 40px;
+    font-weight: 300;   
+    font-style: italic;  
+}
+.metric-info .classCompontes-analitica-rede{
+     display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    font-size: 40px;
+    font-weight: 300;   
+    font-style: italic;  
+}
+
+.infoMetrica_KPI{
+  display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+
+
 }
