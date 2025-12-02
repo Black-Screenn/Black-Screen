@@ -12,6 +12,7 @@ router.get(
 router.get("/buscarchamado", caixaController.buscarChamado);
 router.post("/buscarchamado", caixaController.buscarChamado);
 router.get("/listarinfo", caixaController.listarInfo);
+
 router.get("/localizacao/:mac", caixaController.buscarPorMac);
 router.post("/cadastrar", function (req, res) {
   caixaController.cadastrar(req, res);
