@@ -296,8 +296,14 @@
             <div class="modal-ia-content">
                 <div class="modal-ia-header">
                     <div>
-                        <h2 id="modal-ia-title">Estado Detalhes</h2>
-                        <p>Análise Preditiva e Monitoramento de Hardware</p>
+                        <h2 id="modal-ia-title">Tendência e Previsão (24h)</h2>
+                        <p>Análise baseada nos últimos 7 dias</p>
+                    </div>
+                    <div style="margin-left: auto; margin-right: 20px;">
+                        <select id="select-metric" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;" onchange="updateIaChart()">
+                            <option value="cpu">CPU</option>
+                            <option value="ram">RAM</option>
+                        </select>
                     </div>
                     <button class="btn-close-ia material-symbols-outlined" onclick="closeIaModal()">close</button>
                 </div>
@@ -490,37 +496,35 @@
                             id: idMap, 
                             value: 0, 
                             name: uf, 
-                            processos: [],
+                            maquinas: [],
                             total: 0 
                         };
                     }
                     
                     dadosPorEstado[idMap].value += 1; // Contagem de máquinas
-                    // d.dados contém o JSON do bucket
-                    dadosPorEstado[idMap].processos.push(d.dados);
+                    dadosPorEstado[idMap].maquinas.push(d.dados);
                 });
 
                 // Converter para array
                 return Object.values(dadosPorEstado).map(estado => {
-                    // Encontrar processo com maior consumo de CPU neste estado
-                    let maxCpu = 0;
-                    let maxProcess = "N/A";
+                    // Calcular média de CPU para o estado
+                    let totalCpu = 0;
+                    let count = 0;
                     
-                    estado.processos.forEach(json => {
-                        // Assumindo que o JSON tem uma lista de processos ou métricas
-                        // Se o JSON for direto { cpu: 90, processo: 'java' }
-                        const cpu = parseFloat(json.uso_cpu || json.cpu || 0);
-                        if (cpu > maxCpu) {
-                            maxCpu = cpu;
-                            maxProcess = json.processo || json.nome || 'N/A';
-                        }
+                    estado.maquinas.forEach(json => {
+                        // Estrutura: json.kpis.daily_median.cpu
+                        const cpu = parseFloat(json.kpis?.daily_median?.cpu || 0);
+                        totalCpu += cpu;
+                        count++;
                     });
+
+                    const avgCpu = count > 0 ? (totalCpu / count).toFixed(1) : 0;
 
                     return {
                         id: estado.id,
                         value: estado.value, // Quantidade de registros
                         name: estado.name,
-                        custom_max: maxProcess,
+                        avg_cpu: avgCpu,
                         total: estado.value // Total de registros
                     };
                 });
@@ -548,7 +552,7 @@
             } else {
                 // Fallback se não tiver dados
                 brazilData = [
-                    { id: "BR.SP", value: 0, name: "São Paulo", custom_max: "N/A", total: 0 }
+                    { id: "BR.SP", value: 0, name: "São Paulo", avg_cpu: 0, total: 0 }
                 ];
             }
 
@@ -611,7 +615,7 @@
             
             series.tooltip().useHtml(true);
             series.tooltip().format(function() {
-                return `Máquinas: <b>${this.value}</b><br/>Maior Consumo: <b>${this.getData("custom_max")}</b>`;
+                return `Máquinas: <b>${this.value}</b><br/>Média CPU: <b>${this.getData("avg_cpu")}%</b>`;
             });
 
             mapAnyChart.listen("pointClick", function(e) {
@@ -627,9 +631,11 @@
         }
 
         // --- 4. Lógica do Novo Modal IA ---
+        let currentEstadoData = [];
+
         async function openIaModal(estadoNome) {
             const modal = document.getElementById('modal-ia');
-            document.getElementById('modal-ia-title').innerText = `Análise: ${estadoNome}`;
+            document.getElementById('modal-ia-title').innerText = `Tendência e Previsão (24h) - ${estadoNome}`;
             
             // Loading state
             document.getElementById('ia-cpu').innerText = "...";
@@ -651,15 +657,9 @@
                 }
             }
 
-            // Filtrar dados pelo estado selecionado (estadoNome vem do mapa, ex: "São Paulo")
-            // O backend retorna 'uf' (ex: SP)
-            
+            // Filtrar dados pelo estado selecionado
             const dadosEstado = dados.filter(d => {
                 const uf = d.uf || '';
-                // Mapeamento simples: se estadoNome contém a UF ou vice-versa
-                // Ex: estadoNome="São Paulo", uf="SP" -> precisamos de um mapa melhor ou assumir que o mapa retorna nomes completos
-                // O AnyChart retorna nomes completos (São Paulo). O banco retorna UF (SP).
-                // Vou fazer um match simples
                 const mapUf = {
                     "Acre": "AC", "Alagoas": "AL", "Amapá": "AP", "Amazonas": "AM", "Bahia": "BA", "Ceará": "CE", "Distrito Federal": "DF", "Espírito Santo": "ES", "Goiás": "GO", "Maranhão": "MA", "Mato Grosso": "MT", "Mato Grosso do Sul": "MS", "Minas Gerais": "MG", "Pará": "PA", "Paraíba": "PB", "Paraná": "PR", "Pernambuco": "PE", "Piauí": "PI", "Rio de Janeiro": "RJ", "Rio Grande do Norte": "RN", "Rio Grande do Sul": "RS", "Rondônia": "RO", "Roraima": "RR", "Santa Catarina": "SC", "São Paulo": "SP", "Sergipe": "SE", "Tocantins": "TO"
                 };
@@ -667,6 +667,8 @@
                 const ufEsperada = mapUf[estadoNome] || estadoNome;
                 return uf === ufEsperada;
             });
+
+            currentEstadoData = dadosEstado;
 
             if (dadosEstado.length === 0) {
                  document.getElementById('process-table-body').innerHTML = '<tr><td colspan="4">Nenhum dado encontrado para esta região.</td></tr>';
@@ -677,133 +679,153 @@
             // Calcular KPIs reais baseados nos dados filtrados
             let totalCpu = 0;
             let totalRam = 0;
+            let totalDisco = 0;
             let count = 0;
             
             dadosEstado.forEach(d => {
                 const json = d.dados;
-                totalCpu += parseFloat(json.uso_cpu || json.cpu || 0);
-                totalRam += parseFloat(json.uso_ram || json.ram || 0);
+                totalCpu += parseFloat(json.kpis?.daily_median?.cpu || 0);
+                totalRam += parseFloat(json.kpis?.daily_median?.ram || 0);
+                totalDisco += parseFloat(json.kpis?.daily_median?.disco || 0);
                 count++;
             });
             
             const mediaCpu = count > 0 ? (totalCpu / count).toFixed(1) : 0;
             const mediaRam = count > 0 ? (totalRam / count).toFixed(1) : 0;
+            const mediaDisco = count > 0 ? (totalDisco / count).toFixed(1) : 0;
 
             document.getElementById('ia-cpu').innerText = mediaCpu + "%";
-            document.getElementById('ia-ram').innerText = mediaRam + " GB"; 
+            document.getElementById('ia-ram').innerText = mediaRam + "%"; 
+            document.getElementById('ia-disk').innerText = mediaDisco + "%";
+            document.getElementById('ia-net').innerText = "N/A"; 
             
             const tbody = document.getElementById('process-table-body');
-            tbody.innerHTML = '';
+            tbody.innerHTML = '<tr><td colspan="4">Detalhes de processos não disponíveis nos dados coletados.</td></tr>';
 
-            // Exibe os top 10 processos por uso de CPU (pegando de todos os JSONs da região)
-            // Assumindo que cada JSON tem um campo 'processos' que é uma lista, OU que o JSON é um processo único
-            // Se for processo único, já temos a lista em dadosEstado
-            
-            const listaProcessos = [];
-            dadosEstado.forEach(d => {
-                const json = d.dados;
-                // Se o JSON tiver lista de processos
-                if (json.processos && Array.isArray(json.processos)) {
-                    listaProcessos.push(...json.processos);
-                } else {
-                    // Se o JSON for o próprio processo
-                    listaProcessos.push(json);
-                }
-            });
+            // Resetar select para CPU
+            const select = document.getElementById('select-metric');
+            if(select) select.value = 'cpu';
 
-            listaProcessos
-                .sort((a, b) => parseFloat(b.uso_cpu || b.cpu || 0) - parseFloat(a.uso_cpu || a.cpu || 0))
-                .slice(0, 10)
-                .forEach(p => {
-                    const nome = p.processo || p.nome || 'Desconhecido';
-                    const pid = p.pid || p.id || 'N/A';
-                    const cpu = p.uso_cpu || p.cpu || '0';
-                    
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${nome}</td>
-                        <td>${pid}</td>
-                        <td><span class="badge ${parseFloat(cpu) > 10 ? 'high' : 'ok'}">${cpu}%</span></td>
-                        <td>Running</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+            updateIaChart();
+        }
+
+        function updateIaChart() {
+            const metric = document.getElementById('select-metric').value; // 'cpu' or 'ram'
+            const dadosEstado = currentEstadoData;
+
+            if (!dadosEstado || dadosEstado.length === 0) return;
 
             // Preparar dados para o gráfico (Histórico vs Predição)
-            // Agrupar dados por data
-            // Assumindo que d.data_arquivo existe (veio do backend)
-            const dadosPorData = {};
+            // Agrupar dados por timestamp
+            const aggReal = {};
+            const aggPred = {};
+
             dadosEstado.forEach(d => {
-                if (d.data_arquivo) {
-                    if (!dadosPorData[d.data_arquivo]) dadosPorData[d.data_arquivo] = [];
-                    dadosPorData[d.data_arquivo].push(d.dados);
+                const json = d.dados;
+                // Acessa chartData.cpu ou chartData.ram dinamicamente
+                const metricData = json.chartData?.[metric];
+                
+                if (metricData) {
+                    if (metricData.real) {
+                        metricData.real.forEach(point => {
+                            if (!aggReal[point.x]) aggReal[point.x] = { sum: 0, count: 0 };
+                            aggReal[point.x].sum += point.y;
+                            aggReal[point.x].count++;
+                        });
+                    }
+                    if (metricData.prediction) {
+                        metricData.prediction.forEach(point => {
+                            if (!aggPred[point.x]) aggPred[point.x] = { sum: 0, count: 0 };
+                            aggPred[point.x].sum += point.y;
+                            aggPred[point.x].count++;
+                        });
+                    }
                 }
             });
-            
-            // Ordenar datas
-            const datasOrdenadas = Object.keys(dadosPorData).sort();
-            
-            // Calcular média de CPU por dia para o histórico
-            const historicoData = [];
-            const historicoLabels = [];
-            
-            datasOrdenadas.forEach(data => {
-                const lista = dadosPorData[data];
-                const soma = lista.reduce((acc, item) => acc + parseFloat(item.uso_cpu || item.cpu || 0), 0);
-                const media = soma / lista.length;
-                historicoData.push(media.toFixed(1));
-                historicoLabels.push(data.split('-').slice(1).join('/')); // MM/DD
-            });
 
-            // Simular predição (já que não temos modelo real aqui, vamos projetar a média + variação)
-            // Se o JSON tiver campo 'predicao', usar ele.
-            // Vou criar uma série de predição que começa no último ponto do histórico
-            const predicaoData = new Array(historicoData.length).fill(null); // Null para alinhar com histórico
-            
-            // Adicionar ponto de conexão
-            if (historicoData.length > 0) {
-                const ultimoValor = parseFloat(historicoData[historicoData.length - 1]);
-                predicaoData[historicoData.length - 1] = ultimoValor;
-                
-                // Gerar 3 dias futuros
-                for (let i = 1; i <= 3; i++) {
-                    const valorPrevisto = ultimoValor * (1 + (Math.random() * 0.1 - 0.05)); // Variação +/- 5%
-                    predicaoData.push(valorPrevisto.toFixed(1));
-                    
-                    // Adicionar label futura
-                    const ultimaData = new Date(datasOrdenadas[datasOrdenadas.length - 1]);
-                    ultimaData.setDate(ultimaData.getDate() + i);
-                    const dia = String(ultimaData.getDate()).padStart(2, '0');
-                    const mes = String(ultimaData.getMonth() + 1).padStart(2, '0');
-                    historicoLabels.push(`${mes}/${dia}`);
+            // Converter para arrays e ordenar
+            const sortedKeysReal = Object.keys(aggReal).sort();
+            const sortedKeysPred = Object.keys(aggPred).sort();
+
+            const seriesReal = sortedKeysReal.map(k => ({
+                x: k, 
+                y: parseFloat((aggReal[k].sum / aggReal[k].count).toFixed(2))
+            }));
+
+            const seriesPred = sortedKeysPred.map(k => ({
+                x: k,
+                y: parseFloat((aggPred[k].sum / aggPred[k].count).toFixed(2))
+            }));
+
+            // Conectar as linhas: Adiciona o último ponto real ao início da predição para evitar buracos
+            let lastRealPoint = null;
+            if (seriesReal.length > 0) {
+                lastRealPoint = seriesReal[seriesReal.length - 1];
+                if (seriesPred.length > 0) {
+                    seriesPred.unshift(lastRealPoint);
                 }
             }
 
-            renderChart(historicoLabels, historicoData, predicaoData);
+            renderChart(seriesReal, seriesPred, lastRealPoint ? lastRealPoint.x : null);
         }
 
         function closeIaModal() {
             document.getElementById('modal-ia').style.display = 'none';
         }
 
-        function renderChart(labels, historico, predicao) {
+        function renderChart(realData, predData, nowTimestamp) {
             if(chartInstance) chartInstance.destroy();
 
             var options = {
-                chart: { type: 'line', height: 300, toolbar: {show: false} },
+                chart: { 
+                    type: 'line', 
+                    height: 300, 
+                    toolbar: {show: false},
+                    animations: { enabled: false }
+                },
                 series: [
-                    { name: 'Uso Real (Histórico)', data: historico },
-                    { name: 'Predição', data: predicao }
+                    { name: 'Real (Histórico)', type: 'area', data: realData },
+                    { name: 'Previsão (IA)', type: 'line', data: predData }
                 ],
-                colors: ['#2563eb', '#ff9800'], // Azul sólido, Laranja (será pontilhado)
+                colors: ['#2563eb', '#ff9800'], 
+                fill: {
+                    type: ['gradient', 'solid'],
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.7,
+                        opacityTo: 0.3,
+                        stops: [0, 90, 100]
+                    }
+                },
                 stroke: { 
                     curve: 'smooth',
-                    width: [3, 3],
-                    dashArray: [0, 5] // 0 = solido, 5 = pontilhado
+                    width: [2, 2],
+                    dashArray: [0, 5] 
                 },
-                xaxis: { categories: labels },
+                xaxis: { 
+                    type: 'datetime',
+                    labels: { datetimeFormatter: { year: 'yyyy', month: 'MMM \'yy', day: 'dd MMM', hour: 'HH:mm' } },
+                    tooltip: { enabled: false }
+                },
+                annotations: {
+                    xaxis: nowTimestamp ? [{
+                        x: nowTimestamp,
+                        borderColor: '#999',
+                        label: {
+                            style: {
+                                color: '#fff',
+                                background: '#775DD0',
+                            },
+                            text: 'Agora',
+                            orientation: 'vertical'
+                        }
+                    }] : []
+                },
                 dataLabels: { enabled: false },
-                markers: { size: 4 }
+                markers: { size: 0 },
+                tooltip: {
+                    x: { format: 'dd MMM HH:mm' }
+                }
             };
 
             chartInstance = new ApexCharts(document.querySelector("#chart-regression"), options);

@@ -77,6 +77,13 @@ async function buscarDadosDashboard(req, res) {
                 const bodyContents = await streamToString(getResponse.Body);
                 const jsonContent = JSON.parse(bodyContents);
 
+                // DEBUG: Logar a estrutura do primeiro arquivo lido para entender os campos
+                if (resultados.length === 0) {
+                    console.log("--- DEBUG ESTRUTURA JSON S3 ---");
+                    console.log(JSON.stringify(jsonContent, null, 2));
+                    console.log("-------------------------------");
+                }
+
                 // Cruzar com dados do banco
                 const infoBanco = mapaCaixas[mac] || { uf: 'N/A', cidade: 'Desconhecido' };
 
