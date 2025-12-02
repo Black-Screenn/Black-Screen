@@ -331,7 +331,7 @@
             return;
         }
 
-        // agrupar somas e contagens por região SEM usar filter
+        // agrupar somas e contagens por bairro SEM usar filter
         const porBairro = {};
 
         for (let i = 0; i < dadosBrutos.length; i++) {
@@ -451,8 +451,6 @@
             soma += Number(item.disponibilidade_geral);
             quantidade ++;
         }
-
-        console.log(soma + " " + quantidade)
 
         const media = soma / quantidade;
 
@@ -877,8 +875,6 @@
             comentarioRelatorio.innerHTML = comentario;
         }
 
-        // intro_graficos.innerHTML = 'Gráfico indicador do indice de disponibilidade dos processos';
-        var marcados = 0;
         if (check.checked) {
             graficoRelatorio.style.display = "unset";
             criarGraficoTendenciasRelatorio(); 
