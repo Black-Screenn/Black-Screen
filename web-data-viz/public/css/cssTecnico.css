@@ -282,3 +282,49 @@ a {
 .fechar-ajuda:hover {
     color: #000;
 }
+
+/* cssTecnico.css - Estilos técnicos para pesquisa avançada */
+
+.pesquisa-div {
+    position: relative;
+}
+
+.lista-resultados {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.resultado-caixa {
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.resultado-caixa:hover {
+    background: #f8f9ff;
+}
+
+.resultado-caixa:last-child {
+    border-bottom: none;
+}
+
+.resultado-caixa small {
+    color: #666;
+    font-size: 12px;
+}
+
+#pesquisa-caixa {
+    padding-right: 40px !important;
+}

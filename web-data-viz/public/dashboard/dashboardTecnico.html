@@ -13,6 +13,7 @@
         <link rel="stylesheet" href="./../css/dashboards.css" />
         <link rel="stylesheet" href="./../css/style.css" />
         <link rel="stylesheet" href="./../css/dashboardHome.css" />
+        <link rel="stylesheet" href="./../css/cssTecnico.css" />
 
         <link rel="preconnect" href="https://fonts.gstatic.com" />
         <link
@@ -113,12 +114,28 @@
                 <div class="top">
                     <div class="pesquisa-filtros">
                         <div class="pesquisa-div">
-                            <select id="select-caixa">
-                                <option value="">Selecione um caixa</option>
-                            </select>
-                            <span class="material-symbols-outlined"
-                                >arrow_drop_down</span
+                            <input
+                                type="text"
+                                id="pesquisa-caixa"
+                                placeholder="Pesquisar caixa..."
+                                autocomplete="off"
+                            />
+                            <span
+                                class="material-symbols-outlined"
+                                style="
+                                    position: absolute;
+                                    right: 12px;
+                                    top: 50%;
+                                    transform: translateY(-50%);
+                                    pointer-events: none;
+                                    opacity: 0.7;
+                                "
+                                >search</span
                             >
+                            <div
+                                id="lista-caixas"
+                                class="lista-resultados"
+                            ></div>
                         </div>
                     </div>
                 </div>
@@ -136,11 +153,9 @@
         ></script>
 
         <script>
-            // Nome do usuário
             document.getElementById("b_usuario").innerHTML =
                 sessionStorage.NOME_USUARIO || "usuário";
 
-            // Configuração do mapa Leaflet (mapa principal)
             const icon = L.icon({
                 iconUrl: "../assets/imgs/marker.png",
                 shadowUrl: "../assets/imgs/marker_shadow.png",
@@ -162,10 +177,11 @@
             }).addTo(map);
 
             const fkEmpresa = sessionStorage.getItem("FK_EMPRESA");
-            const selectCaixa = document.getElementById("select-caixa");
+            const inputPesquisa = document.getElementById("pesquisa-caixa");
+            const listaResultados = document.getElementById("lista-caixas");
             let allCaixas = [];
 
-            // Carrega dados das caixas e popula o select
+            // Carrega dados das caixas
             fetch("/caixas/listar", {
                 method: "GET",
                 headers: {
@@ -179,15 +195,6 @@
                         (c) => c.Latitude != null && c.Longitude != null,
                     );
 
-                    // Popula o select com as caixas
-                    allCaixas.forEach((c) => {
-                        const option = document.createElement("option");
-                        option.value = c.Macaddress;
-                        option.textContent = `${c.codigoCaixa} - ${c.Logradouro}, ${c.Bairro}`;
-                        selectCaixa.appendChild(option);
-                    });
-
-                    // Cria markers no mapa
                     const group = L.featureGroup();
                     allCaixas.forEach((c) => {
                         const marker = L.marker([c.Latitude, c.Longitude], {
@@ -221,10 +228,50 @@
                     console.error("Falha ao carregar /caixas:", err),
                 );
 
-            // Evento do select - navega para a caixa selecionada
-            selectCaixa.addEventListener("change", function () {
-                if (this.value) {
-                    window.location.href = `../dashboardHercules/caixa.html?id=${this.value}`;
+            inputPesquisa.addEventListener("input", function () {
+                const termo = this.value.toLowerCase().trim();
+                listaResultados.innerHTML = "";
+
+                if (termo.length < 2) {
+                    listaResultados.style.display = "none";
+                    return;
+                }
+
+                const resultados = allCaixas.filter(
+                    (c) =>
+                        c.codigoCaixa.toLowerCase().includes(termo) ||
+                        c.Logradouro.toLowerCase().includes(termo) ||
+                        c.Bairro.toLowerCase().includes(termo) ||
+                        c.Cidade.toLowerCase().includes(termo),
+                );
+
+                if (resultados.length > 0) {
+                    resultados.slice(0, 8).forEach((c) => {
+                        const div = document.createElement("div");
+                        div.className = "resultado-caixa";
+                        div.innerHTML = `
+                        <div>
+                            <strong>${c.codigoCaixa}</strong><br>
+                            <small>${c.Logradouro}, ${c.Bairro}</small>
+                        </div>
+                    `;
+                        div.onclick = () => {
+                            window.location.href = `../dashboardHercules/caixa.html?id=${c.Macaddress}`;
+                        };
+                        listaResultados.appendChild(div);
+                    });
+                    listaResultados.style.display = "block";
+                } else {
+                    listaResultados.style.display = "none";
+                }
+            });
+
+            document.addEventListener("click", function (e) {
+                if (
+                    !inputPesquisa.contains(e.target) &&
+                    !listaResultados.contains(e.target)
+                ) {
+                    listaResultados.style.display = "none";
                 }
             });
         </script>
