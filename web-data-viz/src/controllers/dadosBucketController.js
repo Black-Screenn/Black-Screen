@@ -1,6 +1,6 @@
-/*const { S3Client, ListObjectsV2Command, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, ListObjectsV2Command, GetObjectCommand } = require("@aws-sdk/client-s3");
+const caixaModel = require("../models/caixaModel");
 
-let resultadoFinal = [];
 const s3Client = new S3Client({
     region: process.env.AWS_REGION || "us-east-1",
     credentials: {
@@ -18,70 +18,99 @@ const streamToString = (stream) =>
         stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
     });
 
-async function buscarProcessos(req, res) {
-    const bucketName = "client-blackscreen";
-    const prefix = "processado_Maquina/";
+async function buscarDadosDashboard(req, res) {
+    // Estrutura esperada: bucket-client-etl > dashRafa > empresa=1 > ano=2025 > mes=12 > tipo=maquina > MAC.json
+    
+    const bucketName = "bucket-client-etl"; // Ajuste conforme seu bucket real
+    const prefixBase = "dashRafa/empresa=1/"; 
 
     try {
-        console.log("Iniciando busca de arquivos no S3...");
+        console.log(`[S3] Buscando arquivos em ${bucketName}/${prefixBase}...`);
 
+        // 1. Buscar todas as caixas do banco para mapear MAC -> UF
+        const caixas = await caixaModel.listarTodos();
+        const mapaCaixas = {};
+        caixas.forEach(c => {
+            if (c.Macaddress) {
+                mapaCaixas[c.Macaddress.toLowerCase()] = {
+                    uf: c.UF,
+                    cidade: c.Cidade,
+                    bairro: c.Bairro,
+                    id: c.id,
+                    codigo: c.codigoCaixa
+                };
+            }
+        });
 
+        // 2. Listar arquivos no S3
         const listCommand = new ListObjectsV2Command({
             Bucket: bucketName,
-            Prefix: prefix
+            Prefix: prefixBase
         });
 
         const listResponse = await s3Client.send(listCommand);
-        const csvFiles = listResponse.Contents?.filter(f => f.Key.endsWith('.csv')) || [];
+        
+        // Filtrar apenas JSONs de máquinas
+        const jsonFiles = listResponse.Contents?.filter(f => 
+            f.Key.endsWith('.json') && f.Key.includes('tipo=maquina')
+        ) || [];
 
-        if (csvFiles.length === 0) {
+        if (jsonFiles.length === 0) {
+            console.log("[S3] Nenhum arquivo JSON encontrado.");
             return res.json([]);
         }
 
-        console.log(`Encontrados ${csvFiles.length} arquivos. Processando conteúdo...`);
+        console.log(`[S3] Encontrados ${jsonFiles.length} arquivos JSON. Processando...`);
 
+        const resultados = [];
 
-
-        for (const file of csvFiles) {
+        for (const file of jsonFiles) {
             try {
+                // Extrair MAC do nome do arquivo (ex: .../02bbbdc02bf9.json)
+                const parts = file.Key.split('/');
+                const fileName = parts[parts.length - 1];
+                const mac = fileName.replace('.json', '').toLowerCase();
+
+                // Ler conteúdo
                 const getCommand = new GetObjectCommand({ Bucket: bucketName, Key: file.Key });
                 const getResponse = await s3Client.send(getCommand);
                 const bodyContents = await streamToString(getResponse.Body);
-                const linhas = bodyContents.split(/\r\n|\n|\r/);
-                const headers = linhas[0].split(";").map(h => h.trim());
+                const jsonContent = JSON.parse(bodyContents);
 
-                for (let i = 1; i < linhas.length; i++) {
-                    const linhaTexto = linhas[i].trim();
-                    if (!linhaTexto) continue;
+                // Cruzar com dados do banco
+                const infoBanco = mapaCaixas[mac] || { uf: 'N/A', cidade: 'Desconhecido' };
 
+                // Extrair data da Key se possível (ano=2025/mes=12...)
+                let dataArquivo = null;
+                const anoMatch = file.Key.match(/ano=(\d{4})/);
+                const mesMatch = file.Key.match(/mes=(\d{2})/);
+                const diaMatch = file.Key.match(/dia=(\d{2})/);
 
-                    const colunas = linhaTexto.split(";");
-                    const obj = {};
-
-                    for (let j = 0; j < headers.length; j++) {
-                        if (headers[j] !== undefined && colunas[j] !== undefined) {
-                            obj[headers[j]] = colunas[j].trim();
-                        }
-                    }
-                    if (Object.keys(obj).length > 0) {
-                        resultadoFinal.push(obj);
-                    }
+                if (anoMatch && mesMatch) {
+                    const dia = diaMatch ? diaMatch[1] : '01';
+                    dataArquivo = `${anoMatch[1]}-${mesMatch[1]}-${dia}`;
                 }
+
+                resultados.push({
+                    macaddress: mac,
+                    ...infoBanco,
+                    data_arquivo: dataArquivo,
+                    dados: jsonContent
+                });
+
             } catch (erroArquivo) {
-                console.error(`Erro arquivo ${file.Key}:`, erroArquivo);
+                console.error(`[S3] Erro ao processar arquivo ${file.Key}:`, erroArquivo);
             }
         }
+
+        res.json(resultados);
+
     } catch (error) {
-        console.error("Erro Geral S3:", error);
-        res.status(500).json({ error: "Erro interno ao buscar dados", details: error.message });
+        console.error("[S3] Erro Geral:", error);
+        res.status(500).json({ error: "Erro interno ao buscar dados do bucket", details: error.message });
     }
-
-
-
-    res.json(resultadoFinal);
-
 }
 
 module.exports = {
-    buscarProcessos
-};*/
+    buscarDadosDashboard
+};

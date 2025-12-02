@@ -472,7 +472,7 @@
         // Função para buscar dados do bucket e processar para o mapa
         async function fetchAndProcessBucketData() {
             try {
-                const response = await fetch('/bucket/processos');
+                const response = await fetch('/bucket/dashboard');
                 const dados = await response.json();
                 dadosBucketCache = dados;
                 
@@ -481,9 +481,8 @@
                 const dadosPorEstado = {};
                 
                 dados.forEach(d => {
-                    // Tenta identificar a UF. Ajuste a chave conforme seu JSON.
-                    // Ex: d['uf'], d['estado'], d['UF']
-                    const uf = d['uf'] || d['UF'] || d['estado'] || 'SP'; // Default SP para teste se falhar
+                    // O backend já retorna 'uf' cruzado com o banco
+                    const uf = d.uf || 'SP'; 
                     const idMap = `BR.${uf.toUpperCase()}`;
                     
                     if (!dadosPorEstado[idMap]) {
@@ -496,8 +495,9 @@
                         };
                     }
                     
-                    dadosPorEstado[idMap].value += 1; // Contagem de processos/logs
-                    dadosPorEstado[idMap].processos.push(d);
+                    dadosPorEstado[idMap].value += 1; // Contagem de máquinas
+                    // d.dados contém o JSON do bucket
+                    dadosPorEstado[idMap].processos.push(d.dados);
                 });
 
                 // Converter para array
@@ -506,11 +506,13 @@
                     let maxCpu = 0;
                     let maxProcess = "N/A";
                     
-                    estado.processos.forEach(p => {
-                        const cpu = parseFloat(p['uso_cpu'] || p['cpu'] || 0);
+                    estado.processos.forEach(json => {
+                        // Assumindo que o JSON tem uma lista de processos ou métricas
+                        // Se o JSON for direto { cpu: 90, processo: 'java' }
+                        const cpu = parseFloat(json.uso_cpu || json.cpu || 0);
                         if (cpu > maxCpu) {
                             maxCpu = cpu;
-                            maxProcess = p['processo'] || p['nome'] || 'N/A';
+                            maxProcess = json.processo || json.nome || 'N/A';
                         }
                     });
 
@@ -640,7 +642,7 @@
             let dados = dadosBucketCache;
             if (!dados || dados.length === 0) {
                 try {
-                    const response = await fetch('/bucket/processos');
+                    const response = await fetch('/bucket/dashboard');
                     dados = await response.json();
                     dadosBucketCache = dados;
                 } catch (error) {
@@ -650,46 +652,72 @@
             }
 
             // Filtrar dados pelo estado selecionado (estadoNome vem do mapa, ex: "São Paulo")
-            // Precisamos mapear o nome do estado para a sigla se o JSON usar sigla
-            // Simplificação: assumindo que o JSON tem campo 'estado' ou 'uf'
+            // O backend retorna 'uf' (ex: SP)
             
             const dadosEstado = dados.filter(d => {
-                // Tenta dar match no nome ou sigla
-                const uf = d['uf'] || d['estado'] || '';
-                // Mapeamento simples (pode ser melhorado)
-                return estadoNome.includes(uf) || (uf === 'SP' && estadoNome === 'São Paulo'); 
+                const uf = d.uf || '';
+                // Mapeamento simples: se estadoNome contém a UF ou vice-versa
+                // Ex: estadoNome="São Paulo", uf="SP" -> precisamos de um mapa melhor ou assumir que o mapa retorna nomes completos
+                // O AnyChart retorna nomes completos (São Paulo). O banco retorna UF (SP).
+                // Vou fazer um match simples
+                const mapUf = {
+                    "Acre": "AC", "Alagoas": "AL", "Amapá": "AP", "Amazonas": "AM", "Bahia": "BA", "Ceará": "CE", "Distrito Federal": "DF", "Espírito Santo": "ES", "Goiás": "GO", "Maranhão": "MA", "Mato Grosso": "MT", "Mato Grosso do Sul": "MS", "Minas Gerais": "MG", "Pará": "PA", "Paraíba": "PB", "Paraná": "PR", "Pernambuco": "PE", "Piauí": "PI", "Rio de Janeiro": "RJ", "Rio Grande do Norte": "RN", "Rio Grande do Sul": "RS", "Rondônia": "RO", "Roraima": "RR", "Santa Catarina": "SC", "São Paulo": "SP", "Sergipe": "SE", "Tocantins": "TO"
+                };
+                
+                const ufEsperada = mapUf[estadoNome] || estadoNome;
+                return uf === ufEsperada;
             });
 
             if (dadosEstado.length === 0) {
                  document.getElementById('process-table-body').innerHTML = '<tr><td colspan="4">Nenhum dado encontrado para esta região.</td></tr>';
+                 renderChart([], []);
                  return;
             }
 
             // Calcular KPIs reais baseados nos dados filtrados
             let totalCpu = 0;
             let totalRam = 0;
+            let count = 0;
+            
             dadosEstado.forEach(d => {
-                totalCpu += parseFloat(d['uso_cpu'] || d['cpu'] || 0);
-                totalRam += parseFloat(d['uso_ram'] || d['ram'] || 0);
+                const json = d.dados;
+                totalCpu += parseFloat(json.uso_cpu || json.cpu || 0);
+                totalRam += parseFloat(json.uso_ram || json.ram || 0);
+                count++;
             });
             
-            const mediaCpu = (totalCpu / dadosEstado.length).toFixed(1);
-            const mediaRam = (totalRam / dadosEstado.length).toFixed(1);
+            const mediaCpu = count > 0 ? (totalCpu / count).toFixed(1) : 0;
+            const mediaRam = count > 0 ? (totalRam / count).toFixed(1) : 0;
 
             document.getElementById('ia-cpu').innerText = mediaCpu + "%";
-            document.getElementById('ia-ram').innerText = mediaRam + " GB"; // Assumindo que o dado vem em GB ou MB, ajustar conforme necessário
+            document.getElementById('ia-ram').innerText = mediaRam + " GB"; 
             
             const tbody = document.getElementById('process-table-body');
             tbody.innerHTML = '';
 
-            // Exibe os top 10 processos por uso de CPU
-            dadosEstado
-                .sort((a, b) => parseFloat(b['uso_cpu'] || 0) - parseFloat(a['uso_cpu'] || 0))
+            // Exibe os top 10 processos por uso de CPU (pegando de todos os JSONs da região)
+            // Assumindo que cada JSON tem um campo 'processos' que é uma lista, OU que o JSON é um processo único
+            // Se for processo único, já temos a lista em dadosEstado
+            
+            const listaProcessos = [];
+            dadosEstado.forEach(d => {
+                const json = d.dados;
+                // Se o JSON tiver lista de processos
+                if (json.processos && Array.isArray(json.processos)) {
+                    listaProcessos.push(...json.processos);
+                } else {
+                    // Se o JSON for o próprio processo
+                    listaProcessos.push(json);
+                }
+            });
+
+            listaProcessos
+                .sort((a, b) => parseFloat(b.uso_cpu || b.cpu || 0) - parseFloat(a.uso_cpu || a.cpu || 0))
                 .slice(0, 10)
-                .forEach(d => {
-                    const nome = d['processo'] || d['nome'] || 'Desconhecido';
-                    const pid = d['pid'] || d['id'] || 'N/A';
-                    const cpu = d['uso_cpu'] || d['cpu'] || '0';
+                .forEach(p => {
+                    const nome = p.processo || p.nome || 'Desconhecido';
+                    const pid = p.pid || p.id || 'N/A';
+                    const cpu = p.uso_cpu || p.cpu || '0';
                     
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
@@ -701,23 +729,81 @@
                     tbody.appendChild(tr);
                 });
 
-            renderChart();
+            // Preparar dados para o gráfico (Histórico vs Predição)
+            // Agrupar dados por data
+            // Assumindo que d.data_arquivo existe (veio do backend)
+            const dadosPorData = {};
+            dadosEstado.forEach(d => {
+                if (d.data_arquivo) {
+                    if (!dadosPorData[d.data_arquivo]) dadosPorData[d.data_arquivo] = [];
+                    dadosPorData[d.data_arquivo].push(d.dados);
+                }
+            });
+            
+            // Ordenar datas
+            const datasOrdenadas = Object.keys(dadosPorData).sort();
+            
+            // Calcular média de CPU por dia para o histórico
+            const historicoData = [];
+            const historicoLabels = [];
+            
+            datasOrdenadas.forEach(data => {
+                const lista = dadosPorData[data];
+                const soma = lista.reduce((acc, item) => acc + parseFloat(item.uso_cpu || item.cpu || 0), 0);
+                const media = soma / lista.length;
+                historicoData.push(media.toFixed(1));
+                historicoLabels.push(data.split('-').slice(1).join('/')); // MM/DD
+            });
+
+            // Simular predição (já que não temos modelo real aqui, vamos projetar a média + variação)
+            // Se o JSON tiver campo 'predicao', usar ele.
+            // Vou criar uma série de predição que começa no último ponto do histórico
+            const predicaoData = new Array(historicoData.length).fill(null); // Null para alinhar com histórico
+            
+            // Adicionar ponto de conexão
+            if (historicoData.length > 0) {
+                const ultimoValor = parseFloat(historicoData[historicoData.length - 1]);
+                predicaoData[historicoData.length - 1] = ultimoValor;
+                
+                // Gerar 3 dias futuros
+                for (let i = 1; i <= 3; i++) {
+                    const valorPrevisto = ultimoValor * (1 + (Math.random() * 0.1 - 0.05)); // Variação +/- 5%
+                    predicaoData.push(valorPrevisto.toFixed(1));
+                    
+                    // Adicionar label futura
+                    const ultimaData = new Date(datasOrdenadas[datasOrdenadas.length - 1]);
+                    ultimaData.setDate(ultimaData.getDate() + i);
+                    const dia = String(ultimaData.getDate()).padStart(2, '0');
+                    const mes = String(ultimaData.getMonth() + 1).padStart(2, '0');
+                    historicoLabels.push(`${mes}/${dia}`);
+                }
+            }
+
+            renderChart(historicoLabels, historicoData, predicaoData);
         }
 
         function closeIaModal() {
             document.getElementById('modal-ia').style.display = 'none';
         }
 
-        function renderChart() {
+        function renderChart(labels, historico, predicao) {
             if(chartInstance) chartInstance.destroy();
 
             var options = {
-                chart: { type: 'area', height: 300, toolbar: {show: false} },
-                series: [{ name: 'CPU Prevista', data: [30,40,35,50,49,60,70,91,95,80,60,50] }],
-                colors: ['#2563eb'],
-                stroke: { curve: 'smooth' },
-                xaxis: { categories: ['00h','02h','04h','06h','08h','10h','12h','14h','16h','18h','20h','22h'] },
-                dataLabels: { enabled: false }
+                chart: { type: 'line', height: 300, toolbar: {show: false} },
+                series: [
+                    { name: 'Uso Real (Histórico)', data: historico },
+                    { name: 'Predição', data: predicao }
+                ],
+                colors: ['#2563eb', '#ff9800'], // Azul sólido, Laranja (será pontilhado)
+                stroke: { 
+                    curve: 'smooth',
+                    width: [3, 3],
+                    dashArray: [0, 5] // 0 = solido, 5 = pontilhado
+                },
+                xaxis: { categories: labels },
+                dataLabels: { enabled: false },
+                markers: { size: 4 }
             };
 
             chartInstance = new ApexCharts(document.querySelector("#chart-regression"), options);

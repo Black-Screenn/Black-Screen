@@ -24,7 +24,7 @@ var cargoRouter = require("./src/routes/cargos");
 var relatorioRouter = require("./src/routes/relatorio");
 
 
-//var dadosBucketRouter = require("./src/routes/dadosBucket")
+var dadosBucketRouter = require("./src/routes/dadosBucket")
 var geminiRouter = require("./src/routes/gemini");
 
 app.use(express.json({ limit: '1gb' }));
