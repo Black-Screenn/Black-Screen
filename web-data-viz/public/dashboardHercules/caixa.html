@@ -202,7 +202,7 @@
                         >
                             <h3>Data de manutenção recomendada</h3>
                             <div class="chart-container">
-                                <div id="myChart"></div>
+                                <p id="teste"></p>
                             </div>
                         </div>
                         <div
@@ -234,8 +234,8 @@
                                 onchange="atualizarGraficos(parseInt(this.value))"
                             >
                                 <option value="7">7 dias</option>
+                                <option value="15">15 dias</option>
                                 <option value="30">30 dias</option>
-                                <option value="90">3 meses</option>
                             </select>
                         </div>
                         <div class="graficos-row">
@@ -244,14 +244,10 @@
                                 <div id="lineChart1"></div>
                             </div>
                             <div style="flex: 1; min-width: 0; height: 100%">
-                                <center><h3>Quantidade de chamados</h3></center>
-                                <div id="barChart"></div>
-                            </div>
-                            <div style="flex: 1; min-width: 0; height: 100%">
                                 <center>
                                     <h3>Probabilidade de falha no envio</h3>
                                 </center>
-                                <div id="lineChart2"></div>
+                                <div id="lineChart3"></div>
                             </div>
                         </div>
                     </div>
@@ -277,11 +273,11 @@
             const urlparam = new URLSearchParams(window.location.search);
             const mac = urlparam.get("id");
             var nomeEmpresa = "";
+            var data = "";
             maquinaid.innerHTML = "Caixa #" + urlparam.get("id");
             let dadosGrafico1 = [],
-                dadosGrafico2 = [],
                 dadosGrafico3 = [];
-            let lineChart1, barChart, lineChart2;
+            let lineChart1, lineChart3;
 
             let valoresMetrica = {
                 disponibilidade: 96.6,
@@ -524,30 +520,8 @@
                     },
                 });
 
-                /*
-                let ultimos2 = dadosGrafico2.slice(-dias);
-                if (dias === 30) {
-                    ultimos2 = agruparPorSemana(ultimos2);
-                } else if (dias === 90) {
-                    ultimos2 = agruparPorMes(ultimos2);
-                }
-                const categorias2 = ultimos2.map(d => {
-                    if (dias === 30) return `S${d.semana}`;
-                    if (dias === 90) return d.mes;
-                    return formatarData(d.data);
-                });
-                const valores2 = ultimos2.map(d => {
-                    if (dias === 30 || dias === 90) return d.valorMedio;
-                    return d.valor;
-                });
-                barChart.updateOptions({
-                    xaxis: { categories: categorias2 },
-                    series: [{ data: valores2 }]
-                });
-                */
-
                 const primeiros3 = dadosGrafico3.slice(0, dias);
-                lineChart2.updateOptions({
+                lineChart3.updateOptions({
                     xaxis: {
                         categories: primeiros3.map((d) => formatarData(d.data)),
                     },
@@ -559,14 +533,14 @@
                     yaxis: {
                         labels: {
                             formatter: function (val) {
-                                return Number(val).toFixed(1) + "%";
+                                return Number(val).toFixed(1) * 100 + "%";
                             },
                         },
                     },
                     tooltip: {
                         y: {
                             formatter: function (val) {
-                                return Number(val).toFixed(1) + "%";
+                                return Number(val).toFixed(1) * 100 + "%";
                             },
                         },
                     },
@@ -600,16 +574,20 @@
                             );
                     }
 
-                    /*
-                    const res2 = await fetch(``).then(r => r.json());
-                    dadosGrafico2 = res2.sort((a, b) => new Date(a.data) - new Date(b.data));
-*/
                     const res3 = await fetch(
                         `/cloud/buscaCSVgrafico?local=regressao&empresa=${nomeEmpresa}&maquina=${mac}&campo=1`,
                     ).then((r) => r.json());
                     dadosGrafico3 = res3.sort(
                         (a, b) => new Date(a.data) - new Date(b.data),
                     );
+                    for (let i = 0; i < dadosGrafico3.length; i++) {
+                        if (dadosGrafico3[i].valor > 0.5) {
+                            const data = new Date(dadosGrafico3[i].data);
+                            document.getElementById("teste").innerHTML =
+                                data.toLocaleDateString("pt-BR");
+                            break;
+                        }
+                    }
                 } catch (error) {
                     console.error(
                         "Erro ao carregar dados dos gráficos:",
@@ -625,15 +603,14 @@
                     document.querySelector("#lineChart1"),
                     optionsLine1,
                 );
-                // barChart = new ApexCharts(document.querySelector("#barChart"), optionsBar);
-                lineChart2 = new ApexCharts(
-                    document.querySelector("#lineChart2"),
-                    optionsLine2,
+
+                lineChart3 = new ApexCharts(
+                    document.querySelector("#lineChart3"),
+                    optionsLine3,
                 );
 
                 lineChart1.render();
-                // barChart.render();
-                lineChart2.render();
+                lineChart3.render();
 
                 atualizarGraficos(7);
             }
@@ -644,23 +621,15 @@
                     { name: "Disponibilidade", data: [], color: "#004076" },
                 ],
                 stroke: { curve: "smooth", width: 3 },
-                xaxis: { categories: [], title: { text: "Dias" } },
+                xaxis: { categories: [], title: { text: "Data" } },
                 yaxis: { title: { text: "%" } },
             };
 
-            /*
-            const optionsBar = {
-                chart: { type: "bar", height: 300, toolbar: { show: false } },
-                series: [{ name: "Chamados", data: [], color: "#004076" }],
-                xaxis: { categories: [], title: { text: "Dias" } },
-                yaxis: { title: { text: "Volume" } }
-            };
-*/
-            const optionsLine2 = {
+            const optionsLine3 = {
                 chart: { type: "line", height: 300, toolbar: { show: false } },
                 series: [{ name: "Prob. Falha", data: [], color: "#004076" }],
                 stroke: { curve: "smooth", width: 3 },
-                xaxis: { categories: [], title: { text: "Dias" } },
+                xaxis: { categories: [], title: { text: "Data" } },
                 yaxis: { title: { text: "Tendência" } },
             };
         </script>

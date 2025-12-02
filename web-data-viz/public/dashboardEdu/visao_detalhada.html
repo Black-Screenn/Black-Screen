@@ -212,24 +212,37 @@
     function plotarGrafico() {
     console.log('iniciando plotagem do gráfico...');
 
-    let labels = [];
+    const grafico = document.getElementById('grafico').getContext('2d');
+
+    let labels = ['CPU','RAM','Disco','Rede'];
 
     let dados = {
-      labels: labels,
-      datasets: [{
-        label: 'Alertas por Componente',
+        labels: labels,
+        datasets: [{
         data: [cpu,ram,disco,rede],
         borderWidth: 1
       }]
-    }
+    };
 
-    /*for (i = 0; i < resposta.length; i++) {
-      dados.datasets[0].data.push(cpu,ram,disco,rede);
-    }
-        const config = {
-            type: 'bar',
-            data: dados,
-        };  */
+    const config = {
+      type: "bar",
+      data: dados,
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Alertas por Componente'
+          }
+        }
+      }
+    };
+
+    graficoAvisoPorComponente = new Chart (
+        grafico,
+        config
+    )
+
   }
    
    function carregarChamados() {
@@ -274,8 +287,7 @@
                         </p>
                     `;
                     listaContent.appendChild(item);
-                } if(filtro == "filtro_cpu"){
-                    if(componente_limpo = "CPU"){
+                } if(filtro == "filtro_cpu" && componente_limpo == "CPU"){
                         item.innerHTML = `
                         
                         <p class="atm">${chave}</p>
@@ -286,7 +298,6 @@
                         </p>
                     `;
                     listaContent.appendChild(item);
-                    }
                 } if(filtro == "filtro_ram"){
                     if(componente_limpo = "RAM"){
                         item.innerHTML = `
