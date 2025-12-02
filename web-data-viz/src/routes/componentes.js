@@ -30,5 +30,8 @@ router.put("/desassociar-caixa", function (req, res) {
 router.get("/listar-por-caixa/:idCaixa", function (req, res) {
     componenteController.listarPorCaixa(req, res);
 });
+router.get("/buscarValoresComponentes",function(req, res){
+    componenteController.buscarParametros(req,res);
+})
 
 module.exports = router;

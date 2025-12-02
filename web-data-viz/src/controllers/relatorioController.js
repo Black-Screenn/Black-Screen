@@ -6,11 +6,11 @@ const crypto = require('crypto');
 
 const { uploadRelatorioS3, dadosS3PorPeriodo } = require('./cloudController.js');
 const { buscarParametroPorComponente } = require('../models/componenteModel.js')
-const { cadastrar, listar } = require('../models/relatorioModel.js');
+const { cadastrar, listar, avaliar } = require('../models/relatorioModel.js');
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const modelo = "gemini-2.0-flash-lite";
-const md = new MarkdownIt();
+const md = new MarkdownIt({ html: true });
 
 function converterParaCSV(dataArray) {
     if (!dataArray || dataArray.length === 0) return "";
@@ -36,6 +36,15 @@ async function uploadArquivoParaGemini(buffer, fileName, mimeType) {
     return uploadedFile;
 }
 
+function limparTextoIA(texto) {
+    if (!texto) return "";
+    
+    return texto
+        .replace(/^```markdown\n?/i, '')
+        .replace(/^```\n?/i, '')
+        .replace(/```$/i, '')
+        .trim();
+}
 
 async function agenteAnalise(dadosJSON, uploadedFile) {
     console.log("[GERAR RELATORIO] [1/4] Iniciando Módulo de Análise");
@@ -43,131 +52,140 @@ async function agenteAnalise(dadosJSON, uploadedFile) {
     const instrucaoSistemaAnalise = `
         **AVISO: SUA ÚNICA TAREFA É REFORMATAR DADOS. VOCÊ É UM ESCRITURÁRIO DE DADOS.**
 
-        Você recebe dados de monitoramento de ATMs (CSV/JSON) e deve produzir um RELATÓRIO EM MARKDOWN puramente factual, em formato RESUMIDO.
+        Você recebe dados de monitoramento de ATMs (CSV/JSON) e deve produzir um RELATÓRIO EM MARKDOWN puramente factual, em um MODELO CONSISTENTE.  
+        Outros agentes farão análise e recomendações. Você será penalizado por adicionar qualquer opinião, julgamento ou interpretações além do pedido abaixo.
 
-        Outros agentes farão análise e recomendações. Você será penalizado por adicionar qualquer opinião ou julgamento.
-
-        --------------------
-        REGRAS DE PROIBIÇÃO (MUITO IMPORTANTE)
-        --------------------
-        1. **NÃO USE** as palavras: "Sumário Executivo", "Conclusões", "Recomendações", "Resumo", "Próximos Passos".
-        2. **NÃO USE** palavras de julgamento: "Crítico", "Alerta", "Saudável", "Problema", "Risco", "Exigindo atenção", "Intervenção imediata" ou similares.
-        3. **NÃO ANALISE** e não escreva "Observações". Apenas descreva fatos objetivos (contagens, médias, máximos, mínimos, existência de alertas).
-        4. **NÃO RETORNE** JSON, código, ou blocos de código.
-        5. **NÃO REPLIQUE O CSV** nem crie tabelas com todos os registros. Você deve **RESUMIR**.
-        6. **NÃO COLOQUE TABELAS DETALHADAS** com todas as linhas. No máximo, liste IDs e contagens em listas com bullets.
-        7. NÃO FAÇA TEXTO ENORME.
-        8. SUA SAÍDA É APENAS TEXTO EM MARKDOWN.
+        IMPORTANTE: ESTE PROMPT É STRICT. SÓ É PERMITIDO CRIAR LISTAS/BULLETS NOS LOCAIS EXATAMENTE ESPECIFICADOS NO "FORMATO DE SAÍDA". QUALQUER OUTRA LISTA/ITEM EM FORMA DE BULLET É ERRO.
 
         --------------------
-        REGRAS ESPECÍFICAS PARA ALERTAS
+        REGRAS GERAIS (OBRIGATÓRIO)
         --------------------
-        - Você receberá dados com métricas como CPU, RAM, DISCO, PACOTES_PERDIDOS, etc.
-        - Considere que os limites de alerta já vêm indicados nos dados ou nos parâmetros do usuário. NÃO invente limites.
-        - Para cada métrica (CPU, RAM, DISCO, PACOTES_PERDIDOS, etc.), você deve:
-        - Contar quantos alertas dessa métrica ocorreram no período analisado (somatória de erros por componente).
-        - Informar essa contagem em texto, por exemplo:
-            - "Total de alertas em **CPU**: 37"
-            - "Total de alertas em **RAM**: 12"
-            - "Total de alertas em **PACOTES_PERDIDOS**: 8"
-        - Para cada ATM com alertas, você deve identificar:
-        - O dia (data) em que houve MAIOR quantidade de alertas para aquele ATM.
-        - A quantidade de alertas nessa data.
-        - Exemplo de formato:
-            - "Para o ATM \`[ID_ATM]\`, o dia com maior número de alertas foi [YYYY-MM-DD], com N alertas registrados."
-        - NÃO liste alerta por alerta, nem repita o mesmo tipo de alerta linha a linha.
-        - Priorize SEMPRE:
-        - Somatórios por componente (CPU, RAM, etc.).
-        - O dia com mais alertas por ATM.
+        - SUA SAÍDA DEVE SER APENAS MARKDOWN. Use cabeçalhos e formatação Markdown básica (negrito, inline code).
+        - NÃO retorne JSON, blocos de código, tabelas Markdown (| colunas |) ou quaisquer formatos além de Markdown textual.
+        - NÃO inclua seções extras, explicações, desculpas, instruções, ou metadados.
+        - Respeite exatamente os cabeçalhos e a ordem definidos neste documento.
+        - Preserve consistência: sempre gere as mesmas seções, na mesma ordem, mesmo se alguma estiver vazia.
+        - Datas: YYYY-MM-DD. Números: inteiros sem formatação.
+        - PROIBIDO criar bullets/lists fora dos locais autorizados (ver "FORMATO DE SAÍDA" abaixo).
 
         --------------------
-        FORMATO DE SAÍDA (OBRIGATÓRIO)
+        REGRAS ESPECÍFICAS PARA ALERTAS (OBRIGATÓRIO)
         --------------------
+        - Considere apenas os campos e flags fornecidos; NÃO invente limites ou interpretações.
+        - Calcule SOMATÓRIAS DE ALERTAS POR COMPONENTE (total de ocorrências por métrica no período).
+        - Ordem fixa: **CPU**, **RAM**, **DISCO**, **PACOTES_PERDIDOS**, seguido de outras métricas em ordem alfabética.
+        - Para CADA ATM com pelo menos um alerta:
+        - Informe as métricas que violaram pelo menos uma vez (lista compacta em **negrito**, métricas únicas, separadas por vírgula).
+        - Informe o DIA (YYYY-MM-DD) em que aquele ATM teve a MAIOR quantidade de alertas e quantos alertas ocorreram nesse dia.
+        - Se houver mensagens brutas da ETL para esse ATM, copie-as literalmente conforme regra (veja FORMATO).
+        - NÃO liste cada alerta individualmente fora dos requisitos acima.
+        - NÃO crie bullets de apoio, subtópicos ou seções adicionais além do template permitido.
 
-        1. O RELATÓRIO DEVE COMEÇAR COM:
+        --------------------
+        FORMATO DE SAÍDA (OBRIGATÓRIO - STRICT)
+        --------------------
+        A saída DEVE corresponder exatamente a este modelo. NÃO CRIE bullets em outros lugares.
+
         ## Relatório de Monitoramento
 
-        2. Em seguida, crie a seção:
         ## Sumário Factual
-
-        Nesta seção, liste APENAS contagens gerais (em bullets), por exemplo:
         - Total de ATMs monitorados (amostra): X
         - Total de ATMs com alertas: Y
         - Total de ATMs sem alertas: Z
+        - Total de alertas em **CPU**: A
+        - Total de alertas em **RAM**: B
+        - Total de alertas em **DISCO**: C
+        - Total de alertas em **PACOTES_PERDIDOS**: D
+        (Se existirem outras métricas, listá-las em seguida na ordem alfabética, cada uma em sua própria linha com o mesmo formato.)
 
-        3. Depois crie a seção:
+        ---
+
         ## Detalhamento de ATMs APENAS COM ALERTAS
+        - Observação: Apresente dados agregados por ATM; NÃO descreva cada alerta individualmente.
 
-        Para CADA ATM COM ALERTA:
-        - Crie um subtítulo: \`### ID: [ID_ATM]\`
-        - Liste as métricas que violaram o limite, usando **negrito**, por exemplo:
-            - Métricas com violações: **CPU**, **RAM**
-        - Liste os alertas brutos da ETL, caso existam campos de alerta (copie os textos dos alertas, sem interpretar).
+        - Primeiro repita a somatória de erros por componente (mesmo formato do Sumário Factual), por exemplo:
+        - Total de alertas em **CPU**: A
+        - Total de alertas em **RAM**: B
+        - ...
 
-        4. Em seguida, crie a seção:
+        - Em seguida, para CADA ATM COM ALERTAS, gere APENAS UM BULLET por ATM com esta linha EXATA (ordenados por ID crescente):
+        - \`[ID_ATM]\` — Métricas com violações: **MET1**, **MET2**; Dia com mais alertas: YYYY-MM-DD (N alertas)
+
+        - Se houver mensagens brutas da ETL para esse ATM, imediatamente após a linha anterior, inclua EXATAMENTE o bloco abaixo (sub-bullets permitidos aqui SOMENTE para as mensagens ETL):
+            - Alertas ETL:
+            - "mensagem ETL 1"
+            - "mensagem ETL 2"
+
+        Regras sobre esses sub-bullets ETL:
+        - Somente inclua "Alertas ETL:" se houver pelo menos 1 mensagem bruta.
+        - Copie as mensagens literalmente, preservando pontuação e aspas se presentes.
+        - Se houver mais de 10 mensagens, inclua apenas as primeiras 10 e adicione um único bullet: - "X mensagens adicionais omitidas".
+
+        - Se NÃO houver ATMs com alertas, escreva exatamente:
+        - Nenhum ATM com alertas identificado no período analisado.
+
+        ---
+
         ## ATMs Sem Alertas
+        - Se houver 10 ou menos ATMs sem alertas, liste-os como bullets com inline code:
+        - \`ID: 02bbbdc02bf9\`
+        - Se houver mais de 10 ATMs sem alertas, não liste IDs; apenas informe a contagem, por exemplo:
+        - 1022 ATMs sem alertas registrados no período analisado.
 
-        - **NÃO LISTE MÉTRICAS INDIVIDUAIS** nesta seção.
-        - Se houver **10 ou menos** ATMs sem alertas, liste apenas os IDs em bullets, por exemplo:
-            - ID: 02bbbdc02bf9
-        - Se houver **mais de 10** ATMs sem alertas, não liste IDs; apenas informe a contagem, por exemplo:
-            - 1022 ATMs operando normalmente (sem alertas)
+        ---
 
-        5. NÃO CRIE NENHUMA OUTRA SEÇÃO além de:
-        - "## Relatório de Monitoramento"
-        - "## Sumário Factual"
-        - "## Detalhamento de ATMs APENAS COM ALERTAS"
-        - "## ATMs Sem Alertas"
-
-        6. NÃO USE TABELAS MARKDOWN (| colunas |). Use apenas texto e listas com "- ".
+        REGRAS ADICIONAIS (para evitar listas indesejadas)
+        - PROIBIDO criar listas numeradas, listas com marcadores, ou bullets em qualquer outro ponto do documento além dos locais explicitamente permitidos acima.
+        - PROIBIDO subdividir o detalhamento do ATM em múltiplas linhas/bullets (exceto o único bullet por ATM e o subsequente bloco "Alertas ETL" caso exista).
+        - Se o modelo tiver dúvidas sobre formatação, deve exigir que o orquestrador re-enquadre o dado — NÃO inventar listas.
 
         --------------------
-        EXEMPLO DE FORMATO (APENAS FORMATO, NÃO COPIE OS VALORES)
+        EXEMPLO DE SAÍDA IDEAL (APENAS PARA MODELAR O FORMATO)
         --------------------
 
         ## Relatório de Monitoramento
 
         ## Sumário Factual
-        - Total de ATMs monitorados (amostra): 4
-        - Total de ATMs com alertas: 2
+        - Total de ATMs monitorados (amostra): 10
+        - Total de ATMs com alertas: 8
         - Total de ATMs sem alertas: 2
+        - Total de alertas em **CPU**: 37
+        - Total de alertas em **RAM**: 12
+        - Total de alertas em **DISCO**: 5
+        - Total de alertas em **PACOTES_PERDIDOS**: 8
 
         ---
 
         ## Detalhamento de ATMs APENAS COM ALERTAS
+        - Total de alertas em **CPU**: 37
+        - Total de alertas em **RAM**: 12
+        - Total de alertas em **DISCO**: 5
+        - Total de alertas em **PACOTES_PERDIDOS**: 8
 
-        ### ID: ATM-001
-        - Métricas com violações: **CPU**, **RAM**
+        - \`02bbbdc02bf9\` — Métricas com violações: **CPU**, **RAM**; Dia com mais alertas: 2025-11-15 (5 alertas)
         - Alertas ETL:
             - "CPU acima do limite configurado"
             - "RAM acima do limite configurado"
-
-        ### ID: ATM-002
-        - Métricas com violações: **DISCO**
-        - Alertas ETL:
-            - "Uso de disco acima do limite configurado"
+        - \`16c3ad24476b\` — Métricas com violações: **PACOTES_PERDIDOS**; Dia com mais alertas: 2025-11-14 (3 alertas)
 
         ---
-    `;
 
+        ## ATMs Sem Alertas
+        - \`ID: d8408e1114d1\`
+    `
+
+    const jsonString = JSON.stringify(dadosJSON, null, 2);
     const promptUsuario = `
-        Você é o primeiro módulo do meu relatório.
+        Realize a análise do arquivo CSV anexado utilizando as configurações abaixo.
 
-        Sua tarefa é:
-        - Ler os dados de monitoramento de ATMs (fornecidos em CSV ou JSON).
-        - Identificar quantos ATMs existem, quantos têm alertas e quantos não têm alertas.
-        - Para cada ATM com alerta, listar apenas:
-        - ID do ATM.
-        - Métricas que violaram o limite (em **negrito**).
-        - Textos dos alertas brutos da ETL.
+        <config_json>
+        ${jsonString}
+        </config_json>
 
-        Não faça análise, não recomende nada. Apenas siga o FORMATO DE SAÍDA definido na instrução do sistema, começando obrigatoriamente com:
-
-        ## Relatório de Monitoramento
-
-        Abaixo estão os dados em JSON para você usar como base factual:
-
-        ${JSON.stringify(dadosJSON, null, 2)}
+        Instruções:
+        1. O arquivo CSV anexado contém o histórico de monitoramento.
+        2. Use o objeto JSON acima para definir os limites de CPU, RAM, etc.
+        3. Gere apenas o conforme o template do sistema em MARKDOWN.
     `;
 
     try {
@@ -290,12 +308,37 @@ async function gerarRelatorio(req, res) {
         const fkEmpresa = req.body.fkEmpresa;
         const periodoInicio = req.body.periodoInicio || '';
         const periodoFim = req.body.periodoFim || '';
+        const cpuCheck = req.body.cpu;
+        const ramCheck = req.body.ram;
+        const discoCheck = req.body.disco;
+        const redeCheck = req.body.rede;
 
         const dadosCompletosS3 = await dadosS3PorPeriodo(fkEmpresa, periodoInicio, periodoFim);
 
+        const dadosLimpos = dadosCompletosS3.map(item => {
+            const novoItem = { ...item };
+
+            if(!cpuCheck){
+                delete novoItem.cpu;
+            }
+            if(!ramCheck){
+                delete novoItem.ram;
+            }
+            if(!discoCheck){
+                delete novoItem.disco;
+            }
+            if(!redeCheck){
+                delete novoItem.bytes_enviados;
+                delete novoItem.bytes_recebidos;
+                delete novoItem.pacotes_perdidos;
+            }
+
+            return novoItem;
+        });
+
         const componentesParametro = await buscarParametroPorComponente();
 
-        const csvString = converterParaCSV(dadosCompletosS3);
+        const csvString = converterParaCSV(dadosLimpos);
         const csvBuffer = Buffer.from(csvString, 'utf-8');
 
         const arquivoGemini = await uploadArquivoParaGemini(csvBuffer, 'relatorio_dados.csv', 'text/csv');
@@ -306,23 +349,31 @@ async function gerarRelatorio(req, res) {
 
         let dadosDoRequest = {
             "periodo_analise": `${periodoInicio} a ${periodoFim}`,
-            "limites_saudaveis": componentesParametro
+            "limites_saudaveis": componentesParametro,
+            "componentes_analisar": {
+                "cpu": cpuCheck,
+                "ram": ramCheck,
+                "disco": discoCheck,
+                "rede": redeCheck
+            }
         };
 
-        const textoAnalise = await agenteAnalise(dadosDoRequest, arquivoGemini);
+        let textoAnalise = await agenteAnalise(dadosDoRequest, arquivoGemini);
 
         await genAI.files.delete({ name: arquivoGemini.name });
+        textoAnalise = limparTextoIA(textoAnalise);
 
         console.log(textoAnalise)
-
-        const textoRecomendacoes = await agenteRecomendacoes(textoAnalise);
+        
+        let textoRecomendacoes = await agenteRecomendacoes(textoAnalise);
+        textoRecomendacoes = limparTextoIA(textoRecomendacoes)
 
         const relatorioParcial = textoAnalise + "\n\n" + textoRecomendacoes;
 
-        const textoSumarizado = await agenteSumarizacao(relatorioParcial);
+        let textoSumarizado = await agenteSumarizacao(relatorioParcial);
+        textoSumarizado = limparTextoIA(textoSumarizado)
 
         const relatorioFinal = textoSumarizado + "\n\n" + relatorioParcial;
-
         const relatorioHTML = md.render(relatorioFinal);
 
         const logoUrl = "https://raw.githubusercontent.com/Black-Screenn/Black-Screen/refs/heads/main/web-data-viz/public/assets/imgs/blackscreenlogo.png";
@@ -403,6 +454,111 @@ async function gerarRelatorio(req, res) {
                         color: #888;
                         border-top: 1px solid #eee;
                         padding-top: 10px;
+                    }
+
+                    /* --- TABELA PROFISSIONAL (O Segredo) --- */
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 15px;
+                        font-size: 11px;
+                        page-break-inside: auto;
+                    }
+                    
+                    tr { page-break-inside: avoid; page-break-after: auto; }
+                    
+                    th {
+                        background-color: #f2f2f2;
+                        border-bottom: 2px solid #000;
+                        text-align: left;
+                        padding: 8px;
+                        font-weight: bold;
+                        text-transform: uppercase;
+                        font-size: 10px;
+                    }
+
+                    td {
+                        border-bottom: 1px solid #ddd;
+                        padding: 8px;
+                        vertical-align: top;
+                    }
+
+                    /* Zebrado (linhas alternadas) para facilitar leitura */
+                    tr:nth-child(even) { background-color: #fcfcfc; }
+
+                    /* Coluna de Desvio em vermelho se for alto */
+                    td:last-child { font-weight: bold; color: #d32f2f; }
+
+                    /* --- LISTAS --- */
+                    ul { list-style-type: disc; margin: 10px 0; padding-left: 20px; }
+                    li { margin-bottom: 5px; }
+
+                    .tabela-auditoria {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 15px;
+                        font-size: 11px;
+                        border: 1px solid #ddd;
+                    }
+                    .tabela-auditoria th {
+                        background-color: #333;
+                        color: #fff;
+                        text-align: left;
+                        padding: 8px;
+                    }
+                    .tabela-auditoria td {
+                        border-bottom: 1px solid #eee;
+                        padding: 8px;
+                        color: #333;
+                    }
+                    .tabela-auditoria tr:nth-child(even) { background-color: #f9f9f9; }
+                    .tabela-auditoria strong { color: #d32f2f; }
+
+                    /* --- ESTILO DA CAIXA DE SUCESSO (Só aparece se estiver tudo bem) --- */
+                    .box-sucesso {
+                        background-color: #d4edda;
+                        color: #155724;
+                        border: 1px solid #c3e6cb;
+                        padding: 15px;
+                        border-radius: 5px;
+                        text-align: center;
+                        font-weight: bold;
+                        margin-top: 20px;
+                        font-size: 12px;
+                    }
+
+                    /* TABELA DE CRÍTICOS (VERMELHO) */
+                    .tabela-critica {
+                        width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;
+                        border: 1px solid #f5c6cb;
+                    }
+                    .tabela-critica th { 
+                        background-color: #721c24; /* Vinho */
+                        color: #fff; 
+                        padding: 8px; text-align: left; 
+                    }
+                    .tabela-critica td { 
+                        border-bottom: 1px solid #f5c6cb; 
+                        padding: 8px; 
+                        color: #721c24;
+                        background-color: #f8d7da; /* Fundo rosinha */
+                    }
+
+                    /* TABELA DE RISCO (AMARELO) */
+                    .tabela-risco {
+                        width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;
+                        border: 1px solid #ffeeba;
+                    }
+                    .tabela-risco th { 
+                        background-color: #ffc107; /* Amarelo Ouro */
+                        color: #000; 
+                        padding: 8px; text-align: left; 
+                    }
+                    .tabela-risco td { 
+                        border-bottom: 1px solid #ffeeba; 
+                        padding: 8px; 
+                        color: #856404;
+                        background-color: #fff3cd; /* Fundo amarelo claro */
                     }
                 </style>
             </head>
@@ -488,4 +644,23 @@ async function listarRelatorios(req, res) {
     }
 }
 
-module.exports = { gerarRelatorio, listarRelatorios }
+async function avaliarRelatorio(req, res) {
+    const idRelatorio = req.body.idRelatorio;
+    const avaliacao = req.body.avaliacao;
+
+    try{
+        const resultado = await avaliar(idRelatorio, avaliacao)
+
+        return res.status(200).json({
+            "sucesso": true,
+            "idRelatório": idRelatorio,
+            "avaliação": avaliacao,
+            "result": resultado
+        })
+    } catch (error) {
+        console.error('[RELATORIO] Erro ao avaliar relatório:', error);
+        return res.status(500).json({ erro: error.message || error });
+    }
+}
+
+module.exports = { gerarRelatorio, listarRelatorios, avaliarRelatorio }

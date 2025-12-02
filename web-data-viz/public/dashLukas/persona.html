@@ -2,22 +2,17 @@
 <html lang="pt-br">
 
 <head>
-    <link rel="shortcut icon" href="../assets/imgs/blackscreenicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale-1.0">
+
+
+    <link rel="shortcut icon" href="../assets/imgs/blackscreenicon.ico" type="image/x-icon">
     <title>BlackScreen | Dashboards</title>
-
     <link rel="stylesheet" href="../css/dashPersona.css">
-
     <link rel="stylesheet" href="./../css/dashboards.css">
     <link rel="stylesheet" href="./../css/style.css" />
     <link rel="stylesheet" href="./../css/dashboardHomeAdm.css">
-
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-
-    <script src="../js/sessao.js"></script>
-    <script src="./../js/alerta.js"></script>
-
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
@@ -26,14 +21,18 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-statistics/7.8.3/simple-statistics.min.js"></script>
+    <script src="../js/sessao.js"></script>
+    <script src="./../js/alerta.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/regression/2.0.1/regression.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="../js/leaflet-heat.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
-    <style>
-    </style>
 </head>
 
 <body>
@@ -279,9 +278,100 @@
                     </div>
                 </div>
             </div>
+            <div class="metrics-container container_bottum">
+
+                <div class="perosna-kpi">
+                    <span class="material-symbols-outlined icon_kpi"><svg xmlns="http://www.w3.org/2000/svg"
+                            height="48px" viewBox="0 -960 960 960" width="48px" fill="#000">
+                            <path
+                                d="m24-112 456-789 456 789H24Zm140-81h632L480-740 164-193Zm319.86-50q13.72 0 22.93-9.37 9.21-9.37 9.21-22.79 0-12.42-9.39-22.13-9.39-9.71-23.1-9.71-12.72 0-22.61 9.66-9.9 9.67-9.9 22.52 0 13.42 10.07 22.62 10.07 9.2 22.79 9.2ZM455-348h57v-216h-57v216Zm25-119Z" />
+                        </svg></span>
+                    <div class="metric-info">
+                        <h3>Alerta Por Componente</h3>
+                        <div class="classCompontes">
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="perosna-kpi">
+                    <span class="material_color_kpi material-symbols-outlined icon_kpi"><svg
+                            xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="48px"
+                            fill="#fff">
+                            <path
+                                d="M195-124v-91h64l78-254q9-30 32.46-48 23.45-18 54.54-18h113q30.71 0 53.86 18Q614-499 624-469l77 254h65v91H195Zm162-91h247l-69.5-229H425l-68 229Zm78-450v-212h91v212h-91Zm272 115-65-65 150-150 64 65-149 150Zm61 195v-91h211v91H768ZM253-550 104-700l64-65 151 150-66 65ZM-19-355v-91h212v91H-19Zm499 140Z" />
+                        </svg></span>
+                    <div class="metric-info">
+                        <h3>Chamado Abertos</h3>
+                        <div class="classCompontes_alertas"></div>
+                    </div>
+                </div>
+
+                <div class="perosna-kpi">
+                    <span class="atm_color material_color_kpi material-symbols-outlined icon_kpi atm"><svg
+                            fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" height="48px" viewBox="0 0 60 60" width="48px"
+                            xml:space="preserve">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <g>
+                                    <g>
+                                        <path
+                                            d="M59,36h-1V1c0-0.6-0.4-1-1-1H3C2.4,0,2,0.4,2,1v35H1c-0.6,0-1,0.4-1,1v13c0,0.6,0.4,1,1,1h10v-2H2V38h1h54h1v11H33v2h26 c0.6,0,1-0.4,1-1V37C60,36.4,59.6,36,59,36z M4,36V2h52v34H4z">
+                                        </path>
+                                        <path
+                                            d="M34,6H7C6.4,6,6,6.4,6,7v24c0,0.6,0.4,1,1,1h27c0.6,0,1-0.4,1-1V7C35,6.4,34.6,6,34,6z M33,24h-7V8h7V24z M24,8v16H8V8H24 z M8,30v-4h25v4H8z">
+                                        </path>
+                                        <path
+                                            d="M35,44v-2h-5H14H9v2h4v15c0,0.6,0.4,1,1,1h16c0.6,0,1-0.4,1-1V44H35z M25,44c0,1.1-0.9,2-2,2h-2c-1.1,0-2-0.9-2-2H25z M29,58H15V44h2c0,2.2,1.8,4,4,4h2c2.2,0,4-1.8,4-4h2V58z">
+                                        </path>
+                                        <path
+                                            d="M53,6H39c-0.6,0-1,0.4-1,1v6c0,0.6,0.4,1,1,1h14c0.6,0,1-0.4,1-1V7C54,6.4,53.6,6,53,6z M52,12H40V8h12V12z">
+                                        </path>
+                                        <rect x="39" y="17" width="2" height="2"></rect>
+                                        <rect x="43" y="17" width="2" height="2"></rect>
+                                        <rect x="47" y="17" width="2" height="2"></rect>
+                                        <rect x="51" y="17" width="2" height="2"></rect>
+                                        <rect x="39" y="21" width="2" height="2"></rect>
+                                        <rect x="43" y="21" width="2" height="2"></rect>
+                                        <rect x="47" y="21" width="2" height="2"></rect>
+                                        <rect x="51" y="21" width="2" height="2"></rect>
+                                        <rect x="39" y="25" width="2" height="2"></rect>
+                                        <rect x="43" y="25" width="2" height="2"></rect>
+                                        <rect x="47" y="25" width="2" height="2"></rect>
+                                        <rect x="51" y="25" width="2" height="2"></rect>
+                                        <rect x="39" y="29" width="2" height="2"></rect>
+                                        <rect x="43" y="29" width="2" height="2"></rect>
+                                        <rect x="47" y="29" width="2" height="2"></rect>
+                                        <rect x="51" y="29" width="2" height="2"></rect>
+                                        <rect x="37" y="42" width="4" height="2"></rect>
+                                        <rect x="43" y="42" width="4" height="2"></rect>
+                                        <path d="M18,53h-2v3c0,0.6,0.4,1,1,1h3v-2h-2V53z"></path>
+                                        <path d="M26,55h-2v2h3c0.6,0,1-0.4,1-1v-3h-2V55z"></path>
+                                        <rect x="28" y="11" width="3" height="2"></rect>
+                                        <rect x="28" y="15" width="3" height="2"></rect>
+                                        <rect x="28" y="19" width="3" height="2"></rect>
+                                        <path
+                                            d="M14,21h1v1h2v-1h1c1.2,0,2-0.8,2-2v-2c0-1.2-0.8-2-2-2h-4v-2h4v1h2v-1c0-1.2-0.8-2-2-2h-1v-1h-2v1h-1c-1.2,0-2,0.8-2,2v2 c0,1.2,0.8,2,2,2h4v2h-4v-1h-2v1C12,20.2,12.8,21,14,21z">
+                                        </path>
+                                    </g>
+                                </g>
+                            </g>
+                        </svg></span>
+                    <div class="metric-info">
+                        <h3>ATM Em Alerta</h3>
+                        <div class="ATM_Alerta"></div>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
 
+
+
+        
 
 
 
@@ -297,6 +387,11 @@
 </html>
 
 <script>
+
+   
+    
+    
+
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
     graficoPizza = null;
 
@@ -310,68 +405,173 @@
 
 
     let dadosDoBucket = [];
-
+  let bubble;
 
     async function lerCsvBucket() {
         const bucketUrl = "https://client-blackscreen.s3.us-east-1.amazonaws.com";
         const pasta = "Maquina/";
-
         
-            const responseList = await fetch(`${bucketUrl}?list-type=2&prefix=${pasta}`);
-            if (!responseList.ok) throw new Error("Erro ao listar bucket");
+       
 
-            const xmlText = await responseList.text();
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+        const responseList = await fetch(`${bucketUrl}?list-type=2&prefix=${pasta}`);
+        if (!responseList.ok) throw new Error("Erro ao listar bucket");
 
-            const conteudos = xmlDoc.getElementsByTagName("Contents");
-            const urlsParaBaixar = [];
+        const xmlText = await responseList.text();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
 
-            for (let i = 0; i < conteudos.length; i++) {
-                const key = conteudos[i].getElementsByTagName("Key")[0].textContent;
-                if (key.endsWith(".csv")) {
-                    urlsParaBaixar.push(`${bucketUrl}/${key}`);
+        const conteudos = xmlDoc.getElementsByTagName("Contents");
+        const urlsParaBaixar = [];
+
+        for (let i = 0; i < conteudos.length; i++) {
+            const key = conteudos[i].getElementsByTagName("Key")[0].textContent;
+            if (key.endsWith(".csv")) {
+                urlsParaBaixar.push(`${bucketUrl}/${key}`);
+            }
+        }
+
+        const requests = urlsParaBaixar.map(url => fetch(url).then(res => res.text()));
+        const conteudosClient = await Promise.all(requests);
+        let resultadoFinal = [];
+
+        conteudosClient.forEach(respostaBucket => {
+            var csv = respostaBucket.trim().split("\n");
+            var headers = csv[0].split(";");
+            for (var i = 1; i < csv.length; i++) {
+                var obj = {};
+                var linhaAtual = csv[i].replace('\r', '').split(";");
+
+                if (linhaAtual.length === headers.length) {
+                    for (var j = 0; j < headers.length; j++) {
+                        var chave = headers[j].trim();
+                        var valor = linhaAtual[j];
+                        obj[chave] = valor;
+                    }
+                    resultadoFinal.push(obj);
                 }
             }
+        });
 
-            const requests = urlsParaBaixar.map(url => fetch(url).then(res => res.text()));
-            const conteudosClient = await Promise.all(requests);
-            let resultadoFinal = [];
+        dadosDoBucket = resultadoFinal;
+const ram = dadosDoBucket.map(item => parseFloat(item.ram));
+const cpu = dadosDoBucket.map(item => parseFloat(item.cpu));
+const disco = dadosDoBucket.map(item => parseFloat(item.disco));
+const perda = dadosDoBucket.map(item => parseFloat(item.pacotes_perdidos));
+const bytesRec = dadosDoBucket.map(item => parseFloat(item.bytes_recebidos));
+const bytesEnv = dadosDoBucket.map(item => parseFloat(item.bytes_enviados));
 
-            conteudosClient.forEach(respostaBucket => {
-                var csv = respostaBucket.trim().split("\n");
-                var headers = csv[0].split(";");
-                for (var i = 1; i < csv.length; i++) {
-                    var obj = {};
-                    var linhaAtual = csv[i].replace('\r', '').split(";");
 
-                    if (linhaAtual.length === headers.length) {
-                        for (var j = 0; j < headers.length; j++) {
-                            var chave = headers[j].trim();
-                            var valor = linhaAtual[j];
-                            obj[chave] = valor;
-                        }
-                        resultadoFinal.push(obj);
-                    }
-                }
-            });
+    const montarSerie = (arrayX, arrayY) => {
+  return arrayX.map((valorX, index) => [valorX, arrayY[index]]);
+};
 
-            dadosDoBucket = resultadoFinal;
-
-        
+if(bubble){
+    bubble.destroy();
+                
+}
+var options = {
+  series: [
+    {
+      name: "CPU (vs RAM)",
+      data: montarSerie(cpu, ram) 
+    }
     
+],
+  chart: {
+    width: 1450,
+    height:700,
+
+    type: 'scatter',
+    zoom: {
+      enabled: true,
+      type: 'xy'
+    }
+  },
+  xaxis: {
+    title: {
+      text: 'Uso da CPU em %'
+    },
+    tickAmount: 10,
+    labels: {
+      formatter: function(val) {
+        return parseFloat(val).toFixed(1)
+      }
+    }
+  },
+  yaxis: {
+    title: {
+      text: 'Uso de RAM em %'
+    },
+    tickAmount: 10
+  },
+  markers: {
+    size: 5, 
+    fillOpacity: 0.6, 
+    strokeWidth: 0
+  },
+  tooltip: {
+    shared: false,
+    intersect: true,
+    y: {
+      formatter: function (val) {
+        return val + "% (RAM)"
+      }
+    }
+  },
+  legend: {
+    position: 'top',
+    horizontalAlign: 'left'
+  }
+};
+
+
+bubble = new ApexCharts(document.querySelector("#bubble"), options);
+    
+    bubble.render();
+
+   await kpiGraficoAnalise(
+        ram,
+        cpu,
+        disco,
+        perda,
+        bytesRec,
+        bytesEnv
+        )
 }
 
+async function kpiGraficoAnalise (
+    ram,
+    cpu,
+    disco,
+    perda,
+    bytesRec,
+    bytesEnv){
+        
+        
+
+            fetch("/componentes/buscarValoresComponentes",{
+                method: "GET"
+            }).then(Response =>{
+                return Response.json();
+            }).then(respostaBDComponentes =>{
+
+                console.log(respostaBDComponentes)
+                console.log(ram)
+                console.log(cpu)
+                console.log(disco)
+                console.log(perda)
+                console.log(bytesRec)
+                console.log(bytesEnv)
+            })
+
+        }
+    
     
 
 
 
-   
-   
-   
-   
-   
-   
+
+
     function buscarPorComponenteDash() {
         fetch('http://98.83.124.125:8080/chamadosJira', {
             method: "GET"
@@ -661,7 +861,7 @@
                     chart: {
                         type: 'donut',
                         width: '380px',
-                        height:'280px',
+                        height: '280px',
                         background: '# f5f5f5',
                         color: '#fff'
                     },
@@ -702,7 +902,7 @@
                         options: {
                             chart: {
                                 width: 200,
-                                color:'#fff'
+                                color: '#fff'
                             },
                             legend: {
                                 position: 'bottom'
@@ -739,14 +939,14 @@
         const modal = document.getElementById('meuModalJira');
         const conteudo = document.getElementById('conteudoModal');
         const divSvg = document.querySelector('.divSvg')
-        fetch('http://98.83.124.125:8080/chamadosJira',{
-            method:'PUTT',
-            body:[ ,
+        fetch('http://98.83.124.125:8080/chamadosJira', {
+            method: 'PUTT',
+            body: [,
 
             ]
         })
         let valorSvg = "";
-        
+
 
         conteudo.innerHTML = `
         <div class="divSvg">${nome} ${valorSvg}</div>
