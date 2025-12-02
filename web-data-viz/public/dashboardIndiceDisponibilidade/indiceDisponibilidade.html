@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/dashProcessos.css">
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,cancel,check_circle,circle_notifications,close,do_not_disturb_on,docs,edit,health_and_safety,home,keyboard_arrow_up,local_atm,location_on,manage_accounts,notifications,remove,search,search_insights,work" />
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_circle,assignment,cancel,check_circle,circle_notifications,close,do_not_disturb_on,docs,edit,health_and_safety,home,keyboard_arrow_up,local_atm,location_on,manage_accounts,notifications,remove,search,search_insights,work" />
     <script src="../js/sessao.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -27,6 +27,7 @@
 <body>
 
     <div class="janela">
+        
         <div class="header-left">
             <img src="../assets/imgs/blackscreenlogo.png" alt="BlackScreen">
 
@@ -34,9 +35,9 @@
                 <h3>Bem vindo, <br><span id="b_usuario">usuário</span>!</h3>
             </div>
 
-            <div class="links">
+           <div class="links">
                 <div class="btn-nav-white">
-                    <a href="dashboard.html">
+                    <a href="../dashboard/dashboard.html">
                         <span class="material-symbols-outlined">
                             home
                         </span>
@@ -46,8 +47,43 @@
                     </a>
                 </div>
 
+                <div class="btn-nav-white">
+                    <a href="../dashboard/atm.html">
+                        <span class="material-symbols-outlined">
+                            local_atm
+                        </span>
+                        <h3>
+                            ATMs
+                        </h3>
+                    </a>
+                </div>
+
+                <div class="btn-nav-white">
+                    <a href="../dashboard/cadastroComponentes.html">
+                        <span class="material-symbols-outlined">
+                            health_and_safety
+                        </span>
+                        <h3>
+                            Componentes
+                        </h3>
+                    </a>
+                </div>
+
+                <!-- <div class="btn-nav-white">
+                    <a href="../dashLukas/persona.html">
+                        <span class="material-symbols-outlined">
+                            signal_cellular_alt
+                        </span>
+                        <h3>
+                            Persona
+                        </h3>
+                    </a>
+                </div> -->
+
+
+
                 <div class="btn-nav">
-                    <a href="./logAlertas.html">
+                    <a href="./indiceDisponibilidade.html">
                         <span class="material-symbols-outlined">
                             search_insights
                         </span>
@@ -56,7 +92,16 @@
                         </h3>
                     </a>
                 </div>
-
+                <div class="btn-nav-white">
+                    <a href="../dashboard/relatorio_ia.html">
+                        <span class="material-symbols-outlined">
+                            assignment
+                        </span>
+                        <h3>
+                            Relatórios IA
+                        </h3>
+                    </a>
+                </div>
                 <div class="btn-nav-white">
                     <a href="./perfil.html">
                         <span class="material-symbols-outlined">
