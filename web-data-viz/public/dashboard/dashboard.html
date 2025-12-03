@@ -145,36 +145,36 @@
                         </div>
                     </div>
                     <div class="kpi">
-                        <h3><span>Top 3</span> ATMs Mais Alerta</h3>
+                        <h3><span>Top 3</span> ATMs por Consumo Mediano de RAM</h3>
                         <div class="rank">
                             <div class="header">
-                                <p>N*</p><p class="atm">ATM</p><p>Alertas</p>
+                                <p>N*</p><p class="atm">ATM</p><p>RAM (mediana)</p>
                             </div>
-                            <div class="top3 first" id="top1MaiorAlerta">
-                                <p>1*</p><p class="atm">ATM Paulista</p><p class="alertas">14</p>
+                            <div class="top3 first" id="topRam1">
+                                <p>1*</p><p class="atm">-</p><p class="alertas">-</p>
                             </div>
-                            <div class="top3 second" id="top2MaiorAlerta">
-                                <p>2*</p><p class="atm">ATM São José</p><p class="alertas">13</p>
+                            <div class="top3 second" id="topRam2">
+                                <p>2*</p><p class="atm">-</p><p class="alertas">-</p>
                             </div>
-                            <div class="top3 third" id="top3MaiorAlerta">
-                                <p>3*</p><p class="atm">ATM Iguatemi</p><p class="alertas">8</p>
+                            <div class="top3 third" id="topRam3">
+                                <p>3*</p><p class="atm">-</p><p class="alertas">-</p>
                             </div>
                         </div>
                     </div>
                     <div class="kpi">
-                        <h3><span>Top 3</span> Componentes Mais Alerta</h3>
+                        <h3><span>Top 3</span> ATMs por Maior Uso de Rede</h3>
                         <div class="rank">
                             <div class="header">
-                                <p>N*</p><p class="atm">Componente</p><p>Alertas</p>
+                                <p>N*</p><p class="atm">ATM</p><p>Rede (MB/s)</p>
                             </div>
-                            <div class="top3 first" id="top1MaiorAlerta">
-                                <p>1*</p><p class="atm">CPU</p><p class="alertas">14</p>
+                            <div class="top3 first" id="topLat1">
+                                <p>1*</p><p class="atm">-</p><p class="alertas">-</p>
                             </div>
-                            <div class="top3 second" id="top2MaiorAlerta">
-                                <p>2*</p><p class="atm">Rede</p><p class="alertas">13</p>
+                            <div class="top3 second" id="topLat2">
+                                <p>2*</p><p class="atm">-</p><p class="alertas">-</p>
                             </div>
-                            <div class="top3 third" id="top3MaiorAlerta">
-                                <p>3*</p><p class="atm">Disco</p><p class="alertas">8</p>
+                            <div class="top3 third" id="topLat3">
+                                <p>3*</p><p class="atm">-</p><p class="alertas">-</p>
                             </div>
                         </div>
                     </div>
@@ -460,6 +460,9 @@
                     } catch (e) {
                         console.error('Erro ao atualizar contadores de caixas:', e);
                     }
+                    
+                    // Carregar dados do bucket para os KPIs Top 3
+                    fetchAndProcessBucketData();
             })
             .catch(err => console.error("Falha ao carregar /caixas:", err));
         
@@ -477,6 +480,9 @@
                 const response = await fetch('/bucket/dashboard');
                 const dados = await response.json();
                 dadosBucketCache = dados;
+                
+                // Atualiza os KPIs de Top 3
+                try { computeTop3RamAndLatency(); } catch(e) { console.error(e); }
                 
                 // Processar dados para o formato do AnyChart
                 // Agrupar por UF
@@ -656,6 +662,7 @@
                     const response = await fetch('/bucket/dashboard');
                     dados = await response.json();
                     dadosBucketCache = dados;
+                    try { computeTop3RamAndLatency(); } catch(e) { console.error(e); }
                 } catch (error) {
                     console.error("Erro ao buscar dados:", error);
                     return;
@@ -863,6 +870,75 @@
         });
 
         // --- Funções de Pesquisa ---
+        
+        function computeTop3RamAndLatency() {
+            if (!dadosBucketCache || dadosBucketCache.length === 0) return;
+
+            const agrupado = {};
+            dadosBucketCache.forEach(entry => {
+                // Tenta pegar o código do caixa de várias formas
+                const codigo = entry.codigo || entry.codigoCaixa || entry.id || entry.dados?.codigoCaixa || entry.dados?.codigo || entry.macaddress || 'Desconhecido';
+                
+                if (!agrupado[codigo]) {
+                    agrupado[codigo] = [];
+                }
+                agrupado[codigo].push(entry.dados || {});
+            });
+
+            const resumo = Object.keys(agrupado).map(codigo => {
+                const arr = agrupado[codigo];
+                
+                // Extrair valores de RAM e Latência
+                const ramVals = arr.map(d => {
+                    // Tenta pegar RAM (pode ser 'ram', 'memory', 'mem')
+                    return parseFloat(d.kpis?.daily_median?.ram ?? d.kpis?.daily_median?.memory ?? d.kpis?.daily_median?.mem ?? 0);
+                }).filter(v => !isNaN(v) && v > 0);
+
+                const latVals = arr.map(d => {
+                    // Usando 'rede' como métrica de rede disponível (MB/s)
+                    return parseFloat(d.kpis?.daily_median?.rede ?? 0);
+                }).filter(v => !isNaN(v) && v > 0);
+
+                // Calcular médias (ou medianas) para este ATM
+                const ram = ramVals.length ? (ramVals.reduce((a,b)=>a+b,0)/ramVals.length) : 0;
+                const latency = latVals.length ? (latVals.reduce((a,b)=>a+b,0)/latVals.length) : 0;
+
+                return { codigo, ram, latency };
+            });
+
+            // Ordenar e pegar Top 3
+            const topRam = resumo.filter(r => r.ram > 0).sort((a,b) => b.ram - a.ram).slice(0,3);
+            const topLat = resumo.filter(r => r.latency > 0).sort((a,b) => b.latency - a.latency).slice(0,3);
+
+            // Função auxiliar para preencher o HTML
+            function setTop(id, rank, item, type) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                
+                if (!item) {
+                    el.innerHTML = `<p>${rank}*</p><p class="atm">-</p><p class="alertas">-</p>`;
+                    return;
+                }
+
+                let displayVal = '-';
+                if (type === 'ram') {
+                    displayVal = `${item.ram.toFixed(1)}%`;
+                } else {
+                    displayVal = `${item.latency.toFixed(1)} MB/s`;
+                }
+
+                el.innerHTML = `<p>${rank}*</p><p class="atm">${item.codigo}</p><p class="alertas">${displayVal}</p>`;
+            }
+
+            setTop('topRam1', 1, topRam[0], 'ram');
+            setTop('topRam2', 2, topRam[1], 'ram');
+            setTop('topRam3', 3, topRam[2], 'ram');
+
+            setTop('topLat1', 1, topLat[0], 'lat');
+            setTop('topLat2', 2, topLat[1], 'lat');
+            setTop('topLat3', 3, topLat[2], 'lat');
+        }
+
         function filtrarCaixas() {
             const input = document.getElementById('pesquisa');
             const filter = input.value.toUpperCase();
