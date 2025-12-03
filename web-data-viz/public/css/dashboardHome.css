@@ -9,7 +9,8 @@
 }
 
 .content .top {
-    z-index: 1;
+    z-index: 9999;
+    position: relative;
     background: rgba(212, 212, 212, 0.651);
     border-bottom-left-radius: 16px;
     border-bottom-right-radius: 16px;
@@ -18,6 +19,7 @@
     border: 1px solid rgba(88, 88, 88, 0.17);
     display: flex;
     flex-direction: column;
+    overflow: visible;
 }
 
 .content .kpis {

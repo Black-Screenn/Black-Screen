@@ -132,7 +132,7 @@
                 <div class="kpis expanded">
                     <div class="kpi">
                         <h3>Caixas Cadastrados</h3>
-                        <h1 id="totalCaixas">178</h1>
+                        <h1 id="totalCaixas">0</h1>
                         <div class="status">
                             <div class="status-item">
                                 <div class="circle green"></div>
@@ -182,9 +182,10 @@
                 <button class="btn-expand-kpi material-symbols-outlined">keyboard_arrow_up</button>
     
                 <div class="pesquisa-filtros">
-                    <div class="pesquisa-div">
-                        <input type="text" id="pesquisa" placeholder="Pesquisar..." onkeyup="">
+                    <div class="pesquisa-div" style="position: relative; z-index: 9999;">
+                        <input type="text" id="pesquisa" placeholder="Pesquisar..." onkeyup="filtrarCaixas()">
                         <span class="material-symbols-outlined">search</span>
+                        <div id="search-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ccc; z-index: 99999; max-height: 200px; overflow-y: auto; border-radius: 0 0 5px 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); color: #333;"></div>
                     </div>
                     <select name="slt_tipo_mapa" id="select-mapa">
                         <option value="padrao">Localização</option>
@@ -306,6 +307,7 @@
                         <select id="select-metric" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;" onchange="updateIaChart()">
                             <option value="cpu">CPU</option>
                             <option value="ram">RAM</option>
+                            <option value="rede">Rede</option>
                         </select>
                     </div>
                     <button class="btn-close-ia material-symbols-outlined" onclick="closeIaModal()">close</button>
@@ -335,23 +337,7 @@
                         <div id="chart-regression" style="width: 100%; height: 300px;"></div>
                     </div>
 
-                    <div>
-                        <h3 style="margin-bottom: 10px; color: #333;">Processos Críticos da Região</h3>
-                        <div class="table-container">
-                            <table class="table-ia">
-                                <thead>
-                                    <tr>
-                                        <th>Nome do Processo</th>
-                                        <th>PID</th>
-                                        <th>Uso CPU</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="process-table-body">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -396,7 +382,10 @@
         }).addTo(map);
 
         const fkEmpresa = sessionStorage.getItem("FK_EMPRESA");
-       
+        
+        let listaGlobalCaixas = [];
+        let markersMap = {};
+
         fetch('/caixas/listar', {
             method: 'GET',
             headers: {
@@ -406,6 +395,7 @@
         })
             .then(r => r.json())
             .then(lista => {
+                listaGlobalCaixas = lista;
                 const group = L.featureGroup();
                 lista.forEach(c => {
                     if (c.Latitude == null || c.Longitude == null) return;
@@ -415,6 +405,9 @@
                             `<b>${c.codigoCaixa}</b><br>${c.Logradouro}<br>${c.Bairro} - ${c.Cidade}/${c.UF}<br> <i>Empresa dona: </i>${c.eNome}<br> <i>Código da empresa: </i> ${c.Id_Empresa}`
                         )
                         .addTo(group);
+                    
+                    markersMap[c.codigoCaixa] = marker;
+
                     marker.on('mouseover',function(ev) {
                         ev.target.openPopup();
                     });
@@ -539,7 +532,7 @@
         }
 
         const worldData = [
-            { id: "BR", value: 950, name: "Brasil" }
+            { id: "BR", value: 0, name: "Brasil" }
         ];
 
         // Dados iniciais vazios, serão preenchidos pelo fetch
@@ -552,6 +545,11 @@
             const dadosProcessados = await fetchAndProcessBucketData();
             if (dadosProcessados.length > 0) {
                 brazilData = dadosProcessados;
+
+                // Atualizar total do Brasil somando as máquinas de todos os estados
+                const totalBrasil = dadosProcessados.reduce((acc, curr) => acc + curr.value, 0);
+                const brData = worldData.find(w => w.id === "BR");
+                if (brData) brData.value = totalBrasil;
             } else {
                 // Fallback se não tiver dados
                 brazilData = [
@@ -575,6 +573,8 @@
             mapAnyChart = anychart.map();
             mapAnyChart.geoData(anychart.maps.world);
             
+            mapAnyChart.background().fill('#808080');
+
             var colorScale = anychart.scales.linearColor();
             colorScale.colors(['#dbeafe', '#3b82f6', '#1e40af', '#051e3e']);
 
@@ -609,16 +609,19 @@
             mapAnyChart = anychart.map();
             mapAnyChart.geoData(anychart.maps.brazil);
 
+            mapAnyChart.background().fill('#808080');
+
             var colorScale = anychart.scales.linearColor();
             colorScale.colors(['#bfdbfe', '#2563eb', '#051e3e']);
 
             var series = mapAnyChart.choropleth(brazilData);
             series.colorScale(colorScale);
+            series.hovered().fill('#facc15');
             series.labels(false);
             
             series.tooltip().useHtml(true);
             series.tooltip().format(function() {
-                return `Máquinas: <b>${this.value}</b><br/>Média CPU: <b>${this.getData("avg_cpu")}%</b>`;
+                return `Máquinas: <b>${this.value}</b>`;
             });
 
             mapAnyChart.listen("pointClick", function(e) {
@@ -643,7 +646,6 @@
             // Loading state
             document.getElementById('ia-cpu').innerText = "...";
             document.getElementById('ia-ram').innerText = "...";
-            document.getElementById('process-table-body').innerHTML = '<tr><td colspan="4">Carregando dados...</td></tr>';
 
             modal.style.display = 'flex';
             
@@ -674,7 +676,6 @@
             currentEstadoData = dadosEstado;
 
             if (dadosEstado.length === 0) {
-                 document.getElementById('process-table-body').innerHTML = '<tr><td colspan="4">Nenhum dado encontrado para esta região.</td></tr>';
                  renderChart([], []);
                  return;
             }
@@ -683,6 +684,7 @@
             let totalCpu = 0;
             let totalRam = 0;
             let totalDisco = 0;
+            let totalRede = 0;
             let count = 0;
             
             dadosEstado.forEach(d => {
@@ -690,21 +692,20 @@
                 totalCpu += parseFloat(json.kpis?.daily_median?.cpu || 0);
                 totalRam += parseFloat(json.kpis?.daily_median?.ram || 0);
                 totalDisco += parseFloat(json.kpis?.daily_median?.disco || 0);
+                totalRede += parseFloat(json.kpis?.daily_median?.rede || 0);
                 count++;
             });
             
             const mediaCpu = count > 0 ? (totalCpu / count).toFixed(1) : 0;
             const mediaRam = count > 0 ? (totalRam / count).toFixed(1) : 0;
             const mediaDisco = count > 0 ? (totalDisco / count).toFixed(1) : 0;
+            const mediaRede = count > 0 ? (totalRede / count).toFixed(1) : 0;
 
             document.getElementById('ia-cpu').innerText = mediaCpu + "%";
             document.getElementById('ia-ram').innerText = mediaRam + "%"; 
             document.getElementById('ia-disk').innerText = mediaDisco + "%";
-            document.getElementById('ia-net').innerText = "N/A"; 
+            document.getElementById('ia-net').innerText = mediaRede + " MB/s"; 
             
-            const tbody = document.getElementById('process-table-body');
-            tbody.innerHTML = '<tr><td colspan="4">Detalhes de processos não disponíveis nos dados coletados.</td></tr>';
-
             // Resetar select para CPU
             const select = document.getElementById('select-metric');
             if(select) select.value = 'cpu';
@@ -787,8 +788,8 @@
                     animations: { enabled: false }
                 },
                 series: [
-                    { name: 'Real (Histórico)', type: 'area', data: realData },
-                    { name: 'Previsão (IA)', type: 'line', data: predData }
+                    { name: 'Histórico', type: 'area', data: realData },
+                    { name: 'Previsão', type: 'line', data: predData }
                 ],
                 colors: ['#2563eb', '#ff9800'], 
                 fill: {
@@ -807,7 +808,14 @@
                 },
                 xaxis: { 
                     type: 'datetime',
-                    labels: { datetimeFormatter: { year: 'yyyy', month: 'MMM \'yy', day: 'dd MMM', hour: 'HH:mm' } },
+                    labels: { 
+                        datetimeFormatter: { 
+                            year: 'yyyy', 
+                            month: 'dd MMM', 
+                            day: 'dd MMM', 
+                            hour: 'HH:mm' 
+                        } 
+                    },
                     tooltip: { enabled: false }
                 },
                 annotations: {
@@ -853,6 +861,64 @@
                 setTimeout(() => map.invalidateSize(), 100);
             }
         });
+
+        // --- Funções de Pesquisa ---
+        function filtrarCaixas() {
+            const input = document.getElementById('pesquisa');
+            const filter = input.value.toUpperCase();
+            const resultsContainer = document.getElementById('search-results');
+            
+            resultsContainer.innerHTML = '';
+            
+            if (!filter) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+
+            const filtered = listaGlobalCaixas.filter(c => 
+                c.codigoCaixa && c.codigoCaixa.toUpperCase().startsWith(filter)
+            );
+
+            if (filtered.length > 0) {
+                resultsContainer.style.display = 'block';
+                filtered.forEach(c => {
+                    const div = document.createElement('div');
+                    div.style.padding = '10px';
+                    div.style.cursor = 'pointer';
+                    div.style.borderBottom = '1px solid #eee';
+                    div.style.color = '#333';
+                    div.style.fontSize = '14px';
+                    div.onmouseover = () => div.style.backgroundColor = '#f0f0f0';
+                    div.onmouseout = () => div.style.backgroundColor = '#fff';
+                    
+                    div.innerText = c.codigoCaixa;
+                    div.onclick = () => zoomNoCaixa(c.codigoCaixa, c.Latitude, c.Longitude);
+                    resultsContainer.appendChild(div);
+                });
+            } else {
+                resultsContainer.style.display = 'none';
+            }
+        }
+
+        function zoomNoCaixa(codigo, lat, lng) {
+            document.getElementById('search-results').style.display = 'none';
+            document.getElementById('pesquisa').value = codigo;
+            
+            // Garante que o mapa padrão está visível
+            const selectMapa = document.getElementById('select-mapa');
+            if (selectMapa.value !== 'padrao') {
+                selectMapa.value = 'padrao';
+                selectMapa.dispatchEvent(new Event('change'));
+            }
+
+            if (lat && lng) {
+                map.setView([lat, lng], 18);
+                const marker = markersMap[codigo];
+                if (marker) {
+                    marker.openPopup();
+                }
+            }
+        }
 
     </script>
 </body>
