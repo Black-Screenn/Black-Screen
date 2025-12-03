@@ -157,7 +157,7 @@
 
                 <div class="kpi-desvio">
                     <p>Desvio padrão</p>
-                    <span class="desvio"></span>
+                    <span class="desvio" id="desvio"></span>
                 </div>
             </div>
 
@@ -192,6 +192,7 @@
                 <p>---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</p>
                 <p class="data-inicio"><a class="negrito">Data inicial:</a> <a id="dt_inicio_relatorio"></a></p>
                 <p class="datas"><a class="negrito">Data final:</a> <a id="dt_fim_relatorio"></a></p>
+                <p class="metricas"><a class="negrito">Desvio padrão:</a> <a id="desvio_padrao"></a></p>
                 <p class="metricas"><a class="negrito">Bairro com maior indice de disponibilidade:</a> <a id="reg_maior"></a></p>
                 <p class="metricas"><a class="negrito">Bairro com menor indice de disponibilidade:</a> <a id="reg_menor"></a></p>
                 <p>---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</p>
@@ -207,6 +208,12 @@
                     <div class="card">
                         <h3>Comparação do índice de disponibilidade</h3>
                         <div class="grafico2"><canvas id="graficoComparacaoRelatorio"></canvas></div>
+                    </div>
+                </div>
+                <div class="grafico3-relatorio">
+                    <div class="card">
+                        <h3 id="titulo_graf_relatorio"></h3>
+                        <div class="grafico3"><canvas id="graficoEvolucaoRelatorio"></canvas></div>
                     </div>
                 </div>
                 <div class="observacao">
@@ -242,6 +249,10 @@
                             <input type="checkbox" id="check-grafico2" value="grafico2">
                             <h3>Comparação de disponibilidade</h3>
                         </div>
+                        <div class="linha-grafico">
+                            <input type="checkbox" id="check-grafico3" value="grafico3">
+                            <h3>Evolução da disponibilidade</h3>
+                        </div>
                     </div>
                     <div class="inputGroup">
                         <label for="comentario">Observações</label>
@@ -268,7 +279,7 @@
     let graficoTendencias, graficoComparacao, graficoDisponibilidade;
     let graficoTendenciasRelatorio = null;
     let graficoComparacaoRelatorio = null;
-    let graficoDisponibilidadeRelatorio = null;
+    let graficoEvolucaoRelatorio = null;
 
     // Elementos do DOM
     const dt_inicio = document.getElementById("dt_inicio");
@@ -284,13 +295,6 @@
             if (!dadosBrutos || dadosBrutos.length === 0) {
                 console.error("Nenhum dado retornado.");
                 return;
-            }
-
-            // Remover horário das datas
-            for (let i = 0; i < dadosBrutos.length; i++) {
-                if (dadosBrutos[i].datetime.indexOf(" ") !== -1) {
-                    dadosBrutos[i].datetime = dadosBrutos[i].datetime.split(" ")[0];
-                }
             }
 
             // Criar lista de regiões
@@ -376,7 +380,7 @@
             return;
         }
 
-        // agrupar somas e contagens por bairro SEM usar filter
+        // agrupar somas e contagens por região SEM usar filter
         const porBairro = {};
 
         for (let i = 0; i < dadosBrutos.length; i++) {
@@ -468,63 +472,58 @@
         }
     }
 
-    function atualizarKpiDesvioPadrao(){
-        const inicioStr = dt_inicio.value;
-        const fimStr = dt_fim.value;
-        const bairroSelecionado = select_bairro.value;
+    function atualizarKpiDesvioPadrao() {
+    const inicioStr = dt_inicio.value;
+    const fimStr = dt_fim.value;
+    const bairroSelecionado = select_bairro.value;
 
-        if (!inicioStr || !fimStr) {
-            document.querySelector(".kpi-desvio .desvio").textContent = "-";
-            return;
-        }
+    const elemento = document.querySelector(".kpi-desvio .desvio");
 
-        let soma = 0;
-        let quantidade = 0;
-
-        // Primeiro loop: calcular média somente dos itens válidos
-        for (let i = 0; i < dadosBrutos.length; i++) {
-            const item = dadosBrutos[i];
-            const dataItemStr = item.datetime;
-            
-            if (!dataItemStr) continue;
-
-            if (dataItemStr < inicioStr || dataItemStr > fimStr) continue;
-
-            if (bairroSelecionado !== "Todos os Bairros" && item.bairro !== bairroSelecionado) continue;
-
-            console.log(item)
-            soma += Number(item.disponibilidade_geral);
-            quantidade ++;
-        }
-
-        const media = soma / quantidade;
-
-        let varianca = 0;
-        let desvio = null;
-        for (let i = 0; i < dadosBrutos.length; i++) {
-            const item = dadosBrutos[i];
-            const dataItemStr = item.datetime;
-
-            if (!dataItemStr) continue;
-            if (dataItemStr < inicioStr || dataItemStr > fimStr) continue;
-            if (bairroSelecionado !== "Todos os Bairros" && item.bairro !== bairroSelecionado) continue;
-
-            const x = Number(item.disponibilidade_geral);
-            console.log(x)
-            varianca += (x - media) ** 2;
-        }
-
-        varianca = varianca / quantidade;
-
-        desvio = Math.sqrt(varianca);
-
-        const elemento = document.querySelector(".kpi-desvio .desvio");
-        if (!desvio) {
-            elemento.textContent = "-";
-        } else {
-            elemento.textContent = desvio.toFixed(2);
-        }
+    if (!inicioStr || !fimStr) {
+        elemento.textContent = "-";
+        return;
     }
+
+    let soma = 0;
+    let quantidade = 0;
+    const dadosFiltrados = [];
+
+    for (const item of dadosBrutos) {
+        const dataItemStr = item.datetime;
+
+        if (!dataItemStr) continue;
+
+        const dataApenasDia = dataItemStr.substring(0, 10);
+
+        if (dataApenasDia < inicioStr || dataApenasDia > fimStr) continue;
+
+        if (bairroSelecionado !== "Todos os Bairros" && item.bairro !== bairroSelecionado) continue;
+
+        const disponibilidade = Number(item.disponibilidade_geral);
+        
+        soma += disponibilidade;
+        quantidade++;
+        dadosFiltrados.push(disponibilidade);
+    }
+
+    if (quantidade <= 1) {
+        elemento.textContent = "-";
+        return;
+    }
+
+    const media = soma / quantidade;
+    let varianca = 0;
+
+    for (const x of dadosFiltrados) {
+        varianca += (x - media) ** 2;
+    }
+
+    varianca = varianca / quantidade;
+
+    const desvio = Math.sqrt(varianca);
+
+    elemento.textContent = desvio.toFixed(2);
+}
     
     function gerarGraficos() {
         const filtrado = filtrarDados();
@@ -544,7 +543,7 @@
 
     function gerarGraficoProcessos(filtrado) {
         const processos = [
-            "leitor_cartao",
+            "leitor_cartoes",
             "manipulador_transacoes",
             "gerenciador_rede",
             "interface_grafica",
@@ -554,11 +553,11 @@
         ];
 
         const nomes = [
-            "Leitor cartão",
+            "Leitor de cartões",
             "Transações",
             "Gerenciador de Rede",
             "Interface",
-            "Dispensador de cédulas",
+            "Dispenser dinheiro",
             "Leitor de digitais",
             "Impressora"
         ];
@@ -831,6 +830,50 @@
         });
     }
 
+    function criarGraficoEvolucaoRelatorio() {
+        const dt_inicio = document.getElementById("dt_inicio").value;
+        const dt_fim = document.getElementById("dt_fim").value;
+        const bairro = document.getElementById("select_bairro").value;
+        
+        titulo_graf_relatorio.innerHTML = `Evolução da disponibilidade entre ${formatarDataAtual(dt_inicio)} e ${formatarDataAtual(dt_fim)} - ${bairro}`;
+        const ctx5 = document.getElementById("graficoEvolucaoRelatorio").getContext("2d");
+
+        if (graficoEvolucaoRelatorio != null) {
+            graficoEvolucaoRelatorio.destroy();
+        }
+
+        const labels = [...graficoDisponibilidade.data.labels];
+
+        const datasets = [];
+        for (let i = 0; i < graficoDisponibilidade.data.datasets.length; i++) {
+            const original = graficoDisponibilidade.data.datasets[i];
+
+            datasets.push({
+                label: original.label,
+                data: [...original.data], // Copia os dados
+                borderColor: original.borderColor,
+                pointBackgroundColor: original.pointBackgroundColor,
+                borderWidth: original.borderWidth,
+                fill: false // Linhas geralmente não são preenchidas
+            });
+        }
+
+        graficoEvolucaoRelatorio = new Chart(ctx5, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false, // Desativa animação para geração de PDF
+                aspectRatio: 0
+            }
+        });
+    }
+    
+
     function criarGraficoComparacaoRelatorio() {
         const ctx5 = document.getElementById("graficoComparacaoRelatorio").getContext("2d");
 
@@ -877,8 +920,8 @@
         if(graficoComparacaoRelatorio != null){
             graficoComparacaoRelatorio.destroy();
         }
-        if(graficoDisponibilidadeRelatorio != null){
-            graficoDisponibilidadeRelatorio.destroy();
+        if(graficoEvolucaoRelatorio != null){
+            graficoEvolucaoRelatorio.destroy();
         }
     }
 
@@ -902,8 +945,11 @@
         const element = document.getElementById('content-relatorio');
         const check = document.getElementById('check-grafico');
         const check2 = document.getElementById('check-grafico2');
+        const check3 = document.getElementById('check-grafico3');
+
         const graficoRelatorio = document.querySelector('.grafico-relatorio');
         const grafico2Relatorio = document.querySelector('.grafico2-relatorio');
+        const grafico3Relatorio = document.querySelector('.grafico3-relatorio');
         element.style.display = "unset";
         const nome_arquivo = document.getElementById("nome_arquivo").value;
         b_titulo.innerHTML = document.getElementById("titulo_relatorio").value;
@@ -915,6 +961,7 @@
         dt_fim_relatorio.innerHTML = formatarData(dt_fim);
         reg_maior.innerHTML = document.getElementById("maior-indice").textContent;
         reg_menor.innerHTML = document.getElementById("menor-indice").textContent;
+        desvio_padrao.innerHTML = document.getElementById("desvio").textContent;
 
         const comentario = document.getElementById("comentario").value;
 
@@ -927,7 +974,6 @@
         if (check.checked) {
             graficoRelatorio.style.display = "unset";
             criarGraficoTendenciasRelatorio(); 
-            marcados ++;
         } else{
             graficoRelatorio.style.display = "none";
         }
@@ -935,11 +981,16 @@
         if(check2.checked){
             grafico2Relatorio.style.display = "unset";
             criarGraficoComparacaoRelatorio();
-            marcados++;
         } else{
             grafico2Relatorio.style.display = "none";
         }
-        console.log(marcados)
+
+        if(check3.checked){
+            grafico3Relatorio.style.display = "unset";
+            criarGraficoEvolucaoRelatorio();
+        } else{
+            grafico3Relatorio.style.display = "none";
+        }
         const options = {
             margin: 0.5,
             filename: `${nome_arquivo}.pdf`,
