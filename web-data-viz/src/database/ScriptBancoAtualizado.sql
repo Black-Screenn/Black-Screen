@@ -129,8 +129,15 @@ CREATE TABLE Relatorio (
 
 INSERT INTO Enderecos (Cep, Pais, Cidade, UF, Logradouro, Numero, Latitude, Longitude, Bairro, Complemento) VALUES
 ('01310-100', 'Brasil', 'São Paulo', 'SP', 'Av. Paulista', 1000, -23.56168, -46.65598, 'Bela Vista', 'Andar 10'),
-('04543-907', 'Brasil', 'São Paulo', 'SP', 'Av. Pres. Juscelino Kubitschek', 2041, -23.58998, -46.68987, 'Vila Olímpia', 'Shopping JK'),
-('01001-000', 'Brasil', 'São Paulo', 'SP', 'Praça da Sé', 1, -23.55052, -46.63331, 'Sé', 'Ao lado do metrô');
+('04543-907', 'Brasil', 'São Paulo', 'SP', 'Av. Pres. Juscelino Kubitschek', 2041, -23.58998, -46.68987, 'Vila Olimpia', 'Shopping JK'),
+('01001-000', 'Brasil', 'São Paulo', 'SP', 'Praça da Sé', 1, -23.55052, -46.63331, 'Se', 'Ao lado do metrô'),
+('69000-000', 'Brasil', 'Manaus', 'AM', 'Rua das Flores', 452, -3.10194, -60.02528, 'Centro', 'Loja 1'),
+('40000-000', 'Brasil', 'Salvador', 'BA', 'Av. Oceânica', 1230, -12.97111, -38.51083, 'Barra', 'Loja 2'),
+('90000-000', 'Brasil', 'Porto Alegre', 'RS', 'Av. Borges de Medeiros', 300, -30.02778, -51.22833, 'Centro Historico', 'Loja 3'),
+('70000-000', 'Brasil', 'Brasília', 'DF', 'Esplanada dos Ministérios', 5, -15.79423, -47.88251, 'Zona Civico-Administrativa', 'Loja 4'),
+('30000-000', 'Brasil', 'Belo Horizonte', 'MG', 'Av. Afonso Pena', 1500, -19.91668, -43.93449, 'Centro', 'Loja 5'),
+('80000-000', 'Brasil', 'Curitiba', 'PR', 'Rua XV de Novembro', 800, -25.42969, -49.27136, 'Centro', 'Loja 6'),
+('50000-000', 'Brasil', 'Recife', 'PE', 'Av. Boa Viagem', 4500, -8.06206, -34.89311, 'Boa Viagem', 'Loja 7');
 
 INSERT INTO Empresa (Nome_Empresa, Cnpj, Fk_Endereco) VALUES
 ('Banrisul', '12.345.678/0001-99', 1);
@@ -167,20 +174,6 @@ INSERT INTO CargoPermissao (Fk_Cargo, Fk_Permissao) VALUES
 (1, 1),
 (2, 1),
 (3, 2);
-
-
--- Novos Endereços gerados aleatoriamente (Copie a saída do script Python aqui)
-INSERT INTO Enderecos (Cep, Pais, Cidade, UF, Logradouro, Numero, Latitude, Longitude, Bairro, Complemento) VALUES
-('01310-100', 'Brasil', 'São Paulo', 'SP', 'Av. Paulista', 1000, -23.56168, -46.65598, 'Bela Vista', 'Andar 10'),
-('04543-907', 'Brasil', 'São Paulo', 'SP', 'Av. Pres. Juscelino Kubitschek', 2041, -23.58998, -46.68987, 'Vila Olimpia', 'Shopping JK'),
-('01001-000', 'Brasil', 'São Paulo', 'SP', 'Praça da Sé', 1, -23.55052, -46.63331, 'Se', 'Ao lado do metrô'),
-('69000-000', 'Brasil', 'Manaus', 'AM', 'Rua das Flores', 452, -3.10194, -60.02528, 'Centro', 'Loja 1'),
-('40000-000', 'Brasil', 'Salvador', 'BA', 'Av. Oceânica', 1230, -12.97111, -38.51083, 'Barra', 'Loja 2'),
-('90000-000', 'Brasil', 'Porto Alegre', 'RS', 'Av. Borges de Medeiros', 300, -30.02778, -51.22833, 'Centro Historico', 'Loja 3'),
-('70000-000', 'Brasil', 'Brasília', 'DF', 'Esplanada dos Ministérios', 5, -15.79423, -47.88251, 'Zona Civico-Administrativa', 'Loja 4'),
-('30000-000', 'Brasil', 'Belo Horizonte', 'MG', 'Av. Afonso Pena', 1500, -19.91668, -43.93449, 'Centro', 'Loja 5'),
-('80000-000', 'Brasil', 'Curitiba', 'PR', 'Rua XV de Novembro', 800, -25.42969, -49.27136, 'Centro', 'Loja 6'),
-('50000-000', 'Brasil', 'Recife', 'PE', 'Av. Boa Viagem', 4500, -8.06206, -34.89311, 'Boa Viagem', 'Loja 7');
 
 INSERT INTO Caixa (Macaddress, codigoCaixa, Fk_Endereco_Maquina, Fk_Empresa)
 VALUES
