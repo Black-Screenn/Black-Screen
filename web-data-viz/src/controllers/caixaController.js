@@ -179,6 +179,51 @@ async function buscarInfoCaixaBuckeet(req, res) {
     });
 }
 
+async function buscarTodosChamados(req, res) {
+  try {
+    const baseUrl = process.env.URL_JIRA;
+    const username = process.env.USER_JIRA;
+    const token = process.env.TOKEN_JIRA;
+
+    const url = `${baseUrl}/rest/api/3/search/jql`;
+
+    const jsonBody = {
+      jql: `project = CHAMADO AND status = \"Open\"`,
+      fields: ["description"],
+    };
+
+    const auth = btoa(`${username}:${token}`);
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(jsonBody),
+    });
+
+    if (!response.ok) {
+      console.log(`Erro HTTP ao buscar chamado: ${response.status}`);
+      const errorText = await response.text();
+      console.log(`Resposta: ${errorText}`);
+      return null;
+    }
+
+    const jsonResponse = await response.json();
+    if (!jsonResponse.issues || jsonResponse.issues.length === 0) {
+      console.log("Nenhum chamado encontrado");
+      return null;
+    }
+
+    return res.status(200).json(jsonResponse.issues);
+  } catch (e) {
+    console.error("erro:", e.code, e.sqlMessage || e.message);
+    return res.status(500).json({ erro: "Falha ao consultar chamados" });
+  }
+}
+
 module.exports = {
   listar,
   cadastrar,
@@ -186,4 +231,5 @@ module.exports = {
   listarInfo,
   buscarChamado,
   buscarInfoCaixaBuckeet,
+  buscarTodosChamados,
 };

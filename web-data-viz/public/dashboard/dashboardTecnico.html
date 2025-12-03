@@ -153,11 +153,23 @@
         ></script>
 
         <script>
+            // Nome do usuário
             document.getElementById("b_usuario").innerHTML =
                 sessionStorage.NOME_USUARIO || "usuário";
 
-            const icon = L.icon({
-                iconUrl: "../assets/imgs/marker.png",
+            // Configuração dos ícones
+            const greenIcon = L.icon({
+                iconUrl: "../assets/imgs/green-marker.png",
+                shadowUrl: "../assets/imgs/marker_shadow.png",
+                iconSize: [48, 95],
+                shadowSize: [50, 64],
+                iconAnchor: [22, 94],
+                shadowAnchor: [0, 72],
+                popupAnchor: [-3, -76],
+            });
+
+            const redIcon = L.icon({
+                iconUrl: "../assets/imgs/red-marker.png",
                 shadowUrl: "../assets/imgs/marker_shadow.png",
                 iconSize: [48, 95],
                 shadowSize: [50, 64],
@@ -180,28 +192,86 @@
             const inputPesquisa = document.getElementById("pesquisa-caixa");
             const listaResultados = document.getElementById("lista-caixas");
             let allCaixas = [];
+            let caixasComChamados = new Set();
 
-            // Carrega dados das caixas
-            fetch("/caixas/listar", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    FK_EMPRESA: fkEmpresa,
-                },
-            })
-                .then((r) => r.json())
-                .then((lista) => {
+            async function carregarChamados() {
+                try {
+                    const response = await fetch(
+                        "/caixas/listartodoschamados",
+                        {
+                            method: "GET",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                        },
+                    );
+
+                    const chamados = await response.json();
+
+                    const issues = Array.isArray(chamados)
+                        ? chamados
+                        : chamados.issues || [];
+
+                    if (issues.length > 0) {
+                        issues.forEach((issue, index) => {
+                            if (issue.fields?.description?.content) {
+                                issue.fields.description.content.forEach(
+                                    (paragraph, pIndex) => {
+                                        if (paragraph.content) {
+                                            paragraph.content.forEach(
+                                                (textNode, tIndex) => {
+                                                    if (textNode.text) {
+                                                        const match =
+                                                            textNode.text.match(
+                                                                /ID ATM:\s*(\d+)/i,
+                                                            );
+                                                        if (match) {
+                                                            caixasComChamados.add(
+                                                                match[1],
+                                                            );
+                                                        }
+                                                    }
+                                                },
+                                            );
+                                        }
+                                    },
+                                );
+                            }
+                        });
+                    }
+                } catch (err) {
+                    console.error("Erro ao carregar chamados:", err);
+                }
+            }
+
+            Promise.all([
+                carregarChamados(),
+                fetch("/caixas/listar", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        FK_EMPRESA: fkEmpresa,
+                    },
+                }).then((r) => r.json()),
+            ])
+                .then(([_, lista]) => {
                     allCaixas = lista.filter(
                         (c) => c.Latitude != null && c.Longitude != null,
                     );
 
                     const group = L.featureGroup();
                     allCaixas.forEach((c) => {
+                        const macUpper = c.Macaddress.toUpperCase();
+                        const iconToUse = caixasComChamados.has(macUpper)
+                            ? redIcon
+                            : greenIcon;
+
                         const marker = L.marker([c.Latitude, c.Longitude], {
-                            icon: icon,
+                            icon: iconToUse,
                         })
                             .bindPopup(
-                                `<b>${c.codigoCaixa}</b><br>${c.Logradouro}<br>${c.Bairro} - ${c.Cidade}/${c.UF}<br> <i>Empresa dona: </i>${c.eNome}<br> <i>Código da empresa: </i> ${c.Id_Empresa}`,
+                                `<b>${c.codigoCaixa}</b><br>${c.Logradouro}<br>${c.Bairro} - ${c.Cidade}/${c.UF}<br>
+                         <i>Empresa dona: </i>${c.eNome}<br>`,
                             )
                             .addTo(group);
 
@@ -224,9 +294,7 @@
                         } catch (_) {}
                     }
                 })
-                .catch((err) =>
-                    console.error("Falha ao carregar /caixas:", err),
-                );
+                .catch((err) => console.error("Falha ao carregar dados:", err));
 
             inputPesquisa.addEventListener("input", function () {
                 const termo = this.value.toLowerCase().trim();
@@ -247,13 +315,15 @@
 
                 if (resultados.length > 0) {
                     resultados.slice(0, 8).forEach((c) => {
+                        const macUpper = c.Macaddress.toUpperCase();
+                        const temChamado = caixasComChamados.has(macUpper);
                         const div = document.createElement("div");
                         div.className = "resultado-caixa";
                         div.innerHTML = `
-                        <div>
+                          <div>
                             <strong>${c.codigoCaixa}</strong><br>
                             <small>${c.Logradouro}, ${c.Bairro}</small>
-                        </div>
+                          </div>
                     `;
                         div.onclick = () => {
                             window.location.href = `../dashboardHercules/caixa.html?id=${c.Macaddress}`;
