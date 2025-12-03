@@ -42,13 +42,27 @@ h3 {
     display: none;
 }
 
+#content-relatorio .grafico3 {
+    /* Altura e Largura menores para o PDF */
+    max-width: 550px;
+    height: 280px;
+    /* Você pode ajustar esses valores até que fique ideal no PDF */
+}
+
 .grafico-relatorio .card,
-.grafico2-relatorio .card{
+.grafico2-relatorio .card,
+.grafico3-relatorio .card{
     justify-self: center;
     margin: 15px;
 }
 
+.grafico3-relatorio .card{
+    margin-top: 60px;
+    margin-bottom: 30px;
+}
+
 .observacao{
+    margin-top: 10px;
     justify-self: flex-start;
 }
 
@@ -408,13 +422,3 @@ h3 {
     margin: 0;
     margin-top: 5px;
 }
-
-
-
-
-
-
-
-
-
-
