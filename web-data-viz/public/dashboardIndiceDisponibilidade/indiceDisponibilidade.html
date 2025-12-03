@@ -650,7 +650,7 @@
             const dataLinha = new Date(y, Number(m) - 1, d, 12, 0, 0);
 
             const okData = (dataLinha.getTime() >= inicioAnt.getTime()) && (dataLinha.getTime() <= fimAnt.getTime());
-            const okBairro = (select_bairro.value === "Todas as Regiões") || (linha.bairro === select_bairro.value);
+            const okBairro = (select_bairro.value === "Todos os Bairros") || (linha.bairro === select_bairro.value);
 
             if (okData && okBairro) {
                 filtradoAnt.push(linha);
