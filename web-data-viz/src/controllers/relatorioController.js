@@ -13,6 +13,8 @@ const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const modelo = "gemini-2.0-flash-lite";
 const md = new MarkdownIt({ html: true });
 
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 function otimizarDadosParaIA(dadosBrutos) {
     const agrupado = {};
 
@@ -115,9 +117,9 @@ function previsaoDados(historico, diasPrever = 7, ultimaDataHistorico) {
 
     const predicoes = [];
     const indexUltimoPonto = historico.length - 1;
-    
-    const horasParaPrever = diasPrever * 24; 
-    
+
+    const horasParaPrever = diasPrever * 24;
+
     let dataReferencia = new Date(ultimaDataHistorico);
 
     for (let i = 1; i <= horasParaPrever; i++) {
@@ -126,8 +128,8 @@ function previsaoDados(historico, diasPrever = 7, ultimaDataHistorico) {
 
         dataReferencia.setHours(dataReferencia.getHours() + 1);
 
-        const labelFormatada = dataReferencia.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' + 
-                               dataReferencia.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const labelFormatada = dataReferencia.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' +
+            dataReferencia.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
         const clamp = (n) => Math.max(0, Math.min(100, n));
 
@@ -142,7 +144,7 @@ function previsaoDados(historico, diasPrever = 7, ultimaDataHistorico) {
     return predicoes;
 }
 
-function gerarGraficoComponente(id, titulo, labels, dadosHistorico, dadosPrevisao, cor = '#000000') {
+function gerarGraficoComponente(id, titulo, labels, dadosHistorico, dadosPrevisao, dadosMin, dadosMax, cor = '#000000') {
 
     const html = `
         <div class="chart-section" style="page-break-inside: avoid; margin-bottom: 30px;">
@@ -163,12 +165,13 @@ function gerarGraficoComponente(id, titulo, labels, dadosHistorico, dadosPrevisa
                         label: 'Histórico',
                         data: ${JSON.stringify(dadosHistorico)},
                         borderColor: '${cor}',
-                        backgroundColor: '${cor}20', // 20 é transparencia hex
+                        backgroundColor: '${cor}',
                         borderWidth: 2,
-                        fill: true,
+                        fill: false, // Alterei para false para não pintar o chão do histórico, se preferir pintar, use true
                         tension: 0.4,
                         pointRadius: 0,
-                        pointHitRadius: 10
+                        pointHitRadius: 10,
+                        order: 1 // Fica na frente
                     },
                     {
                         label: 'Previsão',
@@ -178,7 +181,29 @@ function gerarGraficoComponente(id, titulo, labels, dadosHistorico, dadosPrevisa
                         borderWidth: 2,
                         pointRadius: 0,
                         tension: 0.4,
-                        fill: false
+                        fill: false,
+                        order: 2
+                    },
+                    /* --- SOMBRA DE ERRO (MAX) --- */
+                    {
+                        label: 'Margem Max',
+                        data: ${JSON.stringify(dadosMax)},
+                        borderColor: 'transparent', // Linha invisível
+                        pointRadius: 0,
+                        fill: '+1', // Preenche até o próximo dataset (que é o Min)
+                        backgroundColor: '${cor}33', // Cor com transparência (hex 33 = ~20%)
+                        tension: 0.4,
+                        order: 3 // Fica atrás das linhas principais
+                    },
+                    /* --- SOMBRA DE ERRO (MIN) --- */
+                    {
+                        label: 'Margem Min',
+                        data: ${JSON.stringify(dadosMin)},
+                        borderColor: 'transparent', // Linha invisível
+                        pointRadius: 0,
+                        fill: false, // Este serve apenas de base para o Max
+                        tension: 0.4,
+                        order: 4
                     }
                 ]
             },
@@ -186,6 +211,10 @@ function gerarGraficoComponente(id, titulo, labels, dadosHistorico, dadosPrevisa
                 animation: false,
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -197,12 +226,21 @@ function gerarGraficoComponente(id, titulo, labels, dadosHistorico, dadosPrevisa
                         grid: { display: false },
                         ticks: { 
                             font: { size: 10 },
-                            maxTicksLimit: 10 // Evita poluição visual no eixo X
+                            maxTicksLimit: 10
                         }
                     }
                 },
                 plugins: {
-                    legend: { display: true, labels: { font: { size: 10 } } }
+                    legend: { 
+                        display: true, 
+                        labels: { 
+                            font: { size: 10 },
+                            filter: function(item, chart) {
+                                // Esconde as legendas das margens para não poluir
+                                return !item.text.includes('Margem');
+                            }
+                        } 
+                    }
                 }
             }
         });
@@ -218,7 +256,7 @@ function processarDadosParaGrafico(dadosBrutos, chaveMetrica) {
         if (registro[chaveMetrica] === undefined || registro[chaveMetrica] === null) return;
 
         const dataHora = new Date(registro.datetime);
-        dataHora.setMinutes(0, 0, 0); 
+        dataHora.setMinutes(0, 0, 0);
         const chaveHora = dataHora.toISOString();
 
         if (!dadosAgrupados[chaveHora]) {
@@ -226,10 +264,10 @@ function processarDadosParaGrafico(dadosBrutos, chaveMetrica) {
         }
 
         const valor = parseFloat(registro[chaveMetrica]);
-        
+
         dadosAgrupados[chaveHora].total += valor;
         dadosAgrupados[chaveHora].count += 1;
-        
+
         if (valor > dadosAgrupados[chaveHora].max) {
             dadosAgrupados[chaveHora].max = valor;
         }
@@ -247,7 +285,7 @@ function processarDadosParaGrafico(dadosBrutos, chaveMetrica) {
     return arrayResultado.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
 }
 
-async function agenteAnalise(dadosJSON, uploadedFile) {
+async function agenteAnalise(dadosJSON, uploadedFile, maxRetries = 30) {
     console.log("[GERAR RELATORIO] [1/4] Iniciando Módulo de Análise");
 
     const instrucaoSistemaAnalise = `
@@ -389,30 +427,55 @@ async function agenteAnalise(dadosJSON, uploadedFile) {
         3. Gere apenas o conforme o template do sistema em MARKDOWN.
     `;
 
-    try {
-        const result = await genAI.models.generateContent({
-            model: modelo,
-            systemInstruction: instrucaoSistemaAnalise,
-            contents: [
-                {
-                    role: "user",
-                    parts: [
-                        { text: promptUsuario },
-                        { fileData: { mimeType: uploadedFile.mimeType, fileUri: uploadedFile.uri } }
-                    ]
-                }
-            ]
+    let tentativas = 0;
+    let tempoEspera = 2000; // Começa esperando 2 segundos
 
-        });
-        console.log("[GERAR RELATORIO] Agente de Análise concluiu.");
-        return result.text;
-    } catch (error) {
-        console.error("[GERAR RELATORIO - ERRO] Erro no Agente de Análise:", error);
-        throw new Error("Falha ao gerar análise.");
+    while (tentativas < maxRetries) {
+        try {
+            const result = await genAI.models.generateContent({
+                model: modelo,
+                systemInstruction: instrucaoSistemaAnalise,
+                contents: [
+                    {
+                        role: "user",
+                        parts: [
+                            { text: promptUsuario },
+                            { fileData: { mimeType: uploadedFile.mimeType, fileUri: uploadedFile.uri } }
+                        ]
+                    }
+                ]
+            });
+
+            console.log("[GERAR RELATORIO] Agente de Análise concluiu com sucesso.");
+            return result.text;
+
+        } catch (error) {
+            tentativas++;
+
+            // Verifica se é erro 429 (Resource Exhausted)
+            const isRateLimitError = error.status === 429 ||
+                (error.message && error.message.includes('429')) ||
+                (error.error && error.error.code === 429);
+
+            if (isRateLimitError) {
+                console.warn(`[GERAR RELATORIO] Cota de API excedida no Agente de Análise (429). Tentativa ${tentativas}/${maxRetries}. Aguardando ${tempoEspera / 1000}s...`);
+
+                if (tentativas >= maxRetries) {
+                    console.error("[GERAR RELATORIO - FATAL] Número máximo de tentativas excedido no Agente de Análise.");
+                    throw new Error("Falha ao gerar análise: API sobrecarregada após várias tentativas.");
+                }
+
+                await delay(tempoEspera);
+                tempoEspera *= 2;
+            } else {
+                console.error("[GERAR RELATORIO - ERRO] Erro não recuperável no Agente de Análise:", error);
+                throw error;
+            }
+        }
     }
 }
 
-async function agenteRecomendacoes(textoAnaliseFactual) {
+async function agenteRecomendacoes(textoAnaliseFactual, maxRetries = 30) {
     console.log("[GERAR RELATORIO] [2/4] Iniciando Módulo de Insights");
 
     const instrucaoSistemaRecomendacoes = `
@@ -443,21 +506,46 @@ async function agenteRecomendacoes(textoAnaliseFactual) {
         --- FIM DO RELATÓRIO ---
     `;
 
-    try {
-        const result = await genAI.models.generateContent({
-            model: modelo,
-            systemInstruction: instrucaoSistemaRecomendacoes,
-            contents: promptUsuario
-        });
-        console.log("[GERAR RELATORIO] Agente de Recomendações concluiu.");
-        return result.text;
-    } catch (error) {
-        console.error("[GERAR RELATORIO - ERRO] Erro no Agente de Recomendações:", error);
-        throw new Error("Falha ao gerar recomendações.");
+    let tentativas = 0;
+    let tempoEspera = 2000;
+
+    while (tentativas < maxRetries) {
+        try {
+            const result = await genAI.models.generateContent({
+                model: modelo,
+                systemInstruction: instrucaoSistemaRecomendacoes,
+                contents: promptUsuario
+            });
+
+            console.log("[GERAR RELATORIO] Agente de Recomendações concluiu com sucesso.");
+            return result.text;
+
+        } catch (error) {
+            tentativas++;
+
+            const isRateLimitError = error.status === 429 ||
+                (error.message && error.message.includes('429')) ||
+                (error.error && error.error.code === 429);
+
+            if (isRateLimitError) {
+                console.warn(`[GERAR RELATORIO] Cota de API excedida (429). Tentativa ${tentativas}/${maxRetries}. Aguardando ${tempoEspera / 1000}s...`);
+
+                if (tentativas >= maxRetries) {
+                    console.error("[GERAR RELATORIO - FATAL] Número máximo de tentativas excedido.");
+                    throw new Error("Falha ao gerar recomendações: API sobrecarregada após várias tentativas.");
+                }
+
+                await delay(tempoEspera);
+                tempoEspera *= 2;
+            } else {
+                console.error("[GERAR RELATORIO - ERRO] Erro não recuperável no Agente de Recomendações:", error);
+                throw error;
+            }
+        }
     }
 }
 
-async function agenteSumarizacao(relatorioCompleto) {
+async function agenteSumarizacao(relatorioCompleto, maxRetries = 30) {
     console.log("[GERAR RELATORIO] [3/4] Iniciando Módulo de Sumarização (Final)...");
 
     const instrucaoSistemaSumarizacao = `
@@ -490,17 +578,42 @@ async function agenteSumarizacao(relatorioCompleto) {
         --- FIM DO RELATÓRIO ---
     `;
 
-    try {
-        const result = await genAI.models.generateContent({
-            model: modelo,
-            systemInstruction: instrucaoSistemaSumarizacao,
-            contents: promptUsuario
-        });
-        console.log("[GERAR RELATORIO] Agente de Sumarização concluiu.");
-        return result.text;
-    } catch (error) {
-        console.error("[GERAR RELATORIO - ERRO] Erro no Agente de Sumarização:", error);
-        throw new Error("Falha ao gerar sumário.");
+    let tentativas = 0;
+    let tempoEspera = 2000;
+
+    while (tentativas < maxRetries) {
+        try {
+            const result = await genAI.models.generateContent({
+                model: modelo,
+                systemInstruction: instrucaoSistemaSumarizacao,
+                contents: promptUsuario
+            });
+
+            console.log("[GERAR RELATORIO] Agente de Sumarização concluiu com sucesso.");
+            return result.text;
+
+        } catch (error) {
+            tentativas++;
+
+            const isRateLimitError = error.status === 429 ||
+                (error.message && error.message.includes('429')) ||
+                (error.error && error.error.code === 429);
+
+            if (isRateLimitError) {
+                console.warn(`[GERAR RELATORIO] Cota de API excedida no Agente de Sumarização (429). Tentativa ${tentativas}/${maxRetries}. Aguardando ${tempoEspera / 1000}s...`);
+
+                if (tentativas >= maxRetries) {
+                    console.error("[GERAR RELATORIO - FATAL] Número máximo de tentativas excedido no Agente de Sumarização.");
+                    throw new Error("Falha ao gerar sumário: API sobrecarregada após várias tentativas.");
+                }
+
+                await delay(tempoEspera);
+                tempoEspera *= 2;
+            } else {
+                console.error("[GERAR RELATORIO - ERRO] Erro não recuperável no Agente de Sumarização:", error);
+                throw error;
+            }
+        }
     }
 }
 
@@ -540,7 +653,7 @@ async function gerarRelatorio(req, res) {
         });
 
         const dadosGrafico = {};
-        
+
         if (dadosCompletosS3.length > 0) {
             if (cpuCheck) dadosGrafico.cpu = processarDadosParaGrafico(dadosCompletosS3, 'cpu');
             if (ramCheck) dadosGrafico.ram = processarDadosParaGrafico(dadosCompletosS3, 'ram');
@@ -562,9 +675,9 @@ async function gerarRelatorio(req, res) {
         if (dadosGrafico.cpu) dadosGrafico.cpu = filtrarUltimosDias(dadosGrafico.cpu);
         if (dadosGrafico.ram) dadosGrafico.ram = filtrarUltimosDias(dadosGrafico.ram);
         if (dadosGrafico.disco) dadosGrafico.disco = filtrarUltimosDias(dadosGrafico.disco);
-        
+
         const previsoesFuturas = {};
-        
+
         let ultimaDataISO = null;
         if (dadosGrafico.cpu && dadosGrafico.cpu.length > 0) ultimaDataISO = dadosGrafico.cpu[dadosGrafico.cpu.length - 1].datetime;
         else if (dadosGrafico.ram && dadosGrafico.ram.length > 0) ultimaDataISO = dadosGrafico.ram[dadosGrafico.ram.length - 1].datetime;
@@ -592,73 +705,101 @@ async function gerarRelatorio(req, res) {
 
         const labelsHistorico = baseLabels.map(isoDate => {
             const d = new Date(isoDate);
-            return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' + 
-                   d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' +
+                d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         });
 
         const algumaPrevisao = previsoesFuturas.cpu || previsoesFuturas.ram || previsoesFuturas.disco;
         const labelsFuturo = algumaPrevisao ? algumaPrevisao.map(p => p.label) : [];
         const labelsTotal = [...labelsHistorico, ...labelsFuturo];
 
+        if (cpuCheck && previsoesFuturas.cpu && dadosGrafico.cpu) {
+            const histData = dadosGrafico.cpu.map(d => d.media);
 
-        if (cpuCheck && dadosGrafico.cpu) {
-            const histData = dadosGrafico.cpu.map(d => d.media); 
-            const prevData = previsoesFuturas.cpu.map(p => p.value);
+            const prevDataValues = previsoesFuturas.cpu.map(p => p.value);
+            const prevDataMin = previsoesFuturas.cpu.map(p => p.min);
+            const prevDataMax = previsoesFuturas.cpu.map(p => p.max);
+
+            const ultimoValorHistorico = histData[histData.length - 1];
+
+            const paddingHistorico = new Array(labelsHistorico.length - 1).fill(null);
 
             const histAjustado = [...histData, ...new Array(labelsFuturo.length).fill(null)];
-            const ultimoValor = histData[histData.length - 1];
-            const prevAjustado = [...new Array(labelsHistorico.length - 1).fill(null), ultimoValor, ...prevData];
+
+            const prevAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataValues];
+
+            const minAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataMin];
+            const maxAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataMax];
 
             const graficoCPU = gerarGraficoComponente(
                 'chartCpu',
-                'Monitoramento e Previsão de CPU (Média Horária)',
+                'Monitoramento e Previsão de CPU',
                 labelsTotal,
                 histAjustado,
                 prevAjustado,
+                minAjustado,
+                maxAjustado,
                 '#2196F3'
             );
+
             graficosHTML += graficoCPU.html;
             scriptsChartJS += graficoCPU.script;
         }
 
-        if (ramCheck && dadosGrafico.ram) {
+        if (ramCheck && previsoesFuturas.ram && dadosGrafico.ram) {
             const histData = dadosGrafico.ram.map(d => d.media);
-            const prevData = previsoesFuturas.ram.map(p => p.value);
+            const prevDataValues = previsoesFuturas.ram.map(p => p.value);
+            const prevDataMin = previsoesFuturas.ram.map(p => p.min);
+            const prevDataMax = previsoesFuturas.ram.map(p => p.max);
+            const ultimoValorHistorico = histData[histData.length - 1];
+            const paddingHistorico = new Array(labelsHistorico.length - 1).fill(null);
 
             const histAjustado = [...histData, ...new Array(labelsFuturo.length).fill(null)];
-            const ultimoValor = histData[histData.length - 1];
-            const prevAjustado = [...new Array(labelsHistorico.length - 1).fill(null), ultimoValor, ...prevData];
+            const prevAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataValues];
+            const minAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataMin];
+            const maxAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataMax];
 
             const graficoRAM = gerarGraficoComponente(
                 'chartRam',
-                'Monitoramento e Previsão de RAM (Média Horária)',
+                'Monitoramento e Previsão de RAM',
                 labelsTotal,
                 histAjustado,
                 prevAjustado,
-                '#9C27B0'
+                minAjustado,
+                maxAjustado,
+                '#9C27B0' // Roxo
             );
+
             graficosHTML += graficoRAM.html;
             scriptsChartJS += graficoRAM.script;
         }
 
-        if (discoCheck && dadosGrafico.disco) {
+        if (discoCheck && previsoesFuturas.disco && dadosGrafico.disco) {
             const histData = dadosGrafico.disco.map(d => d.media);
-            const prevData = previsoesFuturas.disco.map(p => p.value);
+            const prevDataValues = previsoesFuturas.disco.map(p => p.value);
+            const prevDataMin = previsoesFuturas.disco.map(p => p.min);
+            const prevDataMax = previsoesFuturas.disco.map(p => p.max);
+            const ultimoValorHistorico = histData[histData.length - 1];
+            const paddingHistorico = new Array(labelsHistorico.length - 1).fill(null);
 
             const histAjustado = [...histData, ...new Array(labelsFuturo.length).fill(null)];
-            const ultimoValor = histData[histData.length - 1];
-            const prevAjustado = [...new Array(labelsHistorico.length - 1).fill(null), ultimoValor, ...prevData];
+            const prevAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataValues];
+            const minAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataMin];
+            const maxAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataMax];
 
-            const graficoDISCO = gerarGraficoComponente(
+            const graficoDisco = gerarGraficoComponente(
                 'chartDisco',
-                'Monitoramento e Previsão de Disco (Média Horária)',
+                'Monitoramento e Previsão de Disco',
                 labelsTotal,
                 histAjustado,
                 prevAjustado,
+                minAjustado,
+                maxAjustado,
                 '#ec8815'
             );
-            graficosHTML += graficoDISCO.html;
-            scriptsChartJS += graficoDISCO.script;
+
+            graficosHTML += graficoDisco.html;
+            scriptsChartJS += graficoDisco.script;
         }
 
         const componentesParametro = await buscarParametroPorComponente();
