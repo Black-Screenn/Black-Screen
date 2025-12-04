@@ -318,7 +318,8 @@
 
                 nome_componente = componentesBanco.Nome_Componente
 
-               
+                console.log(nome_componente)
+                console.log(componentesBanco.Nome_Componente)
                 if (nome_componente === "RAM") {
                     valorRamParametrizado = parseFloat(componentesBanco.Valor_Parametrizado)
 
@@ -339,6 +340,7 @@
                     return
                 }
                 
+               
                 if(nome_componente === "CPU"){
                     valorCpuParametrizado = parseFloat(componentesBanco.Valor_Parametrizado)
                     porcentagemCpu = ((medianaCpu - valorCpuParametrizado)/medianaCpu) *100;
@@ -397,6 +399,7 @@
                     }
 
             });
+            
 
         })
 

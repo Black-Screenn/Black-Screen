@@ -184,7 +184,7 @@ INSERT INTO Enderecos (Cep, Pais, Cidade, UF, Logradouro, Numero, Latitude, Long
 
 INSERT INTO Caixa (Macaddress, codigoCaixa, Fk_Endereco_Maquina, Fk_Empresa)
 VALUES
-('02bbbdc02bf9', 'ATM-SP-AVP-01', 1, 1),
+('80160640191877', 'ATM-SP-AVP-01', 1, 1),
 ('16c3ad24476b', 'ATM-SP-JKB-01', 2, 1),
 ('1817c27bfb2d', 'ATM-SP-PSE-01', 3, 1),
 ('28b582796f26', 'ATM-MAO-CEN-01', 4, 1),
@@ -199,7 +199,7 @@ INSERT INTO Caixa_Componente (Fk_Caixa, Fk_Componente)
 SELECT c.Id_Caixa, comp.Id_Componente
 FROM Caixa c
 JOIN Componentes comp ON c.Fk_Empresa = comp.Fk_Empresa
-WHERE c.Macaddress IN ('02bbbdc02bf9', '16c3ad24476b', '1817c27bfb2d', '28b582796f26', '56d446c142d2', '963c48bb0adf', 'bc7673e2bc48', 'c8a006971278', 'd8408e1114d1', 'f0185cdf891b')
+WHERE c.Macaddress IN ('80160640191877', '16c3ad24476b', '1817c27bfb2d', '28b582796f26', '56d446c142d2', '963c48bb0adf', 'bc7673e2bc48', 'c8a006971278', 'd8408e1114d1', 'f0185cdf891b')
   AND c.Fk_Empresa = 1
 ON DUPLICATE KEY UPDATE
   Caixa_Componente.Data_Associacao = Caixa_Componente.Data_Associacao;
