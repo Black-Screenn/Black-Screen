@@ -166,7 +166,9 @@
                     const endereco = `${atm.Logradouro}, ${atm.Bairro}`;
                     const cidadeUF = `${atm.Cidade}/${atm.UF}`;
                     const idMaquina = atm.Macaddress
-                    let qtdAlertas = chamadopormaquina[idMaquina] ;
+                    console.log(chamadopormaquina)
+                    console.log(idMaquina)
+                    let qtdAlertas = chamadopormaquina["ID ATM: " + idMaquina] || 0;
 
                     item.innerHTML = `
                         
