@@ -105,7 +105,7 @@ async function acessarRelatorio(req, res) {
 
     console.log("--- DEBUG AWS S3 ---");
     console.log("1. Link recebido:", link);
-    console.log("2. Bucket no ENV:", process.env.AWS_BUCKET_CURATED_NAME);
+    console.log("2. Bucket no ENV:", process.env.AWS_BUCKET_CLIENT_NAME);
     console.log("3. Region no ENV:", process.env.REGION_AWS);
 
     const partes = link.split(".com/");
@@ -149,7 +149,7 @@ function datasRange(periodoInicio, periodoFim) {
 async function dadosS3PorPeriodo(fkEmpresa, periodoInicio, periodoFim) {
   const datas = datasRange(periodoInicio, periodoFim);
   let dadosCombinados = [];
-  const BUCKET_NAME = process.env.AWS_BUCKET_CURATED_NAME;
+  const BUCKET_NAME = process.env.AWS_BUCKET_CLIENT_NAME;
 
   for (const dataString of datas) {
     const [ano, mes, dia] = dataString.split("-");

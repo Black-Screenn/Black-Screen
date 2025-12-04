@@ -1,152 +1,179 @@
-const { GoogleGenAI } = require('@google/genai');
-const fs = require('fs').promises;
-const MarkdownIt = require('markdown-it');
-const puppeteer = require('puppeteer');
-const crypto = require('crypto');
-const regression = require('regression');
+const { GoogleGenAI } = require("@google/genai");
+const fs = require("fs").promises;
+const MarkdownIt = require("markdown-it");
+const puppeteer = require("puppeteer");
+const crypto = require("crypto");
+const regression = require("regression");
 
-const { uploadRelatorioS3, dadosS3PorPeriodo } = require('./cloudController.js');
-const { buscarParametroPorComponente } = require('../models/componenteModel.js')
-const { cadastrar, listar, avaliar } = require('../models/relatorioModel.js');
+const {
+  uploadRelatorioS3,
+  dadosS3PorPeriodo,
+} = require("./cloudController.js");
+const {
+  buscarParametroPorComponente,
+} = require("../models/componenteModel.js");
+const { cadastrar, listar, avaliar } = require("../models/relatorioModel.js");
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const modelo = "gemini-2.0-flash-lite";
 const md = new MarkdownIt({ html: true });
 
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function otimizarDadosParaIA(dadosBrutos) {
-    const agrupado = {};
+  const agrupado = {};
 
-    dadosBrutos.forEach(registro => {
-        const dataHora = new Date(registro.datetime || registro.data_hora);
-        dataHora.setMinutes(0, 0, 0);
-        const chave = `${registro.macaddress}_${dataHora.toISOString()}`;
+  dadosBrutos.forEach((registro) => {
+    const dataHora = new Date(registro.datetime || registro.data_hora);
+    dataHora.setMinutes(0, 0, 0);
+    const chave = `${registro.macaddress}_${dataHora.toISOString()}`;
 
-        if (!agrupado[chave]) {
-            agrupado[chave] = {
-                macaddress: registro.macaddress,
-                datetime: dataHora.toISOString(),
-                somaCpu: 0, count: 0,
-                somaRam: 0,
-                somaDisco: 0,
-                maxCpu: 0,
-                maxRam: 0,
-                maxDisco: 0
-            };
-        }
+    if (!agrupado[chave]) {
+      agrupado[chave] = {
+        macaddress: registro.macaddress,
+        datetime: dataHora.toISOString(),
+        somaCpu: 0,
+        count: 0,
+        somaRam: 0,
+        somaDisco: 0,
+        maxCpu: 0,
+        maxRam: 0,
+        maxDisco: 0,
+      };
+    }
 
-        const item = agrupado[chave];
-        item.count++;
+    const item = agrupado[chave];
+    item.count++;
 
-        if (registro.cpu !== undefined) {
-            const val = parseFloat(registro.cpu);
-            item.somaCpu += val;
-            if (val > item.maxCpu) item.maxCpu = val;
-        }
+    if (registro.cpu !== undefined) {
+      const val = parseFloat(registro.cpu);
+      item.somaCpu += val;
+      if (val > item.maxCpu) item.maxCpu = val;
+    }
 
-        if (registro.ram !== undefined) {
-            const val = parseFloat(registro.ram);
-            item.somaRam += val;
-            if (val > item.maxRam) item.maxRam = val;
-        }
+    if (registro.ram !== undefined) {
+      const val = parseFloat(registro.ram);
+      item.somaRam += val;
+      if (val > item.maxRam) item.maxRam = val;
+    }
 
-        if (registro.disco !== undefined) {
-            const val = parseFloat(registro.disco);
-            item.somaDisco += val;
-            if (val > item.maxDisco) item.maxDisco = val;
-        }
-    });
+    if (registro.disco !== undefined) {
+      const val = parseFloat(registro.disco);
+      item.somaDisco += val;
+      if (val > item.maxDisco) item.maxDisco = val;
+    }
+  });
 
-    return Object.values(agrupado).map(item => ({
-        macaddress: item.macaddress,
-        datetime: item.datetime,
-        cpu: item.maxCpu > 0 ? item.maxCpu.toFixed(1) : 0,
-        ram: item.maxRam > 0 ? item.maxRam.toFixed(1) : 0,
-        disco: item.maxDisco > 0 ? item.maxDisco.toFixed(1) : 0
-    }));
+  return Object.values(agrupado).map((item) => ({
+    macaddress: item.macaddress,
+    datetime: item.datetime,
+    cpu: item.maxCpu > 0 ? item.maxCpu.toFixed(1) : 0,
+    ram: item.maxRam > 0 ? item.maxRam.toFixed(1) : 0,
+    disco: item.maxDisco > 0 ? item.maxDisco.toFixed(1) : 0,
+  }));
 }
 
 function converterParaCSV(dataArray) {
-    if (!dataArray || dataArray.length === 0) return "";
+  if (!dataArray || dataArray.length === 0) return "";
 
-    const headers = Object.keys(dataArray[0]).join(',');
-    const rows = dataArray.map(obj => Object.values(obj).join(','));
-    return [headers, ...rows].join('\n');
+  const headers = Object.keys(dataArray[0]).join(",");
+  const rows = dataArray.map((obj) => Object.values(obj).join(","));
+  return [headers, ...rows].join("\n");
 }
 
 async function uploadArquivoParaGemini(buffer, fileName, mimeType) {
-    const tempFilePath = `/tmp/${fileName}`;
-    await fs.writeFile(tempFilePath, buffer);
+  const tempFilePath = `/tmp/${fileName}`;
+  await fs.writeFile(tempFilePath, buffer);
 
-    const uploadedFile = await genAI.files.upload({
-        file: tempFilePath,
-        mimeType: mimeType,
-        displayName: fileName,
-    });
+  const uploadedFile = await genAI.files.upload({
+    file: tempFilePath,
+    mimeType: mimeType,
+    displayName: fileName,
+  });
 
-    console.log(`Arquivo ${uploadedFile.displayName} (${uploadedFile.name}) carregado com sucesso.`);
-    await fs.unlink(tempFilePath);
+  console.log(
+    `Arquivo ${uploadedFile.displayName} (${uploadedFile.name}) carregado com sucesso.`,
+  );
+  await fs.unlink(tempFilePath);
 
-    return uploadedFile;
+  return uploadedFile;
 }
 
 function limparTextoIA(texto) {
-    if (!texto) return "";
+  if (!texto) return "";
 
-    return texto
-        .replace(/^```markdown\n?/i, '')
-        .replace(/^```\n?/i, '')
-        .replace(/```$/i, '')
-        .trim();
+  return texto
+    .replace(/^```markdown\n?/i, "")
+    .replace(/^```\n?/i, "")
+    .replace(/```$/i, "")
+    .trim();
 }
 
 function previsaoDados(historico, diasPrever = 7, ultimaDataHistorico) {
-    if (!historico || historico.length < 2) return [];
+  if (!historico || historico.length < 2) return [];
 
-    const dadosValor = historico.map((val, i) => [i, val]);
+  const dadosValor = historico.map((val, i) => [i, val]);
 
-    const resultado = regression.polynomial(dadosValor, { order: 1, precision: 3 });
+  const resultado = regression.polynomial(dadosValor, {
+    order: 1,
+    precision: 3,
+  });
 
-    let somaErro = 0;
-    dadosValor.forEach(([x, y]) => {
-        const valorPrevisto = resultado.predict(x)[1];
-        somaErro += Math.pow(y - valorPrevisto, 2);
+  let somaErro = 0;
+  dadosValor.forEach(([x, y]) => {
+    const valorPrevisto = resultado.predict(x)[1];
+    somaErro += Math.pow(y - valorPrevisto, 2);
+  });
+  const margemErro = Math.sqrt(somaErro / dadosValor.length);
+
+  const predicoes = [];
+  const indexUltimoPonto = historico.length - 1;
+
+  const horasParaPrever = diasPrever * 24;
+
+  let dataReferencia = new Date(ultimaDataHistorico);
+
+  for (let i = 1; i <= horasParaPrever; i++) {
+    const futuroX = indexUltimoPonto + i;
+    const yPrevisto = resultado.predict(futuroX)[1];
+
+    dataReferencia.setHours(dataReferencia.getHours() + 1);
+
+    const labelFormatada =
+      dataReferencia.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+      }) +
+      " " +
+      dataReferencia.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+    const clamp = (n) => Math.max(0, Math.min(100, n));
+
+    predicoes.push({
+      label: labelFormatada,
+      value: clamp(yPrevisto),
+      min: clamp(yPrevisto - margemErro),
+      max: clamp(yPrevisto + margemErro),
     });
-    const margemErro = Math.sqrt(somaErro / dadosValor.length);
+  }
 
-    const predicoes = [];
-    const indexUltimoPonto = historico.length - 1;
-
-    const horasParaPrever = diasPrever * 24;
-
-    let dataReferencia = new Date(ultimaDataHistorico);
-
-    for (let i = 1; i <= horasParaPrever; i++) {
-        const futuroX = indexUltimoPonto + i;
-        const yPrevisto = resultado.predict(futuroX)[1];
-
-        dataReferencia.setHours(dataReferencia.getHours() + 1);
-
-        const labelFormatada = dataReferencia.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' +
-            dataReferencia.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-        const clamp = (n) => Math.max(0, Math.min(100, n));
-
-        predicoes.push({
-            label: labelFormatada,
-            value: clamp(yPrevisto),
-            min: clamp(yPrevisto - margemErro),
-            max: clamp(yPrevisto + margemErro)
-        });
-    }
-
-    return predicoes;
+  return predicoes;
 }
 
-function gerarGraficoComponente(id, titulo, labels, dadosHistorico, dadosPrevisao, dadosMin, dadosMax, cor = '#000000') {
-
-    const html = `
+function gerarGraficoComponente(
+  id,
+  titulo,
+  labels,
+  dadosHistorico,
+  dadosPrevisao,
+  dadosMin,
+  dadosMax,
+  cor = "#000000",
+) {
+  const html = `
         <div class="chart-section" style="page-break-inside: avoid; margin-bottom: 30px;">
             <h3 style="border-left: 4px solid ${cor}; padding-left: 10px; margin-bottom: 10px;">${titulo}</h3>
             <div class="chart-container" style="position: relative; height: 250px; width: 100%;">
@@ -155,7 +182,7 @@ function gerarGraficoComponente(id, titulo, labels, dadosHistorico, dadosPrevisa
         </div>
     `;
 
-    const script = `
+  const script = `
         new Chart(document.getElementById('${id}').getContext('2d'), {
             type: 'line',
             data: {
@@ -224,74 +251,77 @@ function gerarGraficoComponente(id, titulo, labels, dadosHistorico, dadosPrevisa
                     },
                     x: {
                         grid: { display: false },
-                        ticks: { 
+                        ticks: {
                             font: { size: 10 },
                             maxTicksLimit: 10
                         }
                     }
                 },
                 plugins: {
-                    legend: { 
-                        display: true, 
-                        labels: { 
+                    legend: {
+                        display: true,
+                        labels: {
                             font: { size: 10 },
                             filter: function(item, chart) {
                                 // Esconde as legendas das margens para não poluir
                                 return !item.text.includes('Margem');
                             }
-                        } 
+                        }
                     }
                 }
             }
         });
     `;
 
-    return { html, script };
+  return { html, script };
 }
 
 function processarDadosParaGrafico(dadosBrutos, chaveMetrica) {
-    const dadosAgrupados = {};
+  const dadosAgrupados = {};
 
-    dadosBrutos.forEach(registro => {
-        if (registro[chaveMetrica] === undefined || registro[chaveMetrica] === null) return;
+  dadosBrutos.forEach((registro) => {
+    if (registro[chaveMetrica] === undefined || registro[chaveMetrica] === null)
+      return;
 
-        const dataHora = new Date(registro.datetime);
-        dataHora.setMinutes(0, 0, 0);
-        const chaveHora = dataHora.toISOString();
+    const dataHora = new Date(registro.datetime);
+    dataHora.setMinutes(0, 0, 0);
+    const chaveHora = dataHora.toISOString();
 
-        if (!dadosAgrupados[chaveHora]) {
-            dadosAgrupados[chaveHora] = { total: 0, count: 0, max: 0 };
-        }
+    if (!dadosAgrupados[chaveHora]) {
+      dadosAgrupados[chaveHora] = { total: 0, count: 0, max: 0 };
+    }
 
-        const valor = parseFloat(registro[chaveMetrica]);
+    const valor = parseFloat(registro[chaveMetrica]);
 
-        dadosAgrupados[chaveHora].total += valor;
-        dadosAgrupados[chaveHora].count += 1;
+    dadosAgrupados[chaveHora].total += valor;
+    dadosAgrupados[chaveHora].count += 1;
 
-        if (valor > dadosAgrupados[chaveHora].max) {
-            dadosAgrupados[chaveHora].max = valor;
-        }
-    });
+    if (valor > dadosAgrupados[chaveHora].max) {
+      dadosAgrupados[chaveHora].max = valor;
+    }
+  });
 
-    const arrayResultado = Object.keys(dadosAgrupados).map(hora => {
-        const dados = dadosAgrupados[hora];
-        return {
-            datetime: hora,
-            media: parseFloat((dados.total / dados.count).toFixed(2)),
-            pico: parseFloat(dados.max.toFixed(2))
-        };
-    });
+  const arrayResultado = Object.keys(dadosAgrupados).map((hora) => {
+    const dados = dadosAgrupados[hora];
+    return {
+      datetime: hora,
+      media: parseFloat((dados.total / dados.count).toFixed(2)),
+      pico: parseFloat(dados.max.toFixed(2)),
+    };
+  });
 
-    return arrayResultado.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+  return arrayResultado.sort(
+    (a, b) => new Date(a.datetime) - new Date(b.datetime),
+  );
 }
 
 async function agenteAnalise(dadosJSON, uploadedFile, maxRetries = 30) {
-    console.log("[GERAR RELATORIO] [1/4] Iniciando Módulo de Análise");
+  console.log("[GERAR RELATORIO] [1/4] Iniciando Módulo de Análise");
 
-    const instrucaoSistemaAnalise = `
+  const instrucaoSistemaAnalise = `
         **AVISO: SUA ÚNICA TAREFA É REFORMATAR DADOS. VOCÊ É UM ESCRITURÁRIO DE DADOS.**
 
-        Você recebe dados de monitoramento de ATMs (CSV/JSON) e deve produzir um RELATÓRIO EM MARKDOWN puramente factual, em um MODELO CONSISTENTE.  
+        Você recebe dados de monitoramento de ATMs (CSV/JSON) e deve produzir um RELATÓRIO EM MARKDOWN puramente factual, em um MODELO CONSISTENTE.
         Outros agentes farão análise e recomendações. Você será penalizado por adicionar qualquer opinião, julgamento ou interpretações além do pedido abaixo.
 
         IMPORTANTE: ESTE PROMPT É STRICT. SÓ É PERMITIDO CRIAR LISTAS/BULLETS NOS LOCAIS EXATAMENTE ESPECIFICADOS NO "FORMATO DE SAÍDA". QUALQUER OUTRA LISTA/ITEM EM FORMA DE BULLET É ERRO.
@@ -411,10 +441,10 @@ async function agenteAnalise(dadosJSON, uploadedFile, maxRetries = 30) {
 
         ## ATMs Sem Alertas
         - \`ID: d8408e1114d1\`
-    `
+    `;
 
-    const jsonString = JSON.stringify(dadosJSON, null, 2);
-    const promptUsuario = `
+  const jsonString = JSON.stringify(dadosJSON, null, 2);
+  const promptUsuario = `
         Realize a análise do arquivo CSV anexado utilizando as configurações abaixo.
 
         <config_json>
@@ -427,60 +457,74 @@ async function agenteAnalise(dadosJSON, uploadedFile, maxRetries = 30) {
         3. Gere apenas o conforme o template do sistema em MARKDOWN.
     `;
 
-    let tentativas = 0;
-    let tempoEspera = 2000; // Começa esperando 2 segundos
+  let tentativas = 0;
+  let tempoEspera = 2000; // Começa esperando 2 segundos
 
-    while (tentativas < maxRetries) {
-        try {
-            const result = await genAI.models.generateContent({
-                model: modelo,
-                systemInstruction: instrucaoSistemaAnalise,
-                contents: [
-                    {
-                        role: "user",
-                        parts: [
-                            { text: promptUsuario },
-                            { fileData: { mimeType: uploadedFile.mimeType, fileUri: uploadedFile.uri } }
-                        ]
-                    }
-                ]
-            });
+  while (tentativas < maxRetries) {
+    try {
+      const result = await genAI.models.generateContent({
+        model: modelo,
+        systemInstruction: instrucaoSistemaAnalise,
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: promptUsuario },
+              {
+                fileData: {
+                  mimeType: uploadedFile.mimeType,
+                  fileUri: uploadedFile.uri,
+                },
+              },
+            ],
+          },
+        ],
+      });
 
-            console.log("[GERAR RELATORIO] Agente de Análise concluiu com sucesso.");
-            return result.text;
+      console.log("[GERAR RELATORIO] Agente de Análise concluiu com sucesso.");
+      return result.text;
+    } catch (error) {
+      tentativas++;
 
-        } catch (error) {
-            tentativas++;
+      // Verifica se é erro 429 (Resource Exhausted)
+      const isRateLimitError =
+        error.status === 429 ||
+        (error.message && error.message.includes("429")) ||
+        (error.error && error.error.code === 429);
 
-            // Verifica se é erro 429 (Resource Exhausted)
-            const isRateLimitError = error.status === 429 ||
-                (error.message && error.message.includes('429')) ||
-                (error.error && error.error.code === 429);
+      if (isRateLimitError) {
+        console.warn(
+          `[GERAR RELATORIO] Cota de API excedida no Agente de Análise (429). Tentativa ${tentativas}/${maxRetries}. Aguardando ${tempoEspera / 1000}s...`,
+        );
 
-            if (isRateLimitError) {
-                console.warn(`[GERAR RELATORIO] Cota de API excedida no Agente de Análise (429). Tentativa ${tentativas}/${maxRetries}. Aguardando ${tempoEspera / 1000}s...`);
-
-                if (tentativas >= maxRetries) {
-                    console.error("[GERAR RELATORIO - FATAL] Número máximo de tentativas excedido no Agente de Análise.");
-                    throw new Error("Falha ao gerar análise: API sobrecarregada após várias tentativas.");
-                }
-
-                await delay(tempoEspera);
-                tempoEspera *= 2;
-            } else {
-                console.error("[GERAR RELATORIO - ERRO] Erro não recuperável no Agente de Análise:", error);
-                throw error;
-            }
+        if (tentativas >= maxRetries) {
+          console.error(
+            "[GERAR RELATORIO - FATAL] Número máximo de tentativas excedido no Agente de Análise.",
+          );
+          throw new Error(
+            "Falha ao gerar análise: API sobrecarregada após várias tentativas.",
+          );
         }
+
+        await delay(tempoEspera);
+        tempoEspera *= 2;
+      } else {
+        console.error(
+          "[GERAR RELATORIO - ERRO] Erro não recuperável no Agente de Análise:",
+          error,
+        );
+        throw error;
+      }
     }
+  }
 }
 
 async function agenteRecomendacoes(textoAnaliseFactual, maxRetries = 30) {
-    console.log("[GERAR RELATORIO] [2/4] Iniciando Módulo de Insights");
+  console.log("[GERAR RELATORIO] [2/4] Iniciando Módulo de Insights");
 
-    const instrucaoSistemaRecomendacoes = `
+  const instrucaoSistemaRecomendacoes = `
         Persona (Quem você é): Você é o 'BlackAnalyst', um especialista sênior em manutenção de hardware de ATMs.
-        
+
         Contexto (Onde você está): Você é o segundo agente em uma cadeia. Você receberá um relatório factual (em Markdown) que lista ATMs com alertas.
 
         Tarefa Principal: Sua única tarefa é LER o relatório factual e ANEXAR uma nova seção no final chamada "## Recomendações e Ações Prioritárias".
@@ -498,7 +542,7 @@ async function agenteRecomendacoes(textoAnaliseFactual, maxRetries = 30) {
         * Apenas retorne a nova seção "## Recomendações e Ações Prioritárias".
     `;
 
-    const promptUsuario = `
+  const promptUsuario = `
         Com base no relatório factual abaixo, gere a seção "## Recomendações e Ações Prioritárias".
 
         --- RELATÓRIO FATUAL ---
@@ -506,51 +550,64 @@ async function agenteRecomendacoes(textoAnaliseFactual, maxRetries = 30) {
         --- FIM DO RELATÓRIO ---
     `;
 
-    let tentativas = 0;
-    let tempoEspera = 2000;
+  let tentativas = 0;
+  let tempoEspera = 2000;
 
-    while (tentativas < maxRetries) {
-        try {
-            const result = await genAI.models.generateContent({
-                model: modelo,
-                systemInstruction: instrucaoSistemaRecomendacoes,
-                contents: promptUsuario
-            });
+  while (tentativas < maxRetries) {
+    try {
+      const result = await genAI.models.generateContent({
+        model: modelo,
+        systemInstruction: instrucaoSistemaRecomendacoes,
+        contents: promptUsuario,
+      });
 
-            console.log("[GERAR RELATORIO] Agente de Recomendações concluiu com sucesso.");
-            return result.text;
+      console.log(
+        "[GERAR RELATORIO] Agente de Recomendações concluiu com sucesso.",
+      );
+      return result.text;
+    } catch (error) {
+      tentativas++;
 
-        } catch (error) {
-            tentativas++;
+      const isRateLimitError =
+        error.status === 429 ||
+        (error.message && error.message.includes("429")) ||
+        (error.error && error.error.code === 429);
 
-            const isRateLimitError = error.status === 429 ||
-                (error.message && error.message.includes('429')) ||
-                (error.error && error.error.code === 429);
+      if (isRateLimitError) {
+        console.warn(
+          `[GERAR RELATORIO] Cota de API excedida (429). Tentativa ${tentativas}/${maxRetries}. Aguardando ${tempoEspera / 1000}s...`,
+        );
 
-            if (isRateLimitError) {
-                console.warn(`[GERAR RELATORIO] Cota de API excedida (429). Tentativa ${tentativas}/${maxRetries}. Aguardando ${tempoEspera / 1000}s...`);
-
-                if (tentativas >= maxRetries) {
-                    console.error("[GERAR RELATORIO - FATAL] Número máximo de tentativas excedido.");
-                    throw new Error("Falha ao gerar recomendações: API sobrecarregada após várias tentativas.");
-                }
-
-                await delay(tempoEspera);
-                tempoEspera *= 2;
-            } else {
-                console.error("[GERAR RELATORIO - ERRO] Erro não recuperável no Agente de Recomendações:", error);
-                throw error;
-            }
+        if (tentativas >= maxRetries) {
+          console.error(
+            "[GERAR RELATORIO - FATAL] Número máximo de tentativas excedido.",
+          );
+          throw new Error(
+            "Falha ao gerar recomendações: API sobrecarregada após várias tentativas.",
+          );
         }
+
+        await delay(tempoEspera);
+        tempoEspera *= 2;
+      } else {
+        console.error(
+          "[GERAR RELATORIO - ERRO] Erro não recuperável no Agente de Recomendações:",
+          error,
+        );
+        throw error;
+      }
     }
+  }
 }
 
 async function agenteSumarizacao(relatorioCompleto, maxRetries = 30) {
-    console.log("[GERAR RELATORIO] [3/4] Iniciando Módulo de Sumarização (Final)...");
+  console.log(
+    "[GERAR RELATORIO] [3/4] Iniciando Módulo de Sumarização (Final)...",
+  );
 
-    const instrucaoSistemaSumarizacao = `
+  const instrucaoSistemaSumarizacao = `
         Persona (Quem você é): Você é o 'BlackAnalyst', o Analista Chefe (SME - Subject Matter Expert).
-        
+
         Contexto (Onde você está): Você é o ÚLTIMO agente da cadeia. Sua tarefa é ler o relatório técnico completo (que já contém a análise factual e as recomendações) e escrever o **"Sumário Executivo"**.
 
         Tarefa Principal: Gerar um parágrafo curto (máximo 4-5 frases) que será colocado NO TOPO do relatório. O analista deve ler apenas isso e entender 90% do problema.
@@ -559,18 +616,18 @@ async function agenteSumarizacao(relatorioCompleto, maxRetries = 30) {
         1.  Qual foi o escopo? (Ex: "Análise de 1024 ATMs...")
         2.  Qual a descoberta principal? (Ex: "...identificou X ATMs com alertas críticos...")
         3.  Qual é a recomendação mais urgente? (Ex: "...exigindo ação imediata no ATM '00:00:...' devido a falhas de CPU/RAM.")
-        
+
         Formato de Saída (Obrigatório):
         * Um único cabeçalho: "## Sumário Executivo"
         * Seguido de um parágrafo conciso.
-        
+
         Restrições (O que NÃO fazer):
         * NÃO repita os detalhes técnicos.
         * NÃO mencione os ATMs saudáveis.
         * Seja direto, gerencial e focado na ação.
     `;
 
-    const promptUsuario = `
+  const promptUsuario = `
         Leia o relatório técnico completo abaixo e gere APENAS o "## Sumário Executivo" gerencial.
 
         --- RELATÓRIO TÉCNICO COMPLETO ---
@@ -578,298 +635,396 @@ async function agenteSumarizacao(relatorioCompleto, maxRetries = 30) {
         --- FIM DO RELATÓRIO ---
     `;
 
-    let tentativas = 0;
-    let tempoEspera = 2000;
+  let tentativas = 0;
+  let tempoEspera = 2000;
 
-    while (tentativas < maxRetries) {
-        try {
-            const result = await genAI.models.generateContent({
-                model: modelo,
-                systemInstruction: instrucaoSistemaSumarizacao,
-                contents: promptUsuario
-            });
+  while (tentativas < maxRetries) {
+    try {
+      const result = await genAI.models.generateContent({
+        model: modelo,
+        systemInstruction: instrucaoSistemaSumarizacao,
+        contents: promptUsuario,
+      });
 
-            console.log("[GERAR RELATORIO] Agente de Sumarização concluiu com sucesso.");
-            return result.text;
+      console.log(
+        "[GERAR RELATORIO] Agente de Sumarização concluiu com sucesso.",
+      );
+      return result.text;
+    } catch (error) {
+      tentativas++;
 
-        } catch (error) {
-            tentativas++;
+      const isRateLimitError =
+        error.status === 429 ||
+        (error.message && error.message.includes("429")) ||
+        (error.error && error.error.code === 429);
 
-            const isRateLimitError = error.status === 429 ||
-                (error.message && error.message.includes('429')) ||
-                (error.error && error.error.code === 429);
+      if (isRateLimitError) {
+        console.warn(
+          `[GERAR RELATORIO] Cota de API excedida no Agente de Sumarização (429). Tentativa ${tentativas}/${maxRetries}. Aguardando ${tempoEspera / 1000}s...`,
+        );
 
-            if (isRateLimitError) {
-                console.warn(`[GERAR RELATORIO] Cota de API excedida no Agente de Sumarização (429). Tentativa ${tentativas}/${maxRetries}. Aguardando ${tempoEspera / 1000}s...`);
-
-                if (tentativas >= maxRetries) {
-                    console.error("[GERAR RELATORIO - FATAL] Número máximo de tentativas excedido no Agente de Sumarização.");
-                    throw new Error("Falha ao gerar sumário: API sobrecarregada após várias tentativas.");
-                }
-
-                await delay(tempoEspera);
-                tempoEspera *= 2;
-            } else {
-                console.error("[GERAR RELATORIO - ERRO] Erro não recuperável no Agente de Sumarização:", error);
-                throw error;
-            }
+        if (tentativas >= maxRetries) {
+          console.error(
+            "[GERAR RELATORIO - FATAL] Número máximo de tentativas excedido no Agente de Sumarização.",
+          );
+          throw new Error(
+            "Falha ao gerar sumário: API sobrecarregada após várias tentativas.",
+          );
         }
+
+        await delay(tempoEspera);
+        tempoEspera *= 2;
+      } else {
+        console.error(
+          "[GERAR RELATORIO - ERRO] Erro não recuperável no Agente de Sumarização:",
+          error,
+        );
+        throw error;
+      }
     }
+  }
 }
 
 async function gerarRelatorio(req, res) {
-    try {
-        const fkEmpresa = req.body.fkEmpresa;
-        const periodoInicio = req.body.periodoInicio || '';
-        const periodoFim = req.body.periodoFim || '';
-        const cpuCheck = req.body.cpu;
-        const ramCheck = req.body.ram;
-        const discoCheck = req.body.disco;
-        const redeCheck = req.body.rede;
+  try {
+    const fkEmpresa = req.body.fkEmpresa;
+    const periodoInicio = req.body.periodoInicio || "";
+    const periodoFim = req.body.periodoFim || "";
+    const cpuCheck = req.body.cpu;
+    const ramCheck = req.body.ram;
+    const discoCheck = req.body.disco;
+    const redeCheck = req.body.rede;
 
-        const dadosCompletosS3 = await dadosS3PorPeriodo(fkEmpresa, periodoInicio, periodoFim);
+    const dadosCompletosS3 = await dadosS3PorPeriodo(
+      fkEmpresa,
+      periodoInicio,
+      periodoFim,
+    );
 
-        const dadosOtimizados = otimizarDadosParaIA(dadosCompletosS3);
+    const dadosOtimizados = otimizarDadosParaIA(dadosCompletosS3);
 
-        const dadosLimpos = dadosOtimizados.map(item => {
-            const novoItem = { ...item };
+    const dadosLimpos = dadosOtimizados.map((item) => {
+      const novoItem = { ...item };
 
-            if (!cpuCheck) {
-                delete novoItem.cpu;
-            }
-            if (!ramCheck) {
-                delete novoItem.ram;
-            }
-            if (!discoCheck) {
-                delete novoItem.disco;
-            }
-            if (!redeCheck) {
-                delete novoItem.bytes_enviados;
-                delete novoItem.bytes_recebidos;
-                delete novoItem.pacotes_perdidos;
-            }
+      if (!cpuCheck) {
+        delete novoItem.cpu;
+      }
+      if (!ramCheck) {
+        delete novoItem.ram;
+      }
+      if (!discoCheck) {
+        delete novoItem.disco;
+      }
+      if (!redeCheck) {
+        delete novoItem.bytes_enviados;
+        delete novoItem.bytes_recebidos;
+        delete novoItem.pacotes_perdidos;
+      }
 
-            return novoItem;
-        });
+      return novoItem;
+    });
 
-        const dadosGrafico = {};
+    const dadosGrafico = {};
 
-        if (dadosCompletosS3.length > 0) {
-            if (cpuCheck) dadosGrafico.cpu = processarDadosParaGrafico(dadosCompletosS3, 'cpu');
-            if (ramCheck) dadosGrafico.ram = processarDadosParaGrafico(dadosCompletosS3, 'ram');
-            if (discoCheck) dadosGrafico.disco = processarDadosParaGrafico(dadosCompletosS3, 'disco');
-        }
+    if (dadosCompletosS3.length > 0) {
+      if (cpuCheck)
+        dadosGrafico.cpu = processarDadosParaGrafico(dadosCompletosS3, "cpu");
+      if (ramCheck)
+        dadosGrafico.ram = processarDadosParaGrafico(dadosCompletosS3, "ram");
+      if (discoCheck)
+        dadosGrafico.disco = processarDadosParaGrafico(
+          dadosCompletosS3,
+          "disco",
+        );
+    }
 
-        const DIAS_VISIVEIS = 7;
-        const DIAS_PREVISAO = 3;
+    const DIAS_VISIVEIS = 7;
+    const DIAS_PREVISAO = 3;
 
-        const filtrarUltimosDias = (dadosArray) => {
-            if (!dadosArray || dadosArray.length === 0) return [];
-            const ultimaData = new Date(dadosArray[dadosArray.length - 1].datetime);
-            const dataCorte = new Date(ultimaData);
-            dataCorte.setDate(dataCorte.getDate() - DIAS_VISIVEIS);
+    const filtrarUltimosDias = (dadosArray) => {
+      if (!dadosArray || dadosArray.length === 0) return [];
+      const ultimaData = new Date(dadosArray[dadosArray.length - 1].datetime);
+      const dataCorte = new Date(ultimaData);
+      dataCorte.setDate(dataCorte.getDate() - DIAS_VISIVEIS);
 
-            return dadosArray.filter(d => new Date(d.datetime) >= dataCorte);
-        };
+      return dadosArray.filter((d) => new Date(d.datetime) >= dataCorte);
+    };
 
-        if (dadosGrafico.cpu) dadosGrafico.cpu = filtrarUltimosDias(dadosGrafico.cpu);
-        if (dadosGrafico.ram) dadosGrafico.ram = filtrarUltimosDias(dadosGrafico.ram);
-        if (dadosGrafico.disco) dadosGrafico.disco = filtrarUltimosDias(dadosGrafico.disco);
+    if (dadosGrafico.cpu)
+      dadosGrafico.cpu = filtrarUltimosDias(dadosGrafico.cpu);
+    if (dadosGrafico.ram)
+      dadosGrafico.ram = filtrarUltimosDias(dadosGrafico.ram);
+    if (dadosGrafico.disco)
+      dadosGrafico.disco = filtrarUltimosDias(dadosGrafico.disco);
 
-        const previsoesFuturas = {};
+    const previsoesFuturas = {};
 
-        let ultimaDataISO = null;
-        if (dadosGrafico.cpu && dadosGrafico.cpu.length > 0) ultimaDataISO = dadosGrafico.cpu[dadosGrafico.cpu.length - 1].datetime;
-        else if (dadosGrafico.ram && dadosGrafico.ram.length > 0) ultimaDataISO = dadosGrafico.ram[dadosGrafico.ram.length - 1].datetime;
-        else if (dadosGrafico.disco && dadosGrafico.disco.length > 0) ultimaDataISO = dadosGrafico.disco[dadosGrafico.disco.length - 1].datetime;
+    let ultimaDataISO = null;
+    if (dadosGrafico.cpu && dadosGrafico.cpu.length > 0)
+      ultimaDataISO = dadosGrafico.cpu[dadosGrafico.cpu.length - 1].datetime;
+    else if (dadosGrafico.ram && dadosGrafico.ram.length > 0)
+      ultimaDataISO = dadosGrafico.ram[dadosGrafico.ram.length - 1].datetime;
+    else if (dadosGrafico.disco && dadosGrafico.disco.length > 0)
+      ultimaDataISO =
+        dadosGrafico.disco[dadosGrafico.disco.length - 1].datetime;
 
-        if (ultimaDataISO) {
-            if (cpuCheck && dadosGrafico.cpu) {
-                previsoesFuturas.cpu = previsaoDados(dadosGrafico.cpu.map(d => d.media), DIAS_PREVISAO, ultimaDataISO);
-            }
-            if (ramCheck && dadosGrafico.ram) {
-                previsoesFuturas.ram = previsaoDados(dadosGrafico.ram.map(d => d.media), DIAS_PREVISAO, ultimaDataISO);
-            }
-            if (discoCheck && dadosGrafico.disco) {
-                previsoesFuturas.disco = previsaoDados(dadosGrafico.disco.map(d => d.media), DIAS_PREVISAO, ultimaDataISO);
-            }
-        }
+    if (ultimaDataISO) {
+      if (cpuCheck && dadosGrafico.cpu) {
+        previsoesFuturas.cpu = previsaoDados(
+          dadosGrafico.cpu.map((d) => d.media),
+          DIAS_PREVISAO,
+          ultimaDataISO,
+        );
+      }
+      if (ramCheck && dadosGrafico.ram) {
+        previsoesFuturas.ram = previsaoDados(
+          dadosGrafico.ram.map((d) => d.media),
+          DIAS_PREVISAO,
+          ultimaDataISO,
+        );
+      }
+      if (discoCheck && dadosGrafico.disco) {
+        previsoesFuturas.disco = previsaoDados(
+          dadosGrafico.disco.map((d) => d.media),
+          DIAS_PREVISAO,
+          ultimaDataISO,
+        );
+      }
+    }
 
-        let baseLabels = [];
-        if (dadosGrafico.cpu) baseLabels = dadosGrafico.cpu.map(d => d.datetime);
-        else if (dadosGrafico.ram) baseLabels = dadosGrafico.ram.map(d => d.datetime);
-        else if (dadosGrafico.disco) baseLabels = dadosGrafico.disco.map(d => d.datetime);
+    let baseLabels = [];
+    if (dadosGrafico.cpu) baseLabels = dadosGrafico.cpu.map((d) => d.datetime);
+    else if (dadosGrafico.ram)
+      baseLabels = dadosGrafico.ram.map((d) => d.datetime);
+    else if (dadosGrafico.disco)
+      baseLabels = dadosGrafico.disco.map((d) => d.datetime);
 
-        let graficosHTML = "";
-        let scriptsChartJS = "";
+    let graficosHTML = "";
+    let scriptsChartJS = "";
 
-        const labelsHistorico = baseLabels.map(isoDate => {
-            const d = new Date(isoDate);
-            return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' +
-                d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        });
+    const labelsHistorico = baseLabels.map((isoDate) => {
+      const d = new Date(isoDate);
+      return (
+        d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) +
+        " " +
+        d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+      );
+    });
 
-        const algumaPrevisao = previsoesFuturas.cpu || previsoesFuturas.ram || previsoesFuturas.disco;
-        const labelsFuturo = algumaPrevisao ? algumaPrevisao.map(p => p.label) : [];
-        const labelsTotal = [...labelsHistorico, ...labelsFuturo];
+    const algumaPrevisao =
+      previsoesFuturas.cpu || previsoesFuturas.ram || previsoesFuturas.disco;
+    const labelsFuturo = algumaPrevisao
+      ? algumaPrevisao.map((p) => p.label)
+      : [];
+    const labelsTotal = [...labelsHistorico, ...labelsFuturo];
 
-        if (cpuCheck && previsoesFuturas.cpu && dadosGrafico.cpu) {
-            const histData = dadosGrafico.cpu.map(d => d.media);
+    if (cpuCheck && previsoesFuturas.cpu && dadosGrafico.cpu) {
+      const histData = dadosGrafico.cpu.map((d) => d.media);
 
-            const prevDataValues = previsoesFuturas.cpu.map(p => p.value);
-            const prevDataMin = previsoesFuturas.cpu.map(p => p.min);
-            const prevDataMax = previsoesFuturas.cpu.map(p => p.max);
+      const prevDataValues = previsoesFuturas.cpu.map((p) => p.value);
+      const prevDataMin = previsoesFuturas.cpu.map((p) => p.min);
+      const prevDataMax = previsoesFuturas.cpu.map((p) => p.max);
 
-            const ultimoValorHistorico = histData[histData.length - 1];
+      const ultimoValorHistorico = histData[histData.length - 1];
 
-            const paddingHistorico = new Array(labelsHistorico.length - 1).fill(null);
+      const paddingHistorico = new Array(labelsHistorico.length - 1).fill(null);
 
-            const histAjustado = [...histData, ...new Array(labelsFuturo.length).fill(null)];
+      const histAjustado = [
+        ...histData,
+        ...new Array(labelsFuturo.length).fill(null),
+      ];
 
-            const prevAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataValues];
+      const prevAjustado = [
+        ...paddingHistorico,
+        ultimoValorHistorico,
+        ...prevDataValues,
+      ];
 
-            const minAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataMin];
-            const maxAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataMax];
+      const minAjustado = [
+        ...paddingHistorico,
+        ultimoValorHistorico,
+        ...prevDataMin,
+      ];
+      const maxAjustado = [
+        ...paddingHistorico,
+        ultimoValorHistorico,
+        ...prevDataMax,
+      ];
 
-            const graficoCPU = gerarGraficoComponente(
-                'chartCpu',
-                'Monitoramento e Previsão de CPU',
-                labelsTotal,
-                histAjustado,
-                prevAjustado,
-                minAjustado,
-                maxAjustado,
-                '#2196F3'
-            );
+      const graficoCPU = gerarGraficoComponente(
+        "chartCpu",
+        "Monitoramento e Previsão de CPU",
+        labelsTotal,
+        histAjustado,
+        prevAjustado,
+        minAjustado,
+        maxAjustado,
+        "#2196F3",
+      );
 
-            graficosHTML += graficoCPU.html;
-            scriptsChartJS += graficoCPU.script;
-        }
+      graficosHTML += graficoCPU.html;
+      scriptsChartJS += graficoCPU.script;
+    }
 
-        if (ramCheck && previsoesFuturas.ram && dadosGrafico.ram) {
-            const histData = dadosGrafico.ram.map(d => d.media);
-            const prevDataValues = previsoesFuturas.ram.map(p => p.value);
-            const prevDataMin = previsoesFuturas.ram.map(p => p.min);
-            const prevDataMax = previsoesFuturas.ram.map(p => p.max);
-            const ultimoValorHistorico = histData[histData.length - 1];
-            const paddingHistorico = new Array(labelsHistorico.length - 1).fill(null);
+    if (ramCheck && previsoesFuturas.ram && dadosGrafico.ram) {
+      const histData = dadosGrafico.ram.map((d) => d.media);
+      const prevDataValues = previsoesFuturas.ram.map((p) => p.value);
+      const prevDataMin = previsoesFuturas.ram.map((p) => p.min);
+      const prevDataMax = previsoesFuturas.ram.map((p) => p.max);
+      const ultimoValorHistorico = histData[histData.length - 1];
+      const paddingHistorico = new Array(labelsHistorico.length - 1).fill(null);
 
-            const histAjustado = [...histData, ...new Array(labelsFuturo.length).fill(null)];
-            const prevAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataValues];
-            const minAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataMin];
-            const maxAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataMax];
+      const histAjustado = [
+        ...histData,
+        ...new Array(labelsFuturo.length).fill(null),
+      ];
+      const prevAjustado = [
+        ...paddingHistorico,
+        ultimoValorHistorico,
+        ...prevDataValues,
+      ];
+      const minAjustado = [
+        ...paddingHistorico,
+        ultimoValorHistorico,
+        ...prevDataMin,
+      ];
+      const maxAjustado = [
+        ...paddingHistorico,
+        ultimoValorHistorico,
+        ...prevDataMax,
+      ];
 
-            const graficoRAM = gerarGraficoComponente(
-                'chartRam',
-                'Monitoramento e Previsão de RAM',
-                labelsTotal,
-                histAjustado,
-                prevAjustado,
-                minAjustado,
-                maxAjustado,
-                '#9C27B0' // Roxo
-            );
+      const graficoRAM = gerarGraficoComponente(
+        "chartRam",
+        "Monitoramento e Previsão de RAM",
+        labelsTotal,
+        histAjustado,
+        prevAjustado,
+        minAjustado,
+        maxAjustado,
+        "#9C27B0", // Roxo
+      );
 
-            graficosHTML += graficoRAM.html;
-            scriptsChartJS += graficoRAM.script;
-        }
+      graficosHTML += graficoRAM.html;
+      scriptsChartJS += graficoRAM.script;
+    }
 
-        if (discoCheck && previsoesFuturas.disco && dadosGrafico.disco) {
-            const histData = dadosGrafico.disco.map(d => d.media);
-            const prevDataValues = previsoesFuturas.disco.map(p => p.value);
-            const prevDataMin = previsoesFuturas.disco.map(p => p.min);
-            const prevDataMax = previsoesFuturas.disco.map(p => p.max);
-            const ultimoValorHistorico = histData[histData.length - 1];
-            const paddingHistorico = new Array(labelsHistorico.length - 1).fill(null);
+    if (discoCheck && previsoesFuturas.disco && dadosGrafico.disco) {
+      const histData = dadosGrafico.disco.map((d) => d.media);
+      const prevDataValues = previsoesFuturas.disco.map((p) => p.value);
+      const prevDataMin = previsoesFuturas.disco.map((p) => p.min);
+      const prevDataMax = previsoesFuturas.disco.map((p) => p.max);
+      const ultimoValorHistorico = histData[histData.length - 1];
+      const paddingHistorico = new Array(labelsHistorico.length - 1).fill(null);
 
-            const histAjustado = [...histData, ...new Array(labelsFuturo.length).fill(null)];
-            const prevAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataValues];
-            const minAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataMin];
-            const maxAjustado = [...paddingHistorico, ultimoValorHistorico, ...prevDataMax];
+      const histAjustado = [
+        ...histData,
+        ...new Array(labelsFuturo.length).fill(null),
+      ];
+      const prevAjustado = [
+        ...paddingHistorico,
+        ultimoValorHistorico,
+        ...prevDataValues,
+      ];
+      const minAjustado = [
+        ...paddingHistorico,
+        ultimoValorHistorico,
+        ...prevDataMin,
+      ];
+      const maxAjustado = [
+        ...paddingHistorico,
+        ultimoValorHistorico,
+        ...prevDataMax,
+      ];
 
-            const graficoDisco = gerarGraficoComponente(
-                'chartDisco',
-                'Monitoramento e Previsão de Disco',
-                labelsTotal,
-                histAjustado,
-                prevAjustado,
-                minAjustado,
-                maxAjustado,
-                '#ec8815'
-            );
+      const graficoDisco = gerarGraficoComponente(
+        "chartDisco",
+        "Monitoramento e Previsão de Disco",
+        labelsTotal,
+        histAjustado,
+        prevAjustado,
+        minAjustado,
+        maxAjustado,
+        "#ec8815",
+      );
 
-            graficosHTML += graficoDisco.html;
-            scriptsChartJS += graficoDisco.script;
-        }
+      graficosHTML += graficoDisco.html;
+      scriptsChartJS += graficoDisco.script;
+    }
 
-        const componentesParametro = await buscarParametroPorComponente();
+    const componentesParametro = await buscarParametroPorComponente();
 
-        const csvString = converterParaCSV(dadosLimpos);
-        const csvBuffer = Buffer.from(csvString, 'utf-8');
+    const csvString = converterParaCSV(dadosLimpos);
+    const csvBuffer = Buffer.from(csvString, "utf-8");
 
-        const arquivoGemini = await uploadArquivoParaGemini(csvBuffer, 'relatorio_dados.csv', 'text/csv');
+    const arquivoGemini = await uploadArquivoParaGemini(
+      csvBuffer,
+      "relatorio_dados.csv",
+      "text/csv",
+    );
 
-        if (req.url === '/favicon.ico') {
-            return res.status(204).end();
-        }
+    if (req.url === "/favicon.ico") {
+      return res.status(204).end();
+    }
 
-        let dadosDoRequest = {
-            "periodo_analise": `${periodoInicio} a ${periodoFim}`,
-            "limites_saudaveis": componentesParametro,
-            "componentes_analisar": {
-                "cpu": cpuCheck,
-                "ram": ramCheck,
-                "disco": discoCheck,
-                "rede": redeCheck
-            }
-        };
+    let dadosDoRequest = {
+      periodo_analise: `${periodoInicio} a ${periodoFim}`,
+      limites_saudaveis: componentesParametro,
+      componentes_analisar: {
+        cpu: cpuCheck,
+        ram: ramCheck,
+        disco: discoCheck,
+        rede: redeCheck,
+      },
+    };
 
-        let textoAnalise = await agenteAnalise(dadosDoRequest, arquivoGemini);
+    let textoAnalise = await agenteAnalise(dadosDoRequest, arquivoGemini);
 
-        await genAI.files.delete({ name: arquivoGemini.name });
-        textoAnalise = limparTextoIA(textoAnalise);
+    await genAI.files.delete({ name: arquivoGemini.name });
+    textoAnalise = limparTextoIA(textoAnalise);
 
-        console.log(textoAnalise)
+    console.log(textoAnalise);
 
-        let textoRecomendacoes = await agenteRecomendacoes(textoAnalise);
-        textoRecomendacoes = limparTextoIA(textoRecomendacoes)
+    let textoRecomendacoes = await agenteRecomendacoes(textoAnalise);
+    textoRecomendacoes = limparTextoIA(textoRecomendacoes);
 
-        const relatorioParcial = textoAnalise + "\n\n" + textoRecomendacoes;
+    const relatorioParcial = textoAnalise + "\n\n" + textoRecomendacoes;
 
-        let textoSumarizado = await agenteSumarizacao(relatorioParcial);
-        textoSumarizado = limparTextoIA(textoSumarizado)
+    let textoSumarizado = await agenteSumarizacao(relatorioParcial);
+    textoSumarizado = limparTextoIA(textoSumarizado);
 
-        const relatorioFinal = textoSumarizado + "\n\n" + relatorioParcial;
-        const relatorioHTML = md.render(relatorioFinal);
+    const relatorioFinal = textoSumarizado + "\n\n" + relatorioParcial;
+    const relatorioHTML = md.render(relatorioFinal);
 
-        const logoUrl = "https://raw.githubusercontent.com/Black-Screenn/Black-Screen/refs/heads/main/web-data-viz/public/assets/imgs/blackscreenlogo.png";
+    const logoUrl =
+      "https://raw.githubusercontent.com/Black-Screenn/Black-Screen/refs/heads/main/web-data-viz/public/assets/imgs/blackscreenlogo.png";
 
-        const htmlCompleto = `
+    const htmlCompleto = `
             <html>
             <head>
                 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&display=swap" rel="stylesheet">
                 <style>
-                    body { 
-                        font-family: 'Barlow', sans-serif; 
+                    body {
+                        font-family: 'Barlow', sans-serif;
                         font-size: 14px;
                         color: #333;
                         line-height: 1.5;
                         margin: 0;
                     }
 
-                    .header { 
-                        text-align: center; 
-                        padding-bottom: 15px; 
-                        margin-bottom: 30px; 
+                    .header {
+                        text-align: center;
+                        padding-bottom: 15px;
+                        margin-bottom: 30px;
                     }
-                    .header img { 
-                        max-width: 200px; 
+                    .header img {
+                        max-width: 200px;
                     }
 
-                    
-                    h1, h2, h3, h4 { 
-                        color: #000; 
-                        margin-top: 25px; 
+
+                    h1, h2, h3, h4 {
+                        color: #000;
+                        margin-top: 25px;
                         page-break-after: avoid;
                         break-after: avoid;
                     }
@@ -879,44 +1034,44 @@ async function gerarRelatorio(req, res) {
                         break-inside: avoid;
                     }
 
-                    h2 { 
-                        border-bottom: 1px solid #ccc; 
-                        padding-bottom: 5px; 
+                    h2 {
+                        border-bottom: 1px solid #ccc;
+                        padding-bottom: 5px;
                         font-weight: 700;
                         font-size: 18px;
                     }
-                    
+
                     h3 {
                         font-size: 16px;
                         margin-bottom: 5px;
                     }
 
-                    ul { 
+                    ul {
                         margin-top: 5px;
                         padding-left: 20px;
                     }
 
-                    li { 
-                        margin-bottom: 4px; 
+                    li {
+                        margin-bottom: 4px;
                     }
 
-                    strong { 
+                    strong {
                         color: #000;
                     }
 
-                    pre { 
-                        background-color: #f4f4f4; 
+                    pre {
+                        background-color: #f4f4f4;
                         border: 1px solid #ddd;
-                        font-family: monospace; 
+                        font-family: monospace;
                         padding: 10px;
                         border-radius: 4px;
                         white-space: pre-wrap;
                     }
 
                     .footer {
-                        margin-top: 50px; 
-                        font-size: 10px; 
-                        text-align: center; 
+                        margin-top: 50px;
+                        font-size: 10px;
+                        text-align: center;
                         color: #888;
                         border-top: 1px solid #eee;
                         padding-top: 10px;
@@ -930,9 +1085,9 @@ async function gerarRelatorio(req, res) {
                         font-size: 11px;
                         page-break-inside: auto;
                     }
-                    
+
                     tr { page-break-inside: avoid; page-break-after: auto; }
-                    
+
                     th {
                         background-color: #f2f2f2;
                         border-bottom: 2px solid #000;
@@ -998,14 +1153,14 @@ async function gerarRelatorio(req, res) {
                         width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;
                         border: 1px solid #f5c6cb;
                     }
-                    .tabela-critica th { 
+                    .tabela-critica th {
                         background-color: #721c24; /* Vinho */
-                        color: #fff; 
-                        padding: 8px; text-align: left; 
+                        color: #fff;
+                        padding: 8px; text-align: left;
                     }
-                    .tabela-critica td { 
-                        border-bottom: 1px solid #f5c6cb; 
-                        padding: 8px; 
+                    .tabela-critica td {
+                        border-bottom: 1px solid #f5c6cb;
+                        padding: 8px;
                         color: #721c24;
                         background-color: #f8d7da; /* Fundo rosinha */
                     }
@@ -1015,14 +1170,14 @@ async function gerarRelatorio(req, res) {
                         width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;
                         border: 1px solid #ffeeba;
                     }
-                    .tabela-risco th { 
+                    .tabela-risco th {
                         background-color: #ffc107; /* Amarelo Ouro */
-                        color: #000; 
-                        padding: 8px; text-align: left; 
+                        color: #000;
+                        padding: 8px; text-align: left;
                     }
-                    .tabela-risco td { 
-                        border-bottom: 1px solid #ffeeba; 
-                        padding: 8px; 
+                    .tabela-risco td {
+                        border-bottom: 1px solid #ffeeba;
+                        padding: 8px;
                         color: #856404;
                         background-color: #fff3cd; /* Fundo amarelo claro */
                     }
@@ -1032,13 +1187,13 @@ async function gerarRelatorio(req, res) {
                 <div class="header">
                     <img src="${logoUrl}" alt="Logo da Empresa">
                 </div>
-                
+
                 ${relatorioHTML}
 
                 <!-- 2. ÁREA DO GRÁFICO DE PREVISÃO -->
                 <h2>Análise de Tendência e Previsão</h2>
                 <p>O gráfico abaixo apresenta o comportamento histórico recente e a projeção matemática para os próximos dias.</p>
-                
+
                 ${graficosHTML}
 
                 <div style="margin-top: 50px; font-size: 12px; text-align: center; color: #888;">
@@ -1054,91 +1209,100 @@ async function gerarRelatorio(req, res) {
             </html>
         `;
 
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        const page = await browser.newPage();
+    const browser = await puppeteer.launch({
+      headless: true,
+      executablePath: "/opt/brave.com/brave",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+    const page = await browser.newPage();
 
-        await page.setContent(htmlCompleto, { waitUntil: 'networkidle0' });
+    await page.setContent(htmlCompleto, { waitUntil: "networkidle0" });
 
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            margin: {
-                top: '20mm',
-                bottom: '20mm',
-                left: '15mm',
-                right: '15mm'
-            },
-            footerTemplate: `
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      margin: {
+        top: "20mm",
+        bottom: "20mm",
+        left: "15mm",
+        right: "15mm",
+      },
+      footerTemplate: `
                 <div style="font-size: 10px; width: 100%; text-align: right; padding-right: 20px;">
                     <span class="pageNumber"></span> / <span class="totalPages"></span>
                 </div>
-            `
-        });
+            `,
+    });
 
-        console.log("[GERAR RELATÓRIO PDF] [4/4] Tamanho do PDF Gerado:", pdfBuffer.length, "bytes");
+    console.log(
+      "[GERAR RELATÓRIO PDF] [4/4] Tamanho do PDF Gerado:",
+      pdfBuffer.length,
+      "bytes",
+    );
 
-        await browser.close();
-        console.log("[GERAR RELATÓRIO Sucesso] Enviando PDF");
+    await browser.close();
+    console.log("[GERAR RELATÓRIO Sucesso] Enviando PDF");
 
-        const dadosUnicos = Date.now().toString() + Math.random().toString();
-        const hash = crypto.createHash('md5').update(dadosUnicos).digest('hex');
+    const dadosUnicos = Date.now().toString() + Math.random().toString();
+    const hash = crypto.createHash("md5").update(dadosUnicos).digest("hex");
 
-        link = await uploadRelatorioS3(pdfBuffer, "relatorio_" + hash, fkEmpresa);
-        cadastrar(link, fkEmpresa, relatorioFinal, periodoInicio, periodoFim)
+    link = await uploadRelatorioS3(pdfBuffer, "relatorio_" + hash, fkEmpresa);
+    cadastrar(link, fkEmpresa, relatorioFinal, periodoInicio, periodoFim);
 
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline; filename=relatorio.pdf');
-        res.end(pdfBuffer, 'binary');
-    } catch (error) {
-        console.error("Erro no fluxo 'gerarRelatorio':", error);
-        res.status(500).json({ error: "Falha ao processar relatório." });
-    }
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline; filename=relatorio.pdf");
+    res.end(pdfBuffer, "binary");
+  } catch (error) {
+    console.error("Erro no fluxo 'gerarRelatorio':", error);
+    res.status(500).json({ error: "Falha ao processar relatório." });
+  }
 }
 
-
 async function listarRelatorios(req, res) {
-    try {
-        const empresa = req.body.fkEmpresa || req.query.fkEmpresa;
+  try {
+    const empresa = req.body.fkEmpresa || req.query.fkEmpresa;
 
-        if (!empresa) {
-            return res.status(400).json({ erro: 'Fk_Empresa é obrigatório.' });
-        }
-
-        const resultados = await listar(empresa);
-
-        const rows = Array.isArray(resultados) && resultados.length > 0 && Array.isArray(resultados[0]) ? resultados[0] : resultados;
-
-        if (!rows || rows.length === 0) {
-            return res.status(204).send();
-        }
-
-        return res.status(200).json(rows);
-    } catch (error) {
-        console.error('[RELATORIO] Erro ao listar relatórios:', error);
-        return res.status(500).json({ erro: error.message || error });
+    if (!empresa) {
+      return res.status(400).json({ erro: "Fk_Empresa é obrigatório." });
     }
+
+    const resultados = await listar(empresa);
+
+    const rows =
+      Array.isArray(resultados) &&
+      resultados.length > 0 &&
+      Array.isArray(resultados[0])
+        ? resultados[0]
+        : resultados;
+
+    if (!rows || rows.length === 0) {
+      return res.status(204).send();
+    }
+
+    return res.status(200).json(rows);
+  } catch (error) {
+    console.error("[RELATORIO] Erro ao listar relatórios:", error);
+    return res.status(500).json({ erro: error.message || error });
+  }
 }
 
 async function avaliarRelatorio(req, res) {
-    const idRelatorio = req.body.idRelatorio;
-    const avaliacao = req.body.avaliacao;
+  const idRelatorio = req.body.idRelatorio;
+  const avaliacao = req.body.avaliacao;
 
-    try {
-        const resultado = await avaliar(idRelatorio, avaliacao)
+  try {
+    const resultado = await avaliar(idRelatorio, avaliacao);
 
-        return res.status(200).json({
-            "sucesso": true,
-            "idRelatório": idRelatorio,
-            "avaliação": avaliacao,
-            "result": resultado
-        })
-    } catch (error) {
-        console.error('[RELATORIO] Erro ao avaliar relatório:', error);
-        return res.status(500).json({ erro: error.message || error });
-    }
+    return res.status(200).json({
+      sucesso: true,
+      idRelatório: idRelatorio,
+      avaliação: avaliacao,
+      result: resultado,
+    });
+  } catch (error) {
+    console.error("[RELATORIO] Erro ao avaliar relatório:", error);
+    return res.status(500).json({ erro: error.message || error });
+  }
 }
 
-module.exports = { gerarRelatorio, listarRelatorios, avaliarRelatorio }
+module.exports = { gerarRelatorio, listarRelatorios, avaliarRelatorio };
