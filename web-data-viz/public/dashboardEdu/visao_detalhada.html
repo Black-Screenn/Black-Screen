@@ -28,57 +28,49 @@
 
     </style>
 </head>
-<body>   
-     <div class="janela">
 
-            <div class="header-left">
-                <img
-                    src="../assets/imgs/blackscreenlogo.png"
-                    alt="BlackScreen"
-                />
+<body>
+    <div class="janela">
 
-                <div class="hello">
-                    <h3>
-                        Bem vindo, <br /><span id="b_usuario">usuário</span>!
-                    </h3>
+        <div class="header-left">
+            <img src="../assets/imgs/blackscreenlogo.png" alt="BlackScreen" />
+
+            <div class="hello">
+                <h3>
+                    Bem vindo, <br /><span id="b_usuario">usuário</span>!
+                </h3>
+            </div>
+
+            <div class="links">
+                <div class="btn-nav-white">
+                    <a href="../dashboard/dashboardTecnico.html">
+                        <span class="material-symbols-outlined">home</span>
+                        <h3>Ínicio</h3>
+                    </a>
                 </div>
-
-                <div class="links">
-                    <div class="btn-nav-white">
-                        <a href="../dashboard/dashboardTecnico.html">
-                            <span class="material-symbols-outlined">home</span>
-                            <h3>Ínicio</h3>
-                        </a>
-                    </div>
-                    <div class="btn-nav-white">
-                        <a href="../dashLukas/persona.html">
-                            <span class="material-symbols-outlined"
-                                >signal_cellular_alt</span
-                            >
-                            <h3>Métricas</h3>
-                        </a>
-                    </div>
-                    <div class="btn-nav">
-                        <a href="../dashboardEdu/lista.html">
-                            <span class="material-symbols-outlined"
-                                >brightness_alert</span
-                            >
-                            <h3>Alertas</h3>
-                        </a>
-                    </div>
-                    <div class="btn-nav-white">
-                        <a href="../dashboard/perfil.html">
-                            <span class="material-symbols-outlined"
-                                >account_circle</span
-                            >
-                            <h3>Meu Perfil</h3>
-                        </a>
-                    </div>
-                    <div class="btn-logout" onclick="limparSessao()">
-                        <h3>Sair</h3>
-                    </div>
+                <div class="btn-nav-white">
+                    <a href="../dashLukas/persona.html">
+                        <span class="material-symbols-outlined">signal_cellular_alt</span>
+                        <h3>Métricas</h3>
+                    </a>
+                </div>
+                <div class="btn-nav">
+                    <a href="../dashboardEdu/lista.html">
+                        <span class="material-symbols-outlined">brightness_alert</span>
+                        <h3>Alertas</h3>
+                    </a>
+                </div>
+                <div class="btn-nav-white">
+                    <a href="../dashboard/perfil.html">
+                        <span class="material-symbols-outlined">account_circle</span>
+                        <h3>Meu Perfil</h3>
+                    </a>
+                </div>
+                <div class="btn-logout" onclick="limparSessao()">
+                    <h3>Sair</h3>
                 </div>
             </div>
+        </div>
 
         <div class="content">
 
@@ -120,7 +112,7 @@
     var disco = 0;
     var rede = 0;
 
-    window.onload = ()=> {
+    window.onload = () => {
         somandoComponenteAlertaJiraKpi()
         carregarChamados()
 
@@ -133,7 +125,7 @@
             method: "GET"
 
         }).then(Response => {
-                
+
             return Response.json();
 
         }).then(resposta => {
@@ -146,8 +138,9 @@
                 nomeComponente = chamado.fields.summary;
                 chave = chamado.key;
                 idMaquina = chamado.fields.description.content[0].content[0].text;
+                console.log(idMaquina)
 
-                if (idMaquina = sessionStorage.IDMAQUINAESCOLHIDA ) {
+                if (idMaquina == "ID ATM: " + sessionStorage.IDMAQUINAESCOLHIDA) {
                     if (nomeComponente.includes("CPU")) {
                         cpu++
                     }
@@ -229,6 +222,7 @@
                     let chave = chamado.key;
                     let hora = chamado.fields.created;
                     let link = chamado.self;
+                    let idMaquina = chamado.fields.description.content[0].content[0].text;
 
                     let sem_aviso = componente.substring(8);
                     let componente_limpo = sem_aviso.split("|", 1)
@@ -237,8 +231,10 @@
 
                     var filtro = document.getElementById("filtro_componente").value
 
-                    if (filtro == "sem_filtro") {
-                        item.innerHTML = `
+                    if (idMaquina == "ID ATM: " + sessionStorage.IDMAQUINAESCOLHIDA) {
+
+                        if (filtro == "sem_filtro") {
+                            item.innerHTML = `
                         
                         <p class="atm">${chave}</p>
                         <p class="address">${componente_limpo}</p>
@@ -247,9 +243,9 @@
                             <a class="link" href="${link}"> Link Chamado </a> 
                         </p>
                     `;
-                        listaContent.appendChild(item);
-                    } else if (filtro == "filtro_cpu" && componente.includes("CPU")) {
-                        item.innerHTML = `
+                            listaContent.appendChild(item);
+                        } else if (filtro == "filtro_cpu" && componente.includes("CPU")) {
+                            item.innerHTML = `
                         
                         <p class="atm">${chave}</p>
                         <p class="address">${componente_limpo}</p>
@@ -258,9 +254,9 @@
                             <a class="link" href="${link}"> Link Chamado </a> 
                         </p>
                     `;
-                        listaContent.appendChild(item);
-                    } else if (filtro == "filtro_ram" && componente.includes("RAM")) {
-                        item.innerHTML = `
+                            listaContent.appendChild(item);
+                        } else if (filtro == "filtro_ram" && componente.includes("RAM")) {
+                            item.innerHTML = `
                         
                         <p class="atm">${chave}</p>
                         <p class="address">${componente_limpo}</p>
@@ -269,9 +265,9 @@
                             <a class="link" href="${link}"> Link Chamado </a> 
                         </p>
                     `;
-                        listaContent.appendChild(item);
-                    } else if (filtro == "filtro_disco" && componente.includes("Disco")) {
-                        item.innerHTML = `
+                            listaContent.appendChild(item);
+                        } else if (filtro == "filtro_disco" && componente.includes("Disco")) {
+                            item.innerHTML = `
                         
                         <p class="atm">${chave}</p>
                         <p class="address">${componente_limpo}</p>
@@ -280,10 +276,10 @@
                             <a class="link" href="${link}"> Link Chamado </a> 
                         </p>
                     `;
-                        listaContent.appendChild(item);
-                    } else if (filtro == "filtro_rede" && componente.includes("Rede") ||
-                        filtro == "filtro_rede" && componente.includes("REDE")) {
-                        item.innerHTML = `
+                            listaContent.appendChild(item);
+                        } else if (filtro == "filtro_rede" && componente.includes("Rede") ||
+                            filtro == "filtro_rede" && componente.includes("REDE")) {
+                            item.innerHTML = `
                         
                         <p class="atm">${chave}</p>
                         <p class="address">${componente_limpo}</p>
@@ -292,7 +288,8 @@
                             <a class="link" href="${link}"> Link Chamado </a> 
                         </p>
                     `;
-                        listaContent.appendChild(item);
+                            listaContent.appendChild(item);
+                        }
                     }
                 })
             })
