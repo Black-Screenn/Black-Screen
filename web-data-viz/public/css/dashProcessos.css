@@ -422,3 +422,59 @@ h3 {
     margin: 0;
     margin-top: 5px;
 }
+
+
+
+.kpi-desvio p.kpi-title {
+    position: relative; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 5px;
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+
+.tooltip-container {
+    display: inline-block;
+    cursor: help;
+}
+
+.tooltip-icon {
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #001c41; 
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.tooltip-text {
+    visibility: hidden; 
+    opacity: 0;          
+    transition: opacity 0.3s;
+    
+    width: 280px;
+    background-color: #333;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute; 
+    z-index: 1000;
+    top: -100px; 
+    left: 50%;
+    transform: translateX(-50%);
+
+    font-size: 12px;
+    line-height: 1.4; 
+}
+
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
