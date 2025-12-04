@@ -228,43 +228,6 @@
                                 <span class="material-symbols-outlined">check_circle</span>
                                 Ativo
                             </p>
-                            <h3>Componentes:</h3>
-                            <div class="components" id="component-container">
-                                <p class="status bom">
-                                    <span class="material-symbols-outlined">check_circle</span>
-                                    Impressora de Recibos
-                                </p>
-                                <p class="status bom">
-                                    <span class="material-symbols-outlined">check_circle</span>
-                                    Teclado
-                                </p>
-                                <p class="status bom">
-                                    <span class="material-symbols-outlined">check_circle</span>
-                                    Conexão
-                                </p>
-                                <p class="status alerta">
-                                    <span class="material-symbols-outlined">circle_notifications</span>
-                                    Dispensador de Cédulas
-                                </p>
-                                <p class="status falha">
-                                    <span class="material-symbols-outlined">do_not_disturb_on</span>
-                                    Leitor de Cartão
-                                </p>
-                            </div>
-                            <h3>Alertas Recentes:</h3>
-                            <table>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Componente</th>
-                                    <th>Descrição</th>
-                                </tr>
-                                <tr>
-                                    <td>2024-06-15 14:32</td>
-                                    <td>CPU</td>
-                                    <td>Uso elevado da CPU (74%)</td>
-                                </tr>
-                                <!-- Linhas originais mantidas -->
-                            </table>
                         </div>
                     </div>
                     <div class="right">
@@ -272,25 +235,47 @@
                             <span class="material-symbols-outlined">health_and_safety</span>
                             <h2>Saúde do Sistema</h2>
                         </div>
+                        
                         <div class="stats cpu">
                             <h3>CPU</h3>
                             <div class="progress-bar">
-                                <div class="progress" style="width: 98%;"></div>
+                                <div class="progress" style="width: 0%;"></div>
                             </div>
                             <div class="stat usoAtual">
-                                <div class="circle ruim"></div>
-                                <p>Uso: <span>98%</span></p>
-                            </div>
-                            <div class="stat tempAtual">
-                                <div class="circle bom"></div>
-                                <p>Temperatura: <span>55°C</span></p>
-                            </div>
-                            <div class="stat totalProcessos">
-                                <div class="circle bom"></div>
-                                <p>Total de Processos: <span>123</span></p>
+                                <div class="circle"></div>
+                                <p>Uso: <span>-</span></p>
                             </div>
                         </div>
-                        <!-- Outras stats mantidas... -->
+
+                        <div class="stats ram">
+                            <h3>RAM</h3>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 0%;"></div>
+                            </div>
+                            <div class="stat usoAtual">
+                                <div class="circle"></div>
+                                <p>Uso: <span>-</span></p>
+                            </div>
+                        </div>
+
+                        <div class="stats disco">
+                            <h3>Disco</h3>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 0%;"></div>
+                            </div>
+                            <div class="stat usoAtual">
+                                <div class="circle"></div>
+                                <p>Uso: <span>-</span></p>
+                            </div>
+                        </div>
+
+                        <div class="stats rede">
+                            <h3>Rede</h3>
+                            <div class="stat usoAtual">
+                                <div class="circle"></div>
+                                <p>Tráfego: <span>-</span></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -416,25 +401,7 @@
                     });
                     
                     marker.on('click', function (e){
-                        document.getElementById('modal').style.display = "flex";
-                        document.getElementById('caixa-name').textContent = c.codigoCaixa;
-                        document.getElementById('caixa-endereco').textContent = `${c.Logradouro} - ${c.Bairro}, ${c.Cidade}/${c.UF}`;
-                        statusCaixa = 1;
-                        if(statusCaixa === 1){
-                            document.getElementById('caixa-status').classList.remove('inativo');
-                            document.getElementById('caixa-status').classList.add('ativo');
-                            document.getElementById('caixa-status').innerHTML = `
-                                <span class="material-symbols-outlined">check_circle</span>
-                                Ativo
-                            `;
-                        } else {
-                            document.getElementById('caixa-status').classList.remove('ativo');
-                            document.getElementById('caixa-status').classList.add('inativo');
-                            document.getElementById('caixa-status').innerHTML = `
-                                <span class="material-symbols-outlined">cancel</span>
-                                Inativo
-                            `;
-                        }
+                        openModal(c);
                     });
                 });
 
@@ -993,6 +960,84 @@
                 if (marker) {
                     marker.openPopup();
                 }
+            }
+        }
+
+        async function openModal(caixa) {
+            const modal = document.getElementById('modal');
+            modal.style.display = "flex";
+
+            document.getElementById('caixa-name').innerText = caixa.codigoCaixa;
+            document.getElementById('caixa-endereco').innerText = `${caixa.Logradouro} - ${caixa.Bairro}, ${caixa.Cidade}/${caixa.UF}`;
+            
+            // Status: Se está listado, está ativo no banco
+            const statusEl = document.getElementById('caixa-status');
+            statusEl.className = 'status ativo';
+            statusEl.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Ativo';
+
+            // Saúde do Sistema (CPU)
+            // Normalizar MAC para busca (remover pontuação e lowercase)
+            const macAlvo = (caixa.Macaddress || caixa.macaddress || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            
+            let dados = dadosBucketCache.find(d => {
+                const macRef = (d.macaddress || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                return macRef === macAlvo;
+            });
+
+            // Fallback: Tenta buscar pelo código do caixa se o MAC falhar
+            if (!dados) {
+                dados = dadosBucketCache.find(d => d.codigo === caixa.codigoCaixa || d.codigoCaixa === caixa.codigoCaixa);
+            }
+            
+            if (dados && dados.dados) {
+                const kpis = dados.dados.kpis?.daily_median || {};
+                
+                const cpuVal = parseFloat(kpis.cpu || 0).toFixed(1);
+                const ramVal = parseFloat(kpis.ram || kpis.memory || 0).toFixed(1);
+                const discoVal = parseFloat(kpis.disco || kpis.disk || 0).toFixed(1);
+                const redeVal = parseFloat(kpis.rede || 0).toFixed(1);
+                
+                // CPU
+                const cpuProgress = document.querySelector('.stats.cpu .progress');
+                if(cpuProgress) cpuProgress.style.width = `${cpuVal}%`;
+                const cpuSpan = document.querySelector('.stats.cpu .usoAtual p span');
+                if(cpuSpan) cpuSpan.innerText = `${cpuVal}%`;
+                const cpuCircle = document.querySelector('.stats.cpu .circle');
+                if(cpuCircle) cpuCircle.className = `circle ${cpuVal > 70 ? 'ruim' : 'bom'}`;
+
+                // RAM
+                const ramProgress = document.querySelector('.stats.ram .progress');
+                if(ramProgress) ramProgress.style.width = `${ramVal}%`;
+                const ramSpan = document.querySelector('.stats.ram .usoAtual p span');
+                if(ramSpan) ramSpan.innerText = `${ramVal}%`;
+                const ramCircle = document.querySelector('.stats.ram .circle');
+                if(ramCircle) ramCircle.className = `circle ${ramVal > 80 ? 'ruim' : 'bom'}`;
+
+                // Disco
+                const discoProgress = document.querySelector('.stats.disco .progress');
+                if(discoProgress) discoProgress.style.width = `${discoVal}%`;
+                const discoSpan = document.querySelector('.stats.disco .usoAtual p span');
+                if(discoSpan) discoSpan.innerText = `${discoVal}%`;
+                const discoCircle = document.querySelector('.stats.disco .circle');
+                if(discoCircle) discoCircle.className = `circle ${discoVal > 90 ? 'ruim' : 'bom'}`;
+
+                // Rede
+                const redeSpan = document.querySelector('.stats.rede .usoAtual p span');
+                if(redeSpan) redeSpan.innerText = `${redeVal} MB/s`;
+                const redeCircle = document.querySelector('.stats.rede .circle');
+                if(redeCircle) redeCircle.className = `circle ${redeVal > 10 ? 'bom' : 'bom'}`;
+
+            } else {
+                // Resetar valores
+                ['cpu', 'ram', 'disco'].forEach(metric => {
+                    const progress = document.querySelector(`.stats.${metric} .progress`);
+                    if(progress) progress.style.width = `0%`;
+                    const span = document.querySelector(`.stats.${metric} .usoAtual p span`);
+                    if(span) span.innerText = `-`;
+                });
+                
+                const redeSpan = document.querySelector('.stats.rede .usoAtual p span');
+                if(redeSpan) redeSpan.innerText = `-`;
             }
         }
 
