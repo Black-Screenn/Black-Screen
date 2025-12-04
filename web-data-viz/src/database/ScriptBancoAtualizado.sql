@@ -137,7 +137,8 @@ INSERT INTO Enderecos (Cep, Pais, Cidade, UF, Logradouro, Numero, Latitude, Long
 ('70000-000', 'Brasil', 'Brasília', 'DF', 'Esplanada dos Ministérios', 5, -15.79423, -47.88251, 'Zona Civico-Administrativa', 'Loja 4'),
 ('30000-000', 'Brasil', 'Belo Horizonte', 'MG', 'Av. Afonso Pena', 1500, -19.91668, -43.93449, 'Centro', 'Loja 5'),
 ('80000-000', 'Brasil', 'Curitiba', 'PR', 'Rua XV de Novembro', 800, -25.42969, -49.27136, 'Centro', 'Loja 6'),
-('50000-000', 'Brasil', 'Recife', 'PE', 'Av. Boa Viagem', 4500, -8.06206, -34.89311, 'Boa Viagem', 'Loja 7');
+('50000-000', 'Brasil', 'Recife', 'PE', 'Av. Boa Viagem', 4500, -8.06206, -34.89311, 'Boa Viagem', 'Loja 7'),
+('06020-010', 'Brasil', 'Osasco', 'SP', 'Av. dos Autonomistas', 1400, -23.54140, -46.76662, 'Vila Yara', 'Shopping União de Osasco');
 
 INSERT INTO Empresa (Nome_Empresa, Cnpj, Fk_Endereco) VALUES
 ('Banrisul', '12.345.678/0001-99', 1);
@@ -154,12 +155,12 @@ INSERT INTO Usuario (Nome, Email, Senha, Fk_Empresa, Fk_Cargo) VALUES
 
 -- AQUI ADICIONEI OS COMPONENTES DO SEU CSV
 INSERT INTO Componentes (Nome_Componente, Unidade, Fk_Empresa) VALUES
-('CPU', '%', 1),                    -- ID 1
-('RAM', '%', 1),                    -- ID 2 (Mudei pra % pois no CSV parece percentual)
-('Disco', 'GB', 1),                 -- ID 3
-('Rede - Bytes Enviados', 'Bytes', 1),   -- ID 4
-('Rede - Bytes Recebidos', 'Bytes', 1),  -- ID 5
-('Rede - Pacotes Perdidos', 'Qtd', 1);   -- ID 6
+('CPU', '%', 1), -- ID 1
+('RAM', '%', 1), -- ID 2 (Mudei pra % pois no CSV parece percentual)
+('Disco', 'GB', 1), -- ID 3
+('Rede - Bytes Enviados', 'Bytes', 1), -- ID 4
+('Rede - Bytes Recebidos', 'Bytes', 1), -- ID 5
+('Rede - Pacotes Perdidos', 'Qtd', 1); -- ID 6
 
 INSERT INTO Parametros (Valor_Parametrizado, Fk_Componente) VALUES
 (85.00, 1),
@@ -186,13 +187,14 @@ VALUES
 ('bc7673e2bc48', 'ATM-BSB-CIV-01', 7, 1),
 ('c8a006971278', 'ATM-BHZ-CEN-01', 8, 1),
 ('d8408e1114d1', 'ATM-CUR-CEN-01', 9, 1),
-('f0185cdf891b', 'ATM-REC-BOA-01', 10, 1);
+('f0185cdf891b', 'ATM-REC-BOA-01', 10, 1),
+('185691056330935', 'ATM-OSA-UNI-01', 11, 1);
 
 INSERT INTO Caixa_Componente (Fk_Caixa, Fk_Componente)
 SELECT c.Id_Caixa, comp.Id_Componente
 FROM Caixa c
 JOIN Componentes comp ON c.Fk_Empresa = comp.Fk_Empresa
-WHERE c.Macaddress IN ('02bbbdc02bf9', '16c3ad24476b', '1817c27bfb2d', '28b582796f26', '56d446c142d2', '963c48bb0adf', 'bc7673e2bc48', 'c8a006971278', 'd8408e1114d1', 'f0185cdf891b')
-  AND c.Fk_Empresa = 1
+WHERE c.Macaddress IN ('02bbbdc02bf9', '16c3ad24476b', '1817c27bfb2d', '28b582796f26', '56d446c142d2', '963c48bb0adf', 'bc7673e2bc48', 'c8a006971278', 'd8408e1114d1', 'f0185cdf891b', '185691056330935')
+AND c.Fk_Empresa = 1
 ON DUPLICATE KEY UPDATE
-  Caixa_Componente.Data_Associacao = Caixa_Componente.Data_Associacao;
+Caixa_Componente.Data_Associacao = Caixa_Componente.Data_Associacao;
