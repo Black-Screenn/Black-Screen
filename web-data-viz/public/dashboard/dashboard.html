@@ -440,6 +440,19 @@
         let chartInstance = null;
         let anyChartInitialized = false;
         let dadosBucketCache = []; // Cache para evitar requisições repetidas
+        let limitesComponentes = {}; // Cache para limites do banco
+
+        // Buscar limites do banco ao carregar
+        fetch('/componentes/buscarValoresComponentes')
+            .then(r => r.json())
+            .then(lista => {
+                lista.forEach(item => {
+                    // Normaliza chaves: CPU -> cpu, RAM -> ram
+                    const key = item.Nome_Componente.toLowerCase().split(' ')[0]; 
+                    limitesComponentes[key] = parseFloat(item.Valor_Parametrizado);
+                });
+            })
+            .catch(e => console.error("Erro ao buscar limites:", e));
 
         // Função para buscar dados do bucket e processar para o mapa
         async function fetchAndProcessBucketData() {
@@ -744,15 +757,56 @@
                 }
             }
 
-            renderChart(seriesReal, seriesPred, lastRealPoint ? lastRealPoint.x : null);
+            // Buscar limite para a métrica atual
+            // Mapeamento: cpu -> cpu, ram -> ram
+            // Rede ignorada conforme solicitado
+            let limitValue = null;
+            if (metric !== 'rede') {
+                limitValue = limitesComponentes[metric] || null;
+            }
+
+            renderChart(seriesReal, seriesPred, lastRealPoint ? lastRealPoint.x : null, limitValue);
         }
 
         function closeIaModal() {
             document.getElementById('modal-ia').style.display = 'none';
         }
 
-        function renderChart(realData, predData, nowTimestamp) {
+        function renderChart(realData, predData, nowTimestamp, limitValue) {
             if(chartInstance) chartInstance.destroy();
+
+            const annotationsY = [];
+            if (limitValue !== null) {
+                annotationsY.push({
+                    y: limitValue,
+                    borderColor: '#FF4560',
+                    label: {
+                        borderColor: '#FF4560',
+                        style: {
+                            color: '#fff',
+                            background: '#FF4560',
+                        },
+                        text: 'Limite (' + limitValue + ')'
+                    }
+                });
+            }
+
+            // Calcular valor máximo para o eixo Y para garantir que o limite apareça
+            let maxY = 0;
+            realData.forEach(d => { if(d.y > maxY) maxY = d.y; });
+            predData.forEach(d => { if(d.y > maxY) maxY = d.y; });
+            
+            if (limitValue !== null && limitValue > maxY) {
+                maxY = limitValue;
+            }
+            
+            // Adicionar margem superior de 10% (ou 20% se for muito baixo)
+            maxY = maxY > 0 ? maxY * 1.1 : 100;
+            // Se for porcentagem (CPU/RAM), trava em 100 se passar
+            const metric = document.getElementById('select-metric').value;
+            if ((metric === 'cpu' || metric === 'ram') && maxY > 100) {
+                maxY = 100;
+            }
 
             var options = {
                 chart: { 
@@ -780,6 +834,15 @@
                     width: [2, 2],
                     dashArray: [0, 5] 
                 },
+                yaxis: {
+                    max: maxY,
+                    min: 0,
+                    labels: {
+                        formatter: function (val) {
+                            return val.toFixed(0);
+                        }
+                    }
+                },
                 xaxis: { 
                     type: 'datetime',
                     labels: { 
@@ -804,7 +867,8 @@
                             text: 'Agora',
                             orientation: 'vertical'
                         }
-                    }] : []
+                    }] : [],
+                    yaxis: annotationsY
                 },
                 dataLabels: { enabled: false },
                 markers: { size: 0 },
