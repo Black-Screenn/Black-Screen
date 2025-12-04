@@ -102,7 +102,8 @@
 </body>
 
 <script>
-    var qtdAlertas = 0
+    var chamadopormaquina = {}
+    let atmAnterior = ""
 
     window.onload = async () => {
         await buscandoAlertasJiraKpi();
@@ -119,7 +120,6 @@
 
         }).then(resposta => {
             const chamados = resposta.issues;
-            let listaATM = []
             let ATM_Alerta = document.querySelector('.ATM_Alerta')
             chamados.forEach(chamado => {
 
@@ -127,23 +127,16 @@
                 let chave = chamado.key;
                 let idMaquina = chamado.fields.description.content[0].content[0].text;
 
-                let idATM = [
-                    {id_chamado: chave, id_maquina: idMaquina}
-                ];
-
-                //console.log(idATM)
-                console.log(chamado)
-                for(const item of idATM){
-                    let atmAnterior = item.id_maquina;   
-                    if(atmAnterior != item.id_maquina){
-                        qtdAlertas = 1
-                        atmAnterior = item.id_maquina
-                    }else if(atmAnterior == item.id_maquina){
-                        qtdAlertas++
-                    }
-                }
+                
+                if (chamadopormaquina[idMaquina]) {
+                chamadopormaquina[idMaquina]++;
+            } else {
+                chamadopormaquina[idMaquina] = 1;
+            }
                 })
             })
+           // console.log(chamadopormaquina);
+            
     }
 
     function carregarATMs() {
@@ -165,13 +158,15 @@
                     listaContent.innerHTML = "<p style='padding: 20px; text-align: center;'>Nenhum ATM cadastrado.</p>";
                     return;
                 }
-
-                console.log(data)
+                //console.log(chamadopormaquina)
+                //console.log(data)
                 data.forEach(atm => {
                     const item = document.createElement("div");
                     item.classList.add("lista-item");
                     const endereco = `${atm.Logradouro}, ${atm.Bairro}`;
                     const cidadeUF = `${atm.Cidade}/${atm.UF}`;
+                    const idMaquina = atm.Macaddress
+                    let qtdAlertas = chamadopormaquina[idMaquina] ;
 
                     item.innerHTML = `
                         

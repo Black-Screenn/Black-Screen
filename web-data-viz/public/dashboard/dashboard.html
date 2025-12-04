@@ -145,36 +145,36 @@
                         </div>
                     </div>
                     <div class="kpi">
-                        <h3><span>Top 3</span> ATMs Mais Alerta</h3>
+                        <h3><span>Top 3</span> ATMs por Consumo Mediano de RAM</h3>
                         <div class="rank">
                             <div class="header">
-                                <p>N*</p><p class="atm">ATM</p><p>Alertas</p>
+                                <p>N*</p><p class="atm">ATM</p><p>RAM (mediana)</p>
                             </div>
-                            <div class="top3 first" id="top1MaiorAlerta">
-                                <p>1*</p><p class="atm">ATM Paulista</p><p class="alertas">14</p>
+                            <div class="top3 first" id="topRam1">
+                                <p>1*</p><p class="atm">-</p><p class="alertas">-</p>
                             </div>
-                            <div class="top3 second" id="top2MaiorAlerta">
-                                <p>2*</p><p class="atm">ATM São José</p><p class="alertas">13</p>
+                            <div class="top3 second" id="topRam2">
+                                <p>2*</p><p class="atm">-</p><p class="alertas">-</p>
                             </div>
-                            <div class="top3 third" id="top3MaiorAlerta">
-                                <p>3*</p><p class="atm">ATM Iguatemi</p><p class="alertas">8</p>
+                            <div class="top3 third" id="topRam3">
+                                <p>3*</p><p class="atm">-</p><p class="alertas">-</p>
                             </div>
                         </div>
                     </div>
                     <div class="kpi">
-                        <h3><span>Top 3</span> Componentes Mais Alerta</h3>
+                        <h3><span>Top 3</span> ATMs por Maior Uso de Rede</h3>
                         <div class="rank">
                             <div class="header">
-                                <p>N*</p><p class="atm">Componente</p><p>Alertas</p>
+                                <p>N*</p><p class="atm">ATM</p><p>Rede (MB/s)</p>
                             </div>
-                            <div class="top3 first" id="top1MaiorAlerta">
-                                <p>1*</p><p class="atm">CPU</p><p class="alertas">14</p>
+                            <div class="top3 first" id="topLat1">
+                                <p>1*</p><p class="atm">-</p><p class="alertas">-</p>
                             </div>
-                            <div class="top3 second" id="top2MaiorAlerta">
-                                <p>2*</p><p class="atm">Rede</p><p class="alertas">13</p>
+                            <div class="top3 second" id="topLat2">
+                                <p>2*</p><p class="atm">-</p><p class="alertas">-</p>
                             </div>
-                            <div class="top3 third" id="top3MaiorAlerta">
-                                <p>3*</p><p class="atm">Disco</p><p class="alertas">8</p>
+                            <div class="top3 third" id="topLat3">
+                                <p>3*</p><p class="atm">-</p><p class="alertas">-</p>
                             </div>
                         </div>
                     </div>
@@ -228,43 +228,6 @@
                                 <span class="material-symbols-outlined">check_circle</span>
                                 Ativo
                             </p>
-                            <h3>Componentes:</h3>
-                            <div class="components" id="component-container">
-                                <p class="status bom">
-                                    <span class="material-symbols-outlined">check_circle</span>
-                                    Impressora de Recibos
-                                </p>
-                                <p class="status bom">
-                                    <span class="material-symbols-outlined">check_circle</span>
-                                    Teclado
-                                </p>
-                                <p class="status bom">
-                                    <span class="material-symbols-outlined">check_circle</span>
-                                    Conexão
-                                </p>
-                                <p class="status alerta">
-                                    <span class="material-symbols-outlined">circle_notifications</span>
-                                    Dispensador de Cédulas
-                                </p>
-                                <p class="status falha">
-                                    <span class="material-symbols-outlined">do_not_disturb_on</span>
-                                    Leitor de Cartão
-                                </p>
-                            </div>
-                            <h3>Alertas Recentes:</h3>
-                            <table>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Componente</th>
-                                    <th>Descrição</th>
-                                </tr>
-                                <tr>
-                                    <td>2024-06-15 14:32</td>
-                                    <td>CPU</td>
-                                    <td>Uso elevado da CPU (74%)</td>
-                                </tr>
-                                <!-- Linhas originais mantidas -->
-                            </table>
                         </div>
                     </div>
                     <div class="right">
@@ -272,25 +235,47 @@
                             <span class="material-symbols-outlined">health_and_safety</span>
                             <h2>Saúde do Sistema</h2>
                         </div>
+                        
                         <div class="stats cpu">
                             <h3>CPU</h3>
                             <div class="progress-bar">
-                                <div class="progress" style="width: 98%;"></div>
+                                <div class="progress" style="width: 0%;"></div>
                             </div>
                             <div class="stat usoAtual">
-                                <div class="circle ruim"></div>
-                                <p>Uso: <span>98%</span></p>
-                            </div>
-                            <div class="stat tempAtual">
-                                <div class="circle bom"></div>
-                                <p>Temperatura: <span>55°C</span></p>
-                            </div>
-                            <div class="stat totalProcessos">
-                                <div class="circle bom"></div>
-                                <p>Total de Processos: <span>123</span></p>
+                                <div class="circle"></div>
+                                <p>Uso: <span>-</span></p>
                             </div>
                         </div>
-                        <!-- Outras stats mantidas... -->
+
+                        <div class="stats ram">
+                            <h3>RAM</h3>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 0%;"></div>
+                            </div>
+                            <div class="stat usoAtual">
+                                <div class="circle"></div>
+                                <p>Uso: <span>-</span></p>
+                            </div>
+                        </div>
+
+                        <div class="stats disco">
+                            <h3>Disco</h3>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 0%;"></div>
+                            </div>
+                            <div class="stat usoAtual">
+                                <div class="circle"></div>
+                                <p>Uso: <span>-</span></p>
+                            </div>
+                        </div>
+
+                        <div class="stats rede">
+                            <h3>Rede</h3>
+                            <div class="stat usoAtual">
+                                <div class="circle"></div>
+                                <p>Tráfego: <span>-</span></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -416,25 +401,7 @@
                     });
                     
                     marker.on('click', function (e){
-                        document.getElementById('modal').style.display = "flex";
-                        document.getElementById('caixa-name').textContent = c.codigoCaixa;
-                        document.getElementById('caixa-endereco').textContent = `${c.Logradouro} - ${c.Bairro}, ${c.Cidade}/${c.UF}`;
-                        statusCaixa = 1;
-                        if(statusCaixa === 1){
-                            document.getElementById('caixa-status').classList.remove('inativo');
-                            document.getElementById('caixa-status').classList.add('ativo');
-                            document.getElementById('caixa-status').innerHTML = `
-                                <span class="material-symbols-outlined">check_circle</span>
-                                Ativo
-                            `;
-                        } else {
-                            document.getElementById('caixa-status').classList.remove('ativo');
-                            document.getElementById('caixa-status').classList.add('inativo');
-                            document.getElementById('caixa-status').innerHTML = `
-                                <span class="material-symbols-outlined">cancel</span>
-                                Inativo
-                            `;
-                        }
+                        openModal(c);
                     });
                 });
 
@@ -460,6 +427,9 @@
                     } catch (e) {
                         console.error('Erro ao atualizar contadores de caixas:', e);
                     }
+                    
+                    // Carregar dados do bucket para os KPIs Top 3
+                    fetchAndProcessBucketData();
             })
             .catch(err => console.error("Falha ao carregar /caixas:", err));
         
@@ -477,6 +447,9 @@
                 const response = await fetch('/bucket/dashboard');
                 const dados = await response.json();
                 dadosBucketCache = dados;
+                
+                // Atualiza os KPIs de Top 3
+                try { computeTop3RamAndLatency(); } catch(e) { console.error(e); }
                 
                 // Processar dados para o formato do AnyChart
                 // Agrupar por UF
@@ -656,6 +629,7 @@
                     const response = await fetch('/bucket/dashboard');
                     dados = await response.json();
                     dadosBucketCache = dados;
+                    try { computeTop3RamAndLatency(); } catch(e) { console.error(e); }
                 } catch (error) {
                     console.error("Erro ao buscar dados:", error);
                     return;
@@ -863,6 +837,75 @@
         });
 
         // --- Funções de Pesquisa ---
+        
+        function computeTop3RamAndLatency() {
+            if (!dadosBucketCache || dadosBucketCache.length === 0) return;
+
+            const agrupado = {};
+            dadosBucketCache.forEach(entry => {
+                // Tenta pegar o código do caixa de várias formas
+                const codigo = entry.codigo || entry.codigoCaixa || entry.id || entry.dados?.codigoCaixa || entry.dados?.codigo || entry.macaddress || 'Desconhecido';
+                
+                if (!agrupado[codigo]) {
+                    agrupado[codigo] = [];
+                }
+                agrupado[codigo].push(entry.dados || {});
+            });
+
+            const resumo = Object.keys(agrupado).map(codigo => {
+                const arr = agrupado[codigo];
+                
+                // Extrair valores de RAM e Latência
+                const ramVals = arr.map(d => {
+                    // Tenta pegar RAM (pode ser 'ram', 'memory', 'mem')
+                    return parseFloat(d.kpis?.daily_median?.ram ?? d.kpis?.daily_median?.memory ?? d.kpis?.daily_median?.mem ?? 0);
+                }).filter(v => !isNaN(v) && v > 0);
+
+                const latVals = arr.map(d => {
+                    // Usando 'rede' como métrica de rede disponível (MB/s)
+                    return parseFloat(d.kpis?.daily_median?.rede ?? 0);
+                }).filter(v => !isNaN(v) && v > 0);
+
+                // Calcular médias (ou medianas) para este ATM
+                const ram = ramVals.length ? (ramVals.reduce((a,b)=>a+b,0)/ramVals.length) : 0;
+                const latency = latVals.length ? (latVals.reduce((a,b)=>a+b,0)/latVals.length) : 0;
+
+                return { codigo, ram, latency };
+            });
+
+            // Ordenar e pegar Top 3
+            const topRam = resumo.filter(r => r.ram > 0).sort((a,b) => b.ram - a.ram).slice(0,3);
+            const topLat = resumo.filter(r => r.latency > 0).sort((a,b) => b.latency - a.latency).slice(0,3);
+
+            // Função auxiliar para preencher o HTML
+            function setTop(id, rank, item, type) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                
+                if (!item) {
+                    el.innerHTML = `<p>${rank}*</p><p class="atm">-</p><p class="alertas">-</p>`;
+                    return;
+                }
+
+                let displayVal = '-';
+                if (type === 'ram') {
+                    displayVal = `${item.ram.toFixed(1)}%`;
+                } else {
+                    displayVal = `${item.latency.toFixed(1)} MB/s`;
+                }
+
+                el.innerHTML = `<p>${rank}*</p><p class="atm">${item.codigo}</p><p class="alertas">${displayVal}</p>`;
+            }
+
+            setTop('topRam1', 1, topRam[0], 'ram');
+            setTop('topRam2', 2, topRam[1], 'ram');
+            setTop('topRam3', 3, topRam[2], 'ram');
+
+            setTop('topLat1', 1, topLat[0], 'lat');
+            setTop('topLat2', 2, topLat[1], 'lat');
+            setTop('topLat3', 3, topLat[2], 'lat');
+        }
+
         function filtrarCaixas() {
             const input = document.getElementById('pesquisa');
             const filter = input.value.toUpperCase();
@@ -917,6 +960,84 @@
                 if (marker) {
                     marker.openPopup();
                 }
+            }
+        }
+
+        async function openModal(caixa) {
+            const modal = document.getElementById('modal');
+            modal.style.display = "flex";
+
+            document.getElementById('caixa-name').innerText = caixa.codigoCaixa;
+            document.getElementById('caixa-endereco').innerText = `${caixa.Logradouro} - ${caixa.Bairro}, ${caixa.Cidade}/${caixa.UF}`;
+            
+            // Status: Se está listado, está ativo no banco
+            const statusEl = document.getElementById('caixa-status');
+            statusEl.className = 'status ativo';
+            statusEl.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Ativo';
+
+            // Saúde do Sistema (CPU)
+            // Normalizar MAC para busca (remover pontuação e lowercase)
+            const macAlvo = (caixa.Macaddress || caixa.macaddress || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            
+            let dados = dadosBucketCache.find(d => {
+                const macRef = (d.macaddress || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                return macRef === macAlvo;
+            });
+
+            // Fallback: Tenta buscar pelo código do caixa se o MAC falhar
+            if (!dados) {
+                dados = dadosBucketCache.find(d => d.codigo === caixa.codigoCaixa || d.codigoCaixa === caixa.codigoCaixa);
+            }
+            
+            if (dados && dados.dados) {
+                const kpis = dados.dados.kpis?.daily_median || {};
+                
+                const cpuVal = parseFloat(kpis.cpu || 0).toFixed(1);
+                const ramVal = parseFloat(kpis.ram || kpis.memory || 0).toFixed(1);
+                const discoVal = parseFloat(kpis.disco || kpis.disk || 0).toFixed(1);
+                const redeVal = parseFloat(kpis.rede || 0).toFixed(1);
+                
+                // CPU
+                const cpuProgress = document.querySelector('.stats.cpu .progress');
+                if(cpuProgress) cpuProgress.style.width = `${cpuVal}%`;
+                const cpuSpan = document.querySelector('.stats.cpu .usoAtual p span');
+                if(cpuSpan) cpuSpan.innerText = `${cpuVal}%`;
+                const cpuCircle = document.querySelector('.stats.cpu .circle');
+                if(cpuCircle) cpuCircle.className = `circle ${cpuVal > 70 ? 'ruim' : 'bom'}`;
+
+                // RAM
+                const ramProgress = document.querySelector('.stats.ram .progress');
+                if(ramProgress) ramProgress.style.width = `${ramVal}%`;
+                const ramSpan = document.querySelector('.stats.ram .usoAtual p span');
+                if(ramSpan) ramSpan.innerText = `${ramVal}%`;
+                const ramCircle = document.querySelector('.stats.ram .circle');
+                if(ramCircle) ramCircle.className = `circle ${ramVal > 80 ? 'ruim' : 'bom'}`;
+
+                // Disco
+                const discoProgress = document.querySelector('.stats.disco .progress');
+                if(discoProgress) discoProgress.style.width = `${discoVal}%`;
+                const discoSpan = document.querySelector('.stats.disco .usoAtual p span');
+                if(discoSpan) discoSpan.innerText = `${discoVal}%`;
+                const discoCircle = document.querySelector('.stats.disco .circle');
+                if(discoCircle) discoCircle.className = `circle ${discoVal > 90 ? 'ruim' : 'bom'}`;
+
+                // Rede
+                const redeSpan = document.querySelector('.stats.rede .usoAtual p span');
+                if(redeSpan) redeSpan.innerText = `${redeVal} MB/s`;
+                const redeCircle = document.querySelector('.stats.rede .circle');
+                if(redeCircle) redeCircle.className = `circle ${redeVal > 10 ? 'bom' : 'bom'}`;
+
+            } else {
+                // Resetar valores
+                ['cpu', 'ram', 'disco'].forEach(metric => {
+                    const progress = document.querySelector(`.stats.${metric} .progress`);
+                    if(progress) progress.style.width = `0%`;
+                    const span = document.querySelector(`.stats.${metric} .usoAtual p span`);
+                    if(span) span.innerText = `-`;
+                });
+                
+                const redeSpan = document.querySelector('.stats.rede .usoAtual p span');
+                if(redeSpan) redeSpan.innerText = `-`;
             }
         }
 

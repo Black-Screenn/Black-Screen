@@ -42,13 +42,27 @@ h3 {
     display: none;
 }
 
+#content-relatorio .grafico3 {
+    /* Altura e Largura menores para o PDF */
+    max-width: 550px;
+    height: 280px;
+    /* Você pode ajustar esses valores até que fique ideal no PDF */
+}
+
 .grafico-relatorio .card,
-.grafico2-relatorio .card{
+.grafico2-relatorio .card,
+.grafico3-relatorio .card{
     justify-self: center;
     margin: 15px;
 }
 
+.grafico3-relatorio .card{
+    margin-top: 60px;
+    margin-bottom: 30px;
+}
+
 .observacao{
+    margin-top: 10px;
     justify-self: flex-start;
 }
 
@@ -411,10 +425,56 @@ h3 {
 
 
 
+.kpi-desvio p.kpi-title {
+    position: relative; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 5px;
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
 
+.tooltip-container {
+    display: inline-block;
+    cursor: help;
+}
 
+.tooltip-icon {
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #001c41; 
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+}
 
+.tooltip-text {
+    visibility: hidden; 
+    opacity: 0;          
+    transition: opacity 0.3s;
+    
+    width: 280px;
+    background-color: #333;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute; 
+    z-index: 1000;
+    top: -100px; 
+    left: 50%;
+    transform: translateX(-50%);
 
+    font-size: 12px;
+    line-height: 1.4; 
+}
 
-
-
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
