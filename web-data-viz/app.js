@@ -22,6 +22,7 @@ var caixasRouter = require("./src/routes/caixas");
 var cloudRouter = require("./src/routes/cloud");
 var cargoRouter = require("./src/routes/cargos");
 var relatorioRouter = require("./src/routes/relatorio");
+const s3Router = require('./src/routes/s3Route');
 
 
 var dadosBucketRouter = require("./src/routes/dadosBucket")
@@ -51,6 +52,8 @@ app.use("/cargos", cargoRouter);
 app.use("/bucket",dadosBucketRouter);
 app.use("/gemini", geminiRouter)
 app.use("/relatorio",relatorioRouter);
+app.use('/s3Route', s3Router);
+
 
 
 app.listen(PORTA_APP, function () {
