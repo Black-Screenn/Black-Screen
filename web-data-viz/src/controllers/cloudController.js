@@ -189,7 +189,7 @@ async function dadosS3PorPeriodo(fkEmpresa, periodoInicio, periodoFim) {
       console.log(`- ${fileKey} processado com ${records.length} registros.`);
     } catch (error) {
       if (error.Code === "NoSuchKey") {
-        console.log(`- Nenhum arquivo encontrado para ${dateString}, pulando.`);
+        console.log(`- Nenhum arquivo encontrado para ${dataString}, pulando.`);
       } else {
         console.error(`Erro ao buscar ${fileKey}:`, error);
       }
