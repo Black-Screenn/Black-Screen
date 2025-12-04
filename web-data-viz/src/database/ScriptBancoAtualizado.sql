@@ -123,9 +123,7 @@ CREATE TABLE Relatorio (
     FOREIGN KEY (Fk_Empresa) REFERENCES Empresa(Id_Empresa)
 );
 
--- ==========================================================
--- 2. INSERÇÃO DE DADOS (POPULAÇÃO)
--- ==========================================================
+
 
 INSERT INTO Enderecos (Cep, Pais, Cidade, UF, Logradouro, Numero, Latitude, Longitude, Bairro, Complemento) VALUES
 ('01310-100', 'Brasil', 'Sao Paulo', 'SP', 'Av. Paulista', 1000, -23.56168, -46.65598, 'Bela Vista', 'Andar 10'),
@@ -161,6 +159,7 @@ INSERT INTO Componentes (Nome_Componente, Unidade, Fk_Empresa) VALUES
 ('Rede - Bytes Enviados', 'Bytes', 1), -- ID 4
 ('Rede - Bytes Recebidos', 'Bytes', 1), -- ID 5
 ('Rede - Pacotes Perdidos', 'Qtd', 1); -- ID 6
+
 
 INSERT INTO Parametros (Valor_Parametrizado, Fk_Componente) VALUES
 (85.00, 1),
